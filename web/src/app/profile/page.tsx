@@ -7,7 +7,7 @@ import React from 'react';
 
 // This is the ProfilePage content component.
 export default function ProfilePage() {
-  const username = "Alex"; // Placeholder for user name
+  const username = "Kathrin"; // Placeholder for user name
 
   return (
     // This div matches the flex-1 container mx-auto structure from your HTML
