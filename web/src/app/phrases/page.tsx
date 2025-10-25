@@ -38,9 +38,6 @@ export default function PhrasesPage() {
 
           {/* SearchBar */}
           <div className="relative w-full">
-            <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-              <span className="material-symbols-outlined text-gray-500 dark:text-gray-400">search</span>
-            </div>
             <input 
               className="w-full rounded-lg border border-border-light dark:border-border-dark bg-background-light dark:bg-background-dark py-2.5 pl-10 pr-4 text-base text-text-light dark:text-text-dark placeholder:text-gray-500 dark:placeholder:text-gray-400 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary" 
               placeholder="Search for a phrase or keyword (e.g., 'meeting', 'entschuldigen')" 
