@@ -60,7 +60,6 @@ export default function DashboardPage() {
                         <button className="px-4 py-2 rounded-full text-sm font-semibold hover:bg-gray-100 dark:hover:bg-white/10 transition-colors">Phone Calls</button>
                       </div>
                       <div className="relative">
-                        <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">search</span>
                         <input className="w-full sm:w-auto pl-10 pr-4 py-2 rounded-full bg-background-light dark:bg-background-dark border border-border-light dark:border-border-dark focus:ring-2 focus:ring-primary/50 focus:border-primary outline-none transition-all" placeholder="Search phrases..." type="text"/>
                       </div>
                     </div>
