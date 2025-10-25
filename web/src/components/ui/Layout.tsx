@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { twMerge } from 'tailwind-merge';
 
 import { Button } from './Button'; // Assuming you've created this
+import { PhraseSidebar } from './PhraseSidebar';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -93,13 +94,15 @@ export const CustomLayout: React.FC<LayoutProps> = ({ children, activeNav }) => 
   // You might want to get actual user data here (e.g., from an auth context or prop)
   const username = "Kathrin"; // Placeholder
   const userAvatar = "https://lh3.googleusercontent.com/aida-public/AB6AXuBvX38Y-qL9Gh9IAJbemO9swZwkQqPlmTIRMYELCU7FgtxKDHsrlbSRdHvXoIoX50_rmgKBO-eK3TKSVLGOWKALuXay7a-6ZYtqPDQk3VU4B1rnL6jvuQnCrMJA8CByo3aHgp0oABGMSv30DWCdzGNP4Z_AdZWuCJ1TSw_4ogi045TBcboWTPI79N3-JrXicBPa5DT2YXipQE5XS8bTsdIkmu6BvtUCKsjReWRDZpo8Vq24iayebT62ODfmyoByKkGPjXtkgcRgbU6E"; // Placeholder
+  const showPhraseSidebar = activeNav === 'phrases'; 
 
   return (
     <div className="flex flex-col min-h-screen"> {/* Overall flex container */}
-      <TopNavBar activeNav={activeNav} /> {/* Render your top navigation bar */}
+      <TopNavBar activeNav={activeNav} /> 
 
       <div className="flex flex-grow"> {/* Container for sidebar and main content */}
-        <Sidebar activeNav={activeNav} username={username} userAvatar={userAvatar} /> {/* Render your sidebar */}
+         {showPhraseSidebar && <PhraseSidebar />} 
+        
         
         <main className="flex-grow p-4"> {/* Main content area */}
           {children} {/* This is where the page content will go */}
