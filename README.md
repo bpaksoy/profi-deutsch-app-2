@@ -43,3 +43,47 @@ Welcome to ProfiDeutsch, your AI-powered professional German tutor for internshi
 -   **Other APIs (TBD):** For Speech-to-Text (e.g., Google Cloud Speech-to-Text) if ElevenLabs STT is not sufficient for German.
 
 ## Project Structure
+profi-deutsch-app/
+├── README.md
+├── package.json
+├── web/ # Next.js (React) Frontend
+│ ├── public/
+│ ├── src/
+│ │ ├── app/ # Next.js App Router structure
+│ │ │ ├── layout.tsx
+│ │ │ ├── page.tsx
+│ │ │ ├── dashboard/
+│ │ │ │ └── page.tsx
+│ │ │ ├── phrases/
+│ │ │ │ └── page.tsx
+│ │ │ ├── chat/
+│ │ │ │ └── page.tsx
+│ │ ├── components/
+│ │ │ ├── ui/
+│ │ │ ├── Layout.tsx
+│ │ │ ├── PhraseCard.tsx
+│ │ │ ├── ChatMessage.tsx
+│ │ │ └── ...
+│ │ ├── styles/
+│ │ │ └── global.css
+│ │ ├── lib/
+│ │ └── types/
+│ ├── tailwind.config.ts
+│ ├── tsconfig.json
+│ ├── next.config.mjs
+│ └── package.json
+└── api/ # NestJS Backend
+├── src/
+│ ├── main.ts
+│ ├── app.controller.ts
+│ ├── app.service.ts
+│ ├── chat/
+│ │ ├── chat.controller.ts
+│ │ ├── chat.service.ts
+│ │ └── chat.module.ts
+│ ├── auth/
+│ │ └── ...
+│ └── common/
+├── tsconfig.json
+├── nest-cli.json
+└── package.json

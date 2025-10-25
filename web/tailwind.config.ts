@@ -1,32 +1,29 @@
-import type { Config } from 'tailwindcss';
+// web/tailwind.config.ts
+import type { Config } from 'tailwindcss'
 
 const config: Config = {
-  darkMode: "class", // Enable dark mode
+  darkMode: 'class', // Keep this for dark mode support
   content: [
-    './src/pages/**/*.{js,ts,jsx,tsx,mdx}',
-    './src/components/**/*.{js,ts,jsx,tsx,mdx}',
-    './src/app/**/*.{js,ts,jsx,tsx,mdx}',
+    './src/**/*.{js,ts,jsx,tsx,mdx}', // Catches all files under src/
   ],
   theme: {
     extend: {
       colors: {
-        "primary": "#005A9C", // Darker blue for professional feel
-        "accent": "#FFC107", // A warm yellow for accents/highlights
-        "background-light": "#F8F9FA", // Light background
-        "background-dark": "#101922", // Dark background
-        "text-light": "#212529", // Dark text on light backgrounds
-        "text-dark": "#E9ECEF", // Light text on dark backgrounds
-        "card-light": "#FFFFFF", // White cards
-        "card-dark": "#192734", // Dark cards
-        "border-light": "#E0E0E0", // Light border
-        "border-dark": "#343A40", // Dark border
-        "ai-bubble-light": "#E0E7F1", // Light blue bubble for AI
-        "ai-bubble-dark": "#2C3E50"   // Darker blue bubble for AI
+        "primary": "#003366",
+        "accent": "#FFCC00",
+        "background-light": "#F5F7FA",
+        "background-dark": "#101922",
+        "text-light": "#333333",
+        "text-dark": "#F5F7FA",
+        "card-light": "#FFFFFF",
+        "card-dark": "#192734",
+        "border-light": "#e7edf3",
+        "border-dark": "#334155"
       },
       fontFamily: {
-        "display": ["Manrope", "sans-serif"]
+        "display": ["Manrope", "sans-serif"] // <--- Important for your font-display class
       },
-      borderRadius: {
+      borderRadius: { // <--- These were in the original HTML
         "DEFAULT": "0.5rem",
         "lg": "0.75rem",
         "xl": "1rem",
@@ -36,7 +33,7 @@ const config: Config = {
   },
   plugins: [
     require('@tailwindcss/forms'),
-    require('@tailwindcss/container-queries'),
+    require('@tailwindcss/container-queries')
   ],
-};
-export default config;
+}
+export default config
