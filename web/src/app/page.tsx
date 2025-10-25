@@ -1,3 +1,6 @@
 import React from "react";
+import DashboardPage from "./dashboard/page";
 
-export default function Page() { return <h1>Hello, Profi-Deutsch App!</h1>}
+export default function Page() { 
+    return <DashboardPage />;
+}
