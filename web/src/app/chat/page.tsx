@@ -8,10 +8,18 @@ import ChatMessage from '../../components/ChatMessage';
 const USER_AVATAR = "https://lh3.googleusercontent.com/aida-public/AB6AXuC3UxJCLgdZY3vIQAPm31GnNp-7w1_8mASbyWEU7JgWMDBmyXkBUq0a9fqdYf3UiKOzV3UjUZdfW7a9VnuJBzD1Ld1yEOBhsCMqYwjROVjVPz6sHd2pznp2zP3eO3tl1y1m5wzdEvVadubycVDI-rzRskUm9FYWUjCjBcLfLNTjz5Di-Am4ZdbDJoqqBaWxS3l1HHJ_izz6YSC15Kd-OYpPp8eUpoN_90subodS_vH9WVSBWXHXfPyhA8tdvoGDTnfQV82dPnfwq2Ql";
 const AI_AVATAR = "https://lh3.googleusercontent.com/aida-public/AB6AXuCWUMtSS9G3SQC2IjMCNqvfvcH7IHfXBZoPZdQ1kBDZPxI54jL8edcEGhtruaLw-T5SJd_4UBiJkCiLYGWN6AEURmh_qRuUdsEyzQFDeHzexv0nZF0u6sW08jEDceAJn_bkfbIY8D8ztfXLhiN-KZNv9Gg9Re9iHmZrbyOLCARxuruv02f4KU4BPtDwBIz26fuD9s0rJk2KkWI0WfUoKGRNIiHmZrbyOLCARxuruv02f4KU4BPtDwBIz26fuD9s0rJk2KkWI0WfUoKGRNIiMZynfWg85WxTBis1vPoYSqQEOZtYzoYM3m5SCNTd4v5URd0n-NcRsk";
 
-const chatHistory = [
+interface ChatMessageData {
+    type: 'ai' | 'user';
+    sender: 'bot' | 'user';
+    message: string;
+    avatar: string;
+    isTyping?: boolean; // Now TypeScript knows this property is optional
+}
+
+const chatHistory : ChatMessageData[] = [
   { type: 'ai', sender: 'bot', message: 'Hallo! Ich bin Ihr KI-Assistent. Worüber möchten Sie heute sprechen? Sie können ein Szenario wie \'Vorstellungsgespräch\' wählen oder einfach eine Frage stellen.', avatar: AI_AVATAR },
   { type: 'user', sender: 'user', message: 'Ich möchte ein Vorstellungsgespräch üben.', avatar: USER_AVATAR },
-  { type: 'ai', sender: 'bot', message: '', avatar: AI_AVATAR, isTyping: true },
+  // { type: 'ai', sender: 'bot', message: '', avatar: AI_AVATAR, isTyping: true }, // <-- TEMPORARILY COMMENT OUT
 ];
 
 export default function ChatPage() {
@@ -55,7 +63,7 @@ export default function ChatPage() {
                             sender={msg.sender as 'user' | 'bot'}
                             message={msg.message}
                             avatarUrl={msg.avatar}
-                            isTyping={msg.isTyping}
+                            isTyping={msg.isTyping ?? false}
                         />
                     ))}
                 </div>
