@@ -19,8 +19,8 @@ let ChatService = ChatService_1 = class ChatService {
     constructor(configService) {
         this.configService = configService;
         this.logger = new common_1.Logger(ChatService_1.name);
-        this.DEFAULT_VOICE_ID = 'YOUR_GERMAN_VOICE_ID';
         const apiKey = this.configService.get('ELEVENLABS_API_KEY');
+        this.DEFAULT_VOICE_ID = this.configService.get('ELEVENLABS_VOICE_ID');
         if (!apiKey) {
             throw new common_1.InternalServerErrorException('ELEVENLABS_API_KEY is not configured.');
         }
