@@ -3,8 +3,9 @@ import { Readable } from 'stream';
 export declare class ChatService {
     private configService;
     private readonly logger;
-    private elevenlabs;
-    private readonly DEFAULT_VOICE_ID;
+    private readonly SPEECH_CONFIG;
+    private readonly DEFAULT_TTS_VOICE;
     constructor(configService: ConfigService);
     generateSpeechStream(text: string): Promise<Readable>;
+    transcribeAudio(audioBuffer: Buffer): Promise<string>;
 }

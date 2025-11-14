@@ -3,6 +3,7 @@
 import React from 'react';
 import ChatSidebar from '../../components/ChatSidebar';
 import ChatMessage from '../../components/ChatMessage';
+import { ListeningAgentIcon } from '../../components/ListeningAgentIcon';
 
 // Placeholder Avatars
 const USER_AVATAR = "https://lh3.googleusercontent.com/aida-public/AB6AXuC3UxJCLgdZY3vIQAPm31GnNp-7w1_8mASbyWEU7JgWMDBmyXkBUq0a9fqdYf3UiKOzV3UjUZdfW7a9VnuJBzD1Ld1yEOBhsCMqYwjROVjVPz6sHd2pznp2zP3eO3tl1y1m5wzdEvVadubycVDI-rzRskUm9FYWUjCjBcLfLNTjz5Di-Am4ZdbDJoqqBaWxS3l1HHJ_izz6YSC15Kd-OYpPp8eUpoN_90subodS_vH9WVSBWXHXfPyhA8tdvoGDTnfQV82dPnfwq2Ql";
@@ -24,6 +25,7 @@ const chatHistory : ChatMessageData[] = [
 
 export default function ChatPage() {
   const username = "Max Mustermann";
+  const [isAgentListening, setIsAgentListening] = React.useState(false);
 
   // CRITICAL: Next.js Layout (RootLayout/CustomLayout) should wrap this entire content.
   // We need to ensure that the layout wrapper provides the h-screen and flex-col structure.
@@ -55,7 +57,7 @@ export default function ChatPage() {
             
             {/* Chat History Container (Scrollable) */}
             <div className="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8">
-                <div className="mx-auto max-w-3xl">
+                {/* <div className="mx-auto max-w-3xl">
                     {chatHistory.map((msg, index) => (
                         <ChatMessage 
                             key={index}
@@ -66,7 +68,7 @@ export default function ChatPage() {
                             isTyping={msg.isTyping ?? false}
                         />
                     ))}
-                </div>
+                </div> */}
             </div>
             
             {/* Composer/Input Box */}
@@ -85,10 +87,14 @@ export default function ChatPage() {
                         />
                         <div className="flex items-center justify-center pr-2">
                             <div className="flex items-center gap-1">
-                                <button className="flex items-center justify-center p-2 rounded-full hover:bg-primary/10 text-gray-500 dark:text-gray-400 hover:text-primary dark:hover:text-accent">
-                                    <span className="material-symbols-outlined text-lg">mic</span>
+                                <button 
+                                    onClick={() => setIsAgentListening(!isAgentListening)} 
+                                    className="flex items-center justify-center p-2 rounded-full hover:bg-primary/10 text-gray-500 dark:text-gray-400 hover:text-primary dark:hover:text-accent"
+                                >
+                                    <ListeningAgentIcon isListening={isAgentListening} size="sm" />
                                 </button>
-                                <button className="flex items-center justify-center p-2 rounded-full bg-primary text-white hover:bg-primary/90">
+                                
+                                <button >
                                     <span className="material-symbols-outlined text-lg">send</span>
                                 </button>
                             </div>

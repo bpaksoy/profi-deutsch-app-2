@@ -21,6 +21,6 @@
     "author": "Your Team Name",
     "license": "MIT",
     "dependencies": {
-        "@elevenlabs/elevenlabs-js": "^2.20.1"
+        "@elevenlabs/elevenlabs-js": "^2.24.0"
     }
 }
