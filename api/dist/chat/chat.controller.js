@@ -16,9 +16,14 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.ChatController = void 0;
 const common_1 = require("@nestjs/common");
 const chat_service_1 = require("./chat.service");
+const platform_express_1 = require("@nestjs/platform-express");
+const rag_service_1 = require("./rag.service");
+const azure_speech_service_1 = require("./azure-speech.service");
 let ChatController = ChatController_1 = class ChatController {
-    constructor(chatService) {
+    constructor(chatService, ragService, azureSpeechService) {
         this.chatService = chatService;
+        this.ragService = ragService;
+        this.azureSpeechService = azureSpeechService;
         this.logger = new common_1.Logger(ChatController_1.name);
     }
     async getTtsStream(text, res) {
@@ -37,6 +42,16 @@ let ChatController = ChatController_1 = class ChatController {
             }
         }
     }
+    async transcribeAndProcess(file, body) {
+        this.logger.log(`Received audio file of size: ${file.size}`);
+        const transcription = await this.azureSpeechService.transcribeAudio(file.buffer);
+        this.logger.log(`Transcription result: "${transcription}"`);
+        const ragObject = await this.ragService.generateResponseJson(transcription);
+        return {
+            transcript: transcription,
+            responseText: ragObject.responseText,
+        };
+    }
 };
 exports.ChatController = ChatController;
 __decorate([
@@ -49,8 +64,19 @@ __decorate([
     __metadata("design:paramtypes", [String, Object]),
     __metadata("design:returntype", Promise)
 ], ChatController.prototype, "getTtsStream", null);
+__decorate([
+    (0, common_1.Post)('stt'),
+    (0, common_1.UseInterceptors)((0, platform_express_1.FileInterceptor)('audio')),
+    __param(0, (0, common_1.UploadedFile)()),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, Object]),
+    __metadata("design:returntype", Promise)
+], ChatController.prototype, "transcribeAndProcess", null);
 exports.ChatController = ChatController = ChatController_1 = __decorate([
     (0, common_1.Controller)('chat'),
-    __metadata("design:paramtypes", [chat_service_1.ChatService])
+    __metadata("design:paramtypes", [chat_service_1.ChatService,
+        rag_service_1.RAGService,
+        azure_speech_service_1.AzureSpeechService])
 ], ChatController);
 //# sourceMappingURL=chat.controller.js.map

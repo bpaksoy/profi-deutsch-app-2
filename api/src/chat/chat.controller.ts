@@ -1,14 +1,22 @@
 // api/src/chat/chat.controller.ts
 
-import { Controller, Get, Query, Res, InternalServerErrorException, Header, Logger } from '@nestjs/common';
+import { Controller, Get, Query, Res, InternalServerErrorException, Header, Logger, Post, UseInterceptors, UploadedFile, Body } from '@nestjs/common';
 import { Response } from 'express'; 
 import { ChatService } from './chat.service';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { RAGService } from './rag.service'; 
+import { AzureSpeechService } from './azure-speech.service'; 
+
 
 @Controller('chat') // The base route will be /chat/tts
 export class ChatController {
   private readonly logger = new Logger(ChatController.name);
 
-  constructor(private readonly chatService: ChatService) {}
+  constructor(
+    private readonly chatService: ChatService,
+    private readonly ragService: RAGService,
+    private readonly azureSpeechService: AzureSpeechService
+  ) {}
 
   @Get('tts')
   @Header('Content-Type', 'audio/mpeg') // Tell the browser what to expect
@@ -39,5 +47,27 @@ export class ChatController {
           res.status(500).send('Audio stream failed.');
       }
     }
+  }
+
+  @Post('stt')
+  @UseInterceptors(FileInterceptor('audio'))
+  async transcribeAndProcess(
+      @UploadedFile() file: Express.Multer.File, 
+      @Body() body: any // for any other form data
+  ) {
+
+      this.logger.log(`Received audio file of size: ${file.size}`);
+      // 1. Transcribe the audio buffer
+      const transcription = await this.azureSpeechService.transcribeAudio(file.buffer);
+       this.logger.log(`Transcription result: "${transcription}"`);
+      
+      const ragObject = await this.ragService.generateResponseJson(transcription);
+      
+      // 3. Return a flattened JSON object
+      return {
+          transcript: transcription, // User's transcribed text from Azure
+          // 👇👇👇 FIX: ACCESS THE RESPONSETEXT PROPERTY OF THE RAG OBJECT 👇👇👇
+          responseText: ragObject.responseText, // AI's final text response (STRING)
+      };
   }
 }

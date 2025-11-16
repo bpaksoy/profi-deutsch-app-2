@@ -2,29 +2,57 @@
 
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
+import * as net from 'net';
+import { execSync } from 'child_process';
+
+async function freePort(port: number) {
+  return new Promise<void>((resolve) => {
+    const tester = net.createServer();
+
+    tester.once('error', () => {
+      // Port busy → will be handled by killIfBusy
+      resolve();
+    });
+
+    tester.once('listening', () => {
+      // Port was free → close and continue
+      tester.close(() => resolve());
+    });
+
+    tester.listen(port);
+  });
+}
+
+async function killIfBusy(port: number) {
+  try {
+    const pid = execSync(`lsof -ti :${port}`).toString().trim();
+
+    if (pid) {
+      console.log(`[Nest] Port ${port} is busy → Killing process ${pid}...`);
+      execSync(`kill -9 ${pid}`);
+    }
+  } catch {
+    // No process found OR kill failed — ignore
+  }
+}
 
 async function bootstrap() {
-  // 1. Create the NestJS application instance
+  const port = 8000;
+
+  // PREVENT EADDRINUSE BEFORE STARTUP
+  await freePort(port);
+  await killIfBusy(port);
+
+  // Create the NestJS app
   const app = await NestFactory.create(AppModule);
 
-  // 2. Set up Global Prefixes and Security (OPTIONAL BUT RECOMMENDED)
-  
-  // CORS Configuration: Essential for allowing your Next.js frontend (web/) to talk to the backend (api/)
-  // In a production environment, you would restrict 'origin' to your frontend URL.
+  // Enable CORS for your Next.js frontend
   app.enableCors({
-    origin: 'http://localhost:3001', // Example: Assuming Next.js runs on 3001
+    origin: 'http://localhost:3000',
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     credentials: true,
   });
 
-  // Global Prefix: Helps separate the API from the frontend in deployment
-  // If you uncomment this, your TTS endpoint would be accessed at: http://localhost:3000/api/chat/tts
-  // app.setGlobalPrefix('api');
-
-  // 3. Start the server
-  // Note: The default port for NestJS is often 3000. 
-  // Make sure this doesn't conflict with your Next.js app (often 3000 or 3001).
-  const port = 8000; 
   await app.listen(port);
   console.log(`Application is running on: ${await app.getUrl()}`);
 }
