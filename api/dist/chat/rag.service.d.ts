@@ -4,4 +4,6 @@ export declare class RAGService {
     private readonly logger;
     constructor(configService: ConfigService);
     generateResponseJson(userInput: string): Promise<any>;
+    private callGemini;
+    testGeminiConnection(): Promise<void>;
 }

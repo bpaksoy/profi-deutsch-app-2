@@ -12,5 +12,9 @@ export declare class ChatController {
     transcribeAndProcess(file: Express.Multer.File, body: any): Promise<{
         transcript: string;
         responseText: any;
+        audioBase64: string;
+    }>;
+    testGemini(): Promise<{
+        status: string;
     }>;
 }

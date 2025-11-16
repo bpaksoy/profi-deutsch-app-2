@@ -49,25 +49,56 @@ export class ChatController {
     }
   }
 
+  // @Post('stt')
+  // @UseInterceptors(FileInterceptor('audio'))
+  // async transcribeAndProcess(
+  //     @UploadedFile() file: Express.Multer.File, 
+  //     @Body() body: any // for any other form data
+  // ) {
+
+  //     this.logger.log(`Received audio file of size: ${file.size}`);
+  //     // 1. Transcribe the audio buffer
+  //     const transcription = await this.azureSpeechService.transcribeAudio(file.buffer);
+  //      this.logger.log(`Transcription result: "${transcription}"`);
+      
+  //     const ragObject = await this.ragService.generateResponseJson(transcription);
+      
+  //     // 3. Return a flattened JSON object
+  //     return {
+  //         transcript: transcription, // User's transcribed text from Azure
+  //         // 👇👇👇 FIX: ACCESS THE RESPONSETEXT PROPERTY OF THE RAG OBJECT 👇👇👇
+  //         responseText: ragObject.responseText, // AI's final text response (STRING)
+  //     };
+  // }
+
+
   @Post('stt')
   @UseInterceptors(FileInterceptor('audio'))
   async transcribeAndProcess(
       @UploadedFile() file: Express.Multer.File, 
-      @Body() body: any // for any other form data
+      @Body() body: any
   ) {
-
-      this.logger.log(`Received audio file of size: ${file.size}`);
-      // 1. Transcribe the audio buffer
       const transcription = await this.azureSpeechService.transcribeAudio(file.buffer);
-       this.logger.log(`Transcription result: "${transcription}"`);
-      
       const ragObject = await this.ragService.generateResponseJson(transcription);
+
+      const audioStream = await this.chatService.generateSpeechStream(ragObject.responseText);
+  
+      const audioChunks: Buffer[] = [];
+      for await (const chunk of audioStream) {
+          audioChunks.push(chunk);
+      }
+      const audioBuffer = Buffer.concat(audioChunks);
       
-      // 3. Return a flattened JSON object
       return {
-          transcript: transcription, // User's transcribed text from Azure
-          // 👇👇👇 FIX: ACCESS THE RESPONSETEXT PROPERTY OF THE RAG OBJECT 👇👇👇
-          responseText: ragObject.responseText, // AI's final text response (STRING)
+          transcript: transcription,
+          responseText: ragObject.responseText,
+          audioBase64: audioBuffer.toString('base64'), // Send audio as base64
       };
+  }
+
+  @Get('test-gemini')
+  async testGemini() {
+      await this.ragService.testGeminiConnection();
+      return { status: 'Check server logs for available models' };
   }
 }

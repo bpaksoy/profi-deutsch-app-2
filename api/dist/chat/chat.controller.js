@@ -43,14 +43,23 @@ let ChatController = ChatController_1 = class ChatController {
         }
     }
     async transcribeAndProcess(file, body) {
-        this.logger.log(`Received audio file of size: ${file.size}`);
         const transcription = await this.azureSpeechService.transcribeAudio(file.buffer);
-        this.logger.log(`Transcription result: "${transcription}"`);
         const ragObject = await this.ragService.generateResponseJson(transcription);
+        const audioStream = await this.chatService.generateSpeechStream(ragObject.responseText);
+        const audioChunks = [];
+        for await (const chunk of audioStream) {
+            audioChunks.push(chunk);
+        }
+        const audioBuffer = Buffer.concat(audioChunks);
         return {
             transcript: transcription,
             responseText: ragObject.responseText,
+            audioBase64: audioBuffer.toString('base64'),
         };
+    }
+    async testGemini() {
+        await this.ragService.testGeminiConnection();
+        return { status: 'Check server logs for available models' };
     }
 };
 exports.ChatController = ChatController;
@@ -73,6 +82,12 @@ __decorate([
     __metadata("design:paramtypes", [Object, Object]),
     __metadata("design:returntype", Promise)
 ], ChatController.prototype, "transcribeAndProcess", null);
+__decorate([
+    (0, common_1.Get)('test-gemini'),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", Promise)
+], ChatController.prototype, "testGemini", null);
 exports.ChatController = ChatController = ChatController_1 = __decorate([
     (0, common_1.Controller)('chat'),
     __metadata("design:paramtypes", [chat_service_1.ChatService,
