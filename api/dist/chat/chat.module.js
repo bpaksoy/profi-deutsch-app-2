@@ -12,6 +12,7 @@ const chat_controller_1 = require("./chat.controller");
 const chat_service_1 = require("./chat.service");
 const rag_service_1 = require("./rag.service");
 const azure_speech_service_1 = require("./azure-speech.service");
+const assistant_service_1 = require("./assistant-service");
 let ChatModule = class ChatModule {
 };
 exports.ChatModule = ChatModule;
@@ -22,9 +23,10 @@ exports.ChatModule = ChatModule = __decorate([
         providers: [
             chat_service_1.ChatService,
             rag_service_1.RAGService,
-            azure_speech_service_1.AzureSpeechService
+            azure_speech_service_1.AzureSpeechService,
+            assistant_service_1.AssistantService
         ],
-        exports: [chat_service_1.ChatService, rag_service_1.RAGService, azure_speech_service_1.AzureSpeechService]
+        exports: [chat_service_1.ChatService, rag_service_1.RAGService, azure_speech_service_1.AzureSpeechService, assistant_service_1.AssistantService]
     })
 ], ChatModule);
 //# sourceMappingURL=chat.module.js.map

@@ -90,7 +90,7 @@ let AzureSpeechService = AzureSpeechService_1 = class AzureSpeechService {
             ffmpeg.stdin.end();
         });
     }
-    async transcribeAudio(audioBuffer) {
+    async transcribeAudio1(audioBuffer) {
         try {
             const speechKey = this.configService.get('AZURE_SPEECH_KEY');
             const speechRegion = this.configService.get('AZURE_SPEECH_REGION');
@@ -115,6 +115,71 @@ let AzureSpeechService = AzureSpeechService_1 = class AzureSpeechService {
             const speechConfig = sdk.SpeechConfig.fromSubscription(speechKey, speechRegion);
             speechConfig.speechRecognitionLanguage = 'de-DE';
             const recognizer = new sdk.SpeechRecognizer(speechConfig, audioConfig);
+            return new Promise((resolve, reject) => {
+                recognizer.recognizeOnceAsync(result => {
+                    this.logger.log(`Recognition result reason: ${sdk.ResultReason[result.reason]}`);
+                    recognizer.close();
+                    if (result.reason === sdk.ResultReason.RecognizedSpeech) {
+                        this.logger.log(`✓ Recognized text: ${result.text}`);
+                        resolve(result.text);
+                    }
+                    else if (result.reason === sdk.ResultReason.NoMatch) {
+                        this.logger.warn('No speech could be recognized');
+                        const noMatchDetail = sdk.NoMatchDetails.fromResult(result);
+                        this.logger.warn(`NoMatch reason: ${sdk.NoMatchReason[noMatchDetail.reason]}`);
+                        resolve('');
+                    }
+                    else if (result.reason === sdk.ResultReason.Canceled) {
+                        const cancellation = sdk.CancellationDetails.fromResult(result);
+                        this.logger.error(`Recognition canceled: ${cancellation.reason}`);
+                        this.logger.error(`Error code: ${cancellation.ErrorCode}`);
+                        this.logger.error(`Error details: ${cancellation.errorDetails}`);
+                        reject(new Error(`Recognition canceled: ${cancellation.errorDetails}`));
+                    }
+                    else {
+                        this.logger.warn(`Unexpected result reason: ${sdk.ResultReason[result.reason]}`);
+                        resolve('');
+                    }
+                }, err => {
+                    recognizer.close();
+                    this.logger.error('Azure Speech recognition error:', err);
+                    reject(err);
+                });
+            });
+        }
+        catch (err) {
+            this.logger.error('transcribeAudio threw exception:', err);
+            throw err;
+        }
+    }
+    async transcribeAudio(audioBuffer) {
+        try {
+            const speechKey = this.configService.get('AZURE_SPEECH_KEY');
+            const speechRegion = this.configService.get('AZURE_SPEECH_REGION');
+            if (!speechKey || !speechRegion) {
+                throw new Error('Azure Speech configuration is missing!');
+            }
+            this.logger.log(`Original audio buffer size: ${audioBuffer.length} bytes`);
+            const pcmBuffer = await this.convertToPcm(audioBuffer);
+            if (pcmBuffer.length === 0) {
+                this.logger.error('PCM conversion resulted in empty buffer!');
+                return '';
+            }
+            const audioFormat = sdk.AudioStreamFormat.getWaveFormatPCM(16000, 16, 1);
+            const pushStream = sdk.AudioInputStream.createPushStream(audioFormat);
+            const arrayBuffer = new ArrayBuffer(pcmBuffer.length);
+            const view = new Uint8Array(arrayBuffer);
+            pcmBuffer.copy(view);
+            this.logger.log(`Writing ${arrayBuffer.byteLength} bytes to Azure stream...`);
+            pushStream.write(arrayBuffer);
+            pushStream.close();
+            const audioConfig = sdk.AudioConfig.fromStreamInput(pushStream);
+            const speechConfig = sdk.SpeechConfig.fromSubscription(speechKey, speechRegion);
+            const autoDetectSourceLanguageConfig = sdk.AutoDetectSourceLanguageConfig.fromLanguages([
+                'de-DE',
+                'en-US'
+            ]);
+            const recognizer = sdk.SpeechRecognizer.FromConfig(speechConfig, autoDetectSourceLanguageConfig, audioConfig);
             return new Promise((resolve, reject) => {
                 recognizer.recognizeOnceAsync(result => {
                     this.logger.log(`Recognition result reason: ${sdk.ResultReason[result.reason]}`);

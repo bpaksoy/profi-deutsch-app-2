@@ -19,11 +19,13 @@ const chat_service_1 = require("./chat.service");
 const platform_express_1 = require("@nestjs/platform-express");
 const rag_service_1 = require("./rag.service");
 const azure_speech_service_1 = require("./azure-speech.service");
+const assistant_service_1 = require("./assistant-service");
 let ChatController = ChatController_1 = class ChatController {
-    constructor(chatService, ragService, azureSpeechService) {
+    constructor(chatService, ragService, azureSpeechService, assistantService) {
         this.chatService = chatService;
         this.ragService = ragService;
         this.azureSpeechService = azureSpeechService;
+        this.assistantService = assistantService;
         this.logger = new common_1.Logger(ChatController_1.name);
     }
     async getTtsStream(text, res) {
@@ -92,6 +94,7 @@ exports.ChatController = ChatController = ChatController_1 = __decorate([
     (0, common_1.Controller)('chat'),
     __metadata("design:paramtypes", [chat_service_1.ChatService,
         rag_service_1.RAGService,
-        azure_speech_service_1.AzureSpeechService])
+        azure_speech_service_1.AzureSpeechService,
+        assistant_service_1.AssistantService])
 ], ChatController);
 //# sourceMappingURL=chat.controller.js.map
