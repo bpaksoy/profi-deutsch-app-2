@@ -1,10 +1,14 @@
-import React from 'react';
-
-export const metadata = {
-  title: 'ProfiDeutsch AI Dashboard',
-};
+'use client';
+import React, { useState } from 'react';
+import { AssistantModal } from '../../components/AssistantModal';
+import { AssistantOrb } from '../../components/AssistantOrb';
+import { VoiceAssistant } from '../../components/VoiceAssistant';
+import { PhrasebookCard } from '../../components/PhrasebookCard';
 
 export default function DashboardPage() {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+   const [isVoiceAssistantOpen, setIsVoiceAssistantOpen] = useState(false);
+
   return (
     <div className="relative flex h-auto min-h-screen w-full flex-col group/design-root overflow-x-hidden">
       <div className="layout-container flex h-full grow flex-col">
@@ -20,30 +24,24 @@ export default function DashboardPage() {
             {/* Main Grid */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
               {/* Left Column (Main Content) */}
+{/*   
+            <AssistantOrb 
+                onClick={() => setIsModalOpen(true)}
+                isModalOpen={isModalOpen}
+            /> */}
+            
+            {/* Modal */}
+            {isModalOpen && <AssistantModal onClose={() => setIsModalOpen(false)} />}
               <div className="lg:col-span-2 flex flex-col gap-8">
                 {/* AI Practice Card */}
                 <div className="bg-card-light dark:bg-card-dark rounded-xl shadow-sm p-6 lg:p-8 flex flex-col items-center text-center gap-6 border border-border-light dark:border-border-dark">
-                  <div className="flex flex-col gap-2 items-center">
-                    <h2 className="text-2xl font-bold leading-tight tracking-[-0.015em]">Sprechübung</h2>
-                    <p className="text-gray-500 dark:text-gray-400 max-w-md">Choose a scenario and start your conversation. The AI will provide feedback on your fluency, grammar, and pronunciation.</p>
-                  </div>
-                  {/* Scenario Selection */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 w-full max-w-2xl">
-                    <button className="flex flex-col items-center justify-center gap-3 p-4 rounded-lg bg-background-light dark:bg-background-dark border-2 border-primary ring-2 ring-primary/20 text-primary font-semibold transition-all">
-                      <span className="material-symbols-outlined text-3xl">groups</span>
-                      <span>Team Meeting</span>
-                    </button>
-                    <button className="flex flex-col items-center justify-center gap-3 p-4 rounded-lg bg-background-light dark:bg-background-dark hover:border-primary border-2 border-transparent transition-all">
-                      <span className="material-symbols-outlined text-3xl">call</span>
-                      <span>Client Call</span>
-                    </button>
-                    <button className="flex flex-col items-center justify-center gap-3 p-4 rounded-lg bg-background-light dark:bg-background-dark hover:border-primary border-2 border-transparent transition-all">
-                      <span className="material-symbols-outlined text-3xl">work</span>
-                      <span>Job Interview</span>
-                    </button>
-                  </div>
+                 
                   {/* SingleButton CTA */}
-                  <button className="flex w-full max-w-sm cursor-pointer items-center justify-center overflow-hidden rounded-lg h-14 px-5 bg-primary text-white gap-3 text-lg font-bold leading-normal tracking-[0.015em] hover:bg-primary/90 transition-colors shadow-lg shadow-primary/30">
+                 {/* SingleButton CTA */}
+                  <button 
+                    onClick={() => setIsVoiceAssistantOpen(true)}
+                    className="flex w-full max-w-sm cursor-pointer items-center justify-center overflow-hidden rounded-lg h-14 px-5 bg-primary text-white gap-3 text-lg font-bold leading-normal tracking-[0.015em] hover:bg-primary/90 transition-colors shadow-lg shadow-primary/30"
+                  >
                     <span className="material-symbols-outlined text-2xl">mic</span>
                     <span className="truncate">Übung starten</span>
                   </button>
@@ -51,43 +49,7 @@ export default function DashboardPage() {
                 {/* SectionHeader for Phrasebook */}
                 <h2 className="text-2xl font-bold leading-tight tracking-[-0.015em] pt-5">Business-Wortschatz</h2>
                 {/* Phrasebook Card */}
-                <div className="bg-card-light dark:bg-card-dark rounded-xl shadow-sm border border-border-light dark:border-border-dark">
-                  <div className="p-6">
-                    <div className="flex flex-col sm:flex-row gap-4 justify-between">
-                      <div className="flex gap-2">
-                        <button className="px-4 py-2 rounded-full text-sm font-semibold bg-primary/10 text-primary dark:bg-accent dark:text-primary">Meetings</button>
-                        <button className="px-4 py-2 rounded-full text-sm font-semibold hover:bg-gray-100 dark:hover:bg-white/10 transition-colors">Emails</button>
-                        <button className="px-4 py-2 rounded-full text-sm font-semibold hover:bg-gray-100 dark:hover:bg-white/10 transition-colors">Phone Calls</button>
-                      </div>
-                      <div className="relative">
-                        <input className="w-full sm:w-auto pl-10 pr-4 py-2 rounded-full bg-background-light dark:bg-background-dark border border-border-light dark:border-border-dark focus:ring-2 focus:ring-primary/50 focus:border-primary outline-none transition-all" placeholder="Search phrases..." type="text"/>
-                      </div>
-                    </div>
-                    <ul className="mt-6 space-y-4">
-                      <li className="flex justify-between items-center p-4 rounded-lg bg-background-light dark:bg-background-dark">
-                        <p className="font-medium">Können wir die Details besprechen?</p>
-                        <div className="flex items-center gap-3">
-                          <button aria-label="Listen to phrase" className="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-white/10 transition-colors"><span className="material-symbols-outlined">volume_up</span></button>
-                          <button aria-label="Practice with AI" className="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-white/10 transition-colors"><span className="material-symbols-outlined">mic</span></button>
-                        </div>
-                      </li>
-                      <li className="flex justify-between items-center p-4 rounded-lg bg-background-light dark:bg-background-dark">
-                        <p className="font-medium">Ich stimme Ihrem Vorschlag zu.</p>
-                        <div className="flex items-center gap-3">
-                          <button aria-label="Listen to phrase" className="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-white/10 transition-colors"><span className="material-symbols-outlined">volume_up</span></button>
-                          <button aria-label="Practice with AI" className="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-white/10 transition-colors"><span className="material-symbols-outlined">mic</span></button>
-                        </div>
-                      </li>
-                      <li className="flex justify-between items-center p-4 rounded-lg bg-background-light dark:bg-background-dark">
-                        <p className="font-medium">Lassen Sie uns einen Termin vereinbaren.</p>
-                        <div className="flex items-center gap-3">
-                          <button aria-label="Listen to phrase" className="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-white/10 transition-colors"><span className="material-symbols-outlined">volume_up</span></button>
-                          <button aria-label="Practice with AI" className="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-white/10 transition-colors"><span className="material-symbols-outlined">mic</span></button>
-                        </div>
-                      </li>
-                    </ul>
-                  </div>
-                </div>
+                <PhrasebookCard />
               </div>
               {/* Right Column (Progress) */}
               <div className="lg:col-span-1 flex flex-col gap-8">
@@ -163,6 +125,10 @@ export default function DashboardPage() {
           </div>
         </main>
       </div>
+       {/* Voice Assistant Modal */}
+      {isVoiceAssistantOpen && (
+        <VoiceAssistant onClose={() => setIsVoiceAssistantOpen(false)} />
+      )}
     </div>
   );
 }

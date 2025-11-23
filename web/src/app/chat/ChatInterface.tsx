@@ -141,15 +141,48 @@ export const ChatInterface = (props: {
 
         setMessages(current => [...current, aiMessage]);
 
-    } catch (error) {
-        console.error('Submission Failed:', error);
-        setMessages(current => current.map(msg => 
-            msg.message === 'Transcribing...' 
-                ? { ...msg, message: 'Transcription Failed.' } 
-                : msg
-        ));
-    }
-};
+        // 🎵 PLAY THE AUDIO RESPONSE
+        if (jsonResponse.audioBase64) {
+            playAudioFromBase64(jsonResponse.audioBase64);
+        }
+
+        } catch (error) {
+            console.error('Submission Failed:', error);
+            setMessages(current => current.map(msg => 
+                msg.message === 'Transcribing...' 
+                    ? { ...msg, message: 'Transcription Failed.' } 
+                    : msg
+            ));
+        }
+    };
+
+    const playAudioFromBase64 = (base64Audio: string) => {
+        try {
+            // Convert base64 to blob
+            const byteCharacters = atob(base64Audio);
+            const byteNumbers = new Array(byteCharacters.length);
+            for (let i = 0; i < byteCharacters.length; i++) {
+                byteNumbers[i] = byteCharacters.charCodeAt(i);
+            }
+            const byteArray = new Uint8Array(byteNumbers);
+            const blob = new Blob([byteArray], { type: 'audio/mpeg' });
+            
+            // Create audio URL and play
+            const audioUrl = URL.createObjectURL(blob);
+            const audio = new Audio(audioUrl);
+            
+            audio.play()
+                .then(() => console.log('Audio playing...'))
+                .catch(err => console.error('Audio playback failed:', err));
+            
+            // Clean up URL after playback
+            audio.onended = () => {
+                URL.revokeObjectURL(audioUrl);
+            };
+        } catch (error) {
+            console.error('Failed to play audio:', error);
+        }
+    };
 
   const { isRecording, startRecording, stopRecording } = useAudioRecorder(handleSubmitAudio);
 

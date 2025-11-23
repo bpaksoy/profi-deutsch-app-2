@@ -5,9 +5,9 @@ import { TtsDemoCard } from "../components/TtsDemoCard";
 export default function Page() { 
    return (
         <>
-            <div className="py-10">
+            {/* <div className="py-10">
                 <TtsDemoCard /> 
-            </div>
+            </div> */}
             
             <DashboardPage />
         </>
