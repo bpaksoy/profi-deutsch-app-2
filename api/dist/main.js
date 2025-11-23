@@ -32,11 +32,15 @@ var __importStar = (this && this.__importStar) || (function () {
         return result;
     };
 })();
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 const core_1 = require("@nestjs/core");
 const app_module_1 = require("./app.module");
 const net = __importStar(require("net"));
 const child_process_1 = require("child_process");
+const express_session_1 = __importDefault(require("express-session"));
 async function freePort(port) {
     return new Promise((resolve) => {
         const tester = net.createServer();
@@ -70,6 +74,16 @@ async function bootstrap() {
         methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
         credentials: true,
     });
+    app.use((0, express_session_1.default)({
+        secret: 'your-secret-key-change-this-in-production',
+        resave: false,
+        saveUninitialized: false,
+        cookie: {
+            maxAge: 3600000,
+            httpOnly: true,
+            sameSite: 'lax',
+        },
+    }));
     await app.listen(port);
     console.log(`Application is running on: ${await app.getUrl()}`);
 }

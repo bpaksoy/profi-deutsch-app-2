@@ -4,6 +4,7 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import * as net from 'net';
 import { execSync } from 'child_process';
+import session from 'express-session';
 
 async function freePort(port: number) {
   return new Promise<void>((resolve) => {
@@ -52,6 +53,19 @@ async function bootstrap() {
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     credentials: true,
   });
+
+  app.use(
+    session({
+      secret: 'your-secret-key-change-this-in-production',
+      resave: false,
+      saveUninitialized: false,
+      cookie: {
+        maxAge: 3600000, // 1 hour
+        httpOnly: true,
+        sameSite: 'lax',
+      },
+    }),
+  );
 
   await app.listen(port);
   console.log(`Application is running on: ${await app.getUrl()}`);

@@ -44,9 +44,14 @@ let ChatController = ChatController_1 = class ChatController {
             }
         }
     }
-    async transcribeAndProcess(file, body) {
+    async transcribeAndProcess(file, body, session) {
+        this.logger.log(`Received audio file of size: ${file.size}`);
+        if (!session.conversationId) {
+            session.conversationId = `conv_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+            this.logger.log(`Created new conversation ID: ${session.conversationId}`);
+        }
         const transcription = await this.azureSpeechService.transcribeAudio(file.buffer);
-        const ragObject = await this.ragService.generateResponseJson(transcription);
+        const ragObject = await this.ragService.generateResponseJson(transcription, session.conversationId);
         const audioStream = await this.chatService.generateSpeechStream(ragObject.responseText);
         const audioChunks = [];
         for await (const chunk of audioStream) {
@@ -58,6 +63,14 @@ let ChatController = ChatController_1 = class ChatController {
             responseText: ragObject.responseText,
             audioBase64: audioBuffer.toString('base64'),
         };
+    }
+    async resetConversation(session) {
+        if (session.conversationId) {
+            this.ragService.clearConversation(session.conversationId);
+            delete session.conversationId;
+            this.logger.log('Conversation reset');
+        }
+        return { success: true };
     }
     async testGemini() {
         await this.ragService.testGeminiConnection();
@@ -80,10 +93,18 @@ __decorate([
     (0, common_1.UseInterceptors)((0, platform_express_1.FileInterceptor)('audio')),
     __param(0, (0, common_1.UploadedFile)()),
     __param(1, (0, common_1.Body)()),
+    __param(2, (0, common_1.Session)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object, Object]),
+    __metadata("design:paramtypes", [Object, Object, Object]),
     __metadata("design:returntype", Promise)
 ], ChatController.prototype, "transcribeAndProcess", null);
+__decorate([
+    (0, common_1.Post)('reset-conversation'),
+    __param(0, (0, common_1.Session)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], ChatController.prototype, "resetConversation", null);
 __decorate([
     (0, common_1.Get)('test-gemini'),
     __metadata("design:type", Function),

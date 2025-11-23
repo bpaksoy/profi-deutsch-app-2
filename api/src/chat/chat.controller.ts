@@ -1,5 +1,5 @@
 
-import { Controller, Get, Query, Res, InternalServerErrorException, Header, Logger, Post, UseInterceptors, UploadedFile, Body } from '@nestjs/common';
+import { Controller, Get, Query, Res, InternalServerErrorException, Header, Logger, Post, UseInterceptors, UploadedFile, Body,  Session } from '@nestjs/common';
 import { Response } from 'express'; 
 import { ChatService } from './chat.service';
 import { FileInterceptor } from '@nestjs/platform-express';
@@ -55,28 +55,57 @@ export class ChatController {
 
 
   @Post('stt')
-  @UseInterceptors(FileInterceptor('audio'))
-  async transcribeAndProcess(
-      @UploadedFile() file: Express.Multer.File, 
-      @Body() body: any
-  ) {
-      const transcription = await this.azureSpeechService.transcribeAudio(file.buffer);
-      const ragObject = await this.ragService.generateResponseJson(transcription);
+    @UseInterceptors(FileInterceptor('audio'))
+    async transcribeAndProcess(
+        @UploadedFile() file: Express.Multer.File, 
+        @Body() body: any,
+        @Session() session: Record<string, any>  // ✅ Get session
+    ) {
+        this.logger.log(`Received audio file of size: ${file.size}`);
+        
+        // ✅ Get or create session ID
+        if (!session.conversationId) {
+            session.conversationId = `conv_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+            this.logger.log(`Created new conversation ID: ${session.conversationId}`);
+        }
+        
+        // 1. Transcribe the audio buffer
+        const transcription = await this.azureSpeechService.transcribeAudio(file.buffer);
+        
+        // 2. Get AI response with conversation history
+        const ragObject = await this.ragService.generateResponseJson(
+            transcription,
+            session.conversationId  // ✅ Pass session ID
+        );
+        
+        // 3. Generate TTS audio for the AI response
+        const audioStream = await this.chatService.generateSpeechStream(ragObject.responseText);
+        
+        // Convert stream to buffer
+        const audioChunks: Buffer[] = [];
+        for await (const chunk of audioStream) {
+            audioChunks.push(chunk);
+        }
+        const audioBuffer = Buffer.concat(audioChunks);
+        
+        // 4. Return both text and audio as base64
+        return {
+            transcript: transcription,
+            responseText: ragObject.responseText,
+            audioBase64: audioBuffer.toString('base64'),
+        };
+    }
 
-      const audioStream = await this.chatService.generateSpeechStream(ragObject.responseText);
-  
-      const audioChunks: Buffer[] = [];
-      for await (const chunk of audioStream) {
-          audioChunks.push(chunk);
-      }
-      const audioBuffer = Buffer.concat(audioChunks);
-      
-      return {
-          transcript: transcription,
-          responseText: ragObject.responseText,
-          audioBase64: audioBuffer.toString('base64'), // Send audio as base64
-      };
-  }
+    // ✅ Add endpoint to reset conversation
+    @Post('reset-conversation')
+    async resetConversation(@Session() session: Record<string, any>) {
+        if (session.conversationId) {
+            this.ragService.clearConversation(session.conversationId);
+            delete session.conversationId;
+            this.logger.log('Conversation reset');
+        }
+        return { success: true };
+    }
 
   @Get('test-gemini')
   async testGemini() {

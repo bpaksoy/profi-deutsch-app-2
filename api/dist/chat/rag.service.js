@@ -17,8 +17,9 @@ let RAGService = RAGService_1 = class RAGService {
     constructor(configService) {
         this.configService = configService;
         this.logger = new common_1.Logger(RAGService_1.name);
+        this.conversationHistories = new Map();
     }
-    async generateResponseJson(userInput) {
+    async generateResponseJson(userInput, sessionId) {
         this.logger.log(`RAG Service received input: ${userInput}`);
         if (!userInput || userInput.trim() === '') {
             return {
@@ -27,7 +28,8 @@ let RAGService = RAGService_1 = class RAGService {
             };
         }
         try {
-            const aiResponse = await this.callGemini(userInput);
+            const session = sessionId || 'default-session';
+            const aiResponse = await this.callGemini(userInput, session);
             return {
                 transcript: userInput,
                 responseText: aiResponse
@@ -41,12 +43,25 @@ let RAGService = RAGService_1 = class RAGService {
             };
         }
     }
-    async callGemini(userInput) {
+    clearConversation(sessionId) {
+        this.conversationHistories.delete(sessionId);
+        this.logger.log(`Cleared conversation history for session: ${sessionId}`);
+    }
+    async callGemini(userInput, sessionId) {
         const apiKey = this.configService.get('GEMINI_API_KEY');
         if (!apiKey) {
             throw new Error('Google Gemini API key is missing');
         }
         const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
+        if (!this.conversationHistories.has(sessionId)) {
+            this.conversationHistories.set(sessionId, []);
+            this.logger.log(`Started new conversation for session: ${sessionId}`);
+        }
+        const history = this.conversationHistories.get(sessionId);
+        history.push({
+            role: 'user',
+            parts: [{ text: userInput }]
+        });
         const systemPrompt = `# Persönlichkeit
 
 Du bist ein geduldiger und freundlicher Sprachlernbegleiter namens Flo. Sprich wie ein Freund.
@@ -57,7 +72,7 @@ Du bist ein deutscher Muttersprachler mit perfekter Aussprache und spezialisiers
 Du führst ein gesprochenes Gespräch mit einem Sprachlernenden, der sein Deutsch übt.
 Der Lernende möchte seine deutschen Sprechfähigkeiten auf das B2-Niveau verbessern.
 Das Gespräch findet in einer virtuellen Umgebung statt und simuliert ein natürliches Gesprächssetting.
-Dies ist ein FORTLAUFENDES Gespräch. Reagiere natürlich auf das, was der Benutzer gerade gesagt hat.
+Dies ist ein FORTLAUFENDES Gespräch. Reagiere natürlich auf das, was der Benutzer gerade gesagt hat und erinnere dich an vorherige Nachrichten.
 
 # Tonfall
 
@@ -70,56 +85,24 @@ Du bist geduldig und verständnisvoll und gibst dem Lernenden Zeit, seine Gedank
 # WICHTIG: Natürliche Gesprächsführung
 
 - Reagiere direkt auf das, was der Benutzer gerade gesagt hat
+- ERINNERE DICH an vorherige Nachrichten im Gespräch
 - Bestätige und erweitere das Thema natürlich
 - Stelle nicht nur Fragen, sondern teile auch eigene Gedanken oder gib Feedback
 - Wenn jemand etwas über sich erzählt, zeige Interesse und baue darauf auf
 
 Beispiele für gute Reaktionen:
 Benutzer: "Ich gehe immer ins Kino."
-Gut: "Oh, das ist toll! Welche Art von Filmen magst du am liebsten? Action, Komödie oder Drama?"
-Gut: "Super! Ins Kino gehen ist schön. Warst du letzte Woche im Kino?"
-Schlecht: "Das ist eine schöne Idee! Erzähl doch mal..."
-
-Benutzer: "Ich arbeite als Lehrer."
-Gut: "Ah, Lehrer! Das ist ein wichtiger Beruf. Welche Fächer unterrichtest du?"
-Schlecht: "Interessant! Erzähl mir mehr darüber."
+Gut: "Oh, das ist toll! Welche Art von Filmen magst du am liebsten?"
+Dann später:
+Benutzer: "Ich mag Action-Filme."
+Gut: "Action-Filme sind spannend! Hast du einen Lieblingsfilm?"
 
 # WICHTIG: Gesprächsfluss
 
-- Sage "Hallo" und stelle dich NUR vor, wenn es die allererste Nachricht ist oder der Benutzer fragt "Wer bist du?"
+- Sage "Hallo" und stelle dich NUR vor, wenn es die allererste Nachricht ist
 - Bei allen anderen Nachrichten: Reagiere direkt auf den Inhalt
-- KEINE Wiederholungen von Begrüßungen oder Vorstellungen mitten im Gespräch
-- Antworte natürlich und direkt auf die Frage ohne unnötige Begrüßungen
-- Sprich wie in einem fortlaufenden Gespräch
-
-# WICHTIG: Umgang mit Übersetzungsfragen
-
-Wenn jemand fragt "What does [deutsche Phrase] mean?" oder "Was bedeutet [englische Phrase] auf Deutsch?":
-- Erkenne, dass sie eine Übersetzung oder Erklärung wollen
-- Gib die Bedeutung/Übersetzung klar an
-- Erkläre kurz den Kontext oder die Verwendung
-
-Beispiele:
-Frage: "What does 'wie alt bist du' mean?"
-Antwort: "Das bedeutet auf Englisch 'How old are you?'. Das fragst du, wenn du jemandes Alter wissen möchtest."
-
-Frage: "Was bedeutet 'I'm happy to be here' auf Deutsch?"
-Antwort: "Das heißt 'Ich freue mich, hier zu sein.' oder 'Ich bin froh, hier zu sein.'"
-
-# WICHTIG: Umgang mit Spracherkennungsfehlern
-
-Die Eingabe des Benutzers kommt von Spracherkennung und kann Fehler enthalten.
-Interpretiere die Bedeutung intelligent, auch wenn Wörter falsch erkannt wurden.
-Wenn du dir unsicher bist, frage kurz nach, aber sei hilfreich und nicht pedantisch.
-
-# Ziel
-
-Dein Hauptziel ist es, dem Lernenden zu helfen, seine deutschen Sprechfähigkeiten zu üben und zu verbessern durch:
-
-1. **Natürliche Gespräche:** Reagiere authentisch auf das, was gesagt wird
-2. **Korrekturen geben:** Grammatikfehler identifizieren und korrigieren, aber freundlich
-3. **Direktes Unterrichten:** Wenn jemand nach Vokabeln oder Grammatik fragt, gib sofort konkrete Beispiele
-4. **Übersetzungen geben:** Wenn nach Übersetzungen gefragt wird, gib klar die Bedeutung an
+- KEINE Wiederholungen von Begrüßungen mitten im Gespräch
+- Beziehe dich auf frühere Teile des Gesprächs, wenn relevant
 
 # WICHTIGE REGEL
 
@@ -133,27 +116,26 @@ AUSNAHME: Wenn du eine deutsche Phrase ins Englische übersetzen sollst, darfst 
 - Sprich natürlich wie in einem echten Gespräch
 - Sei direkt und hilfreich
 - KEINE wiederholten Begrüßungen oder Vorstellungen`;
-        this.logger.log('Calling Gemini API...');
+        this.logger.log('Calling Gemini API with conversation history...');
         const response = await fetch(url, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({
-                contents: [
-                    {
-                        parts: [
-                            {
-                                text: `${systemPrompt}\n\nBenutzer: ${userInput}\n\nAssistent:`
-                            }
-                        ]
-                    }
-                ],
+                contents: history,
                 generationConfig: {
                     temperature: 0.7,
                     maxOutputTokens: 400,
                     topP: 0.8,
                     topK: 40
+                },
+                systemInstruction: {
+                    parts: [
+                        {
+                            text: systemPrompt
+                        }
+                    ]
                 },
                 safetySettings: [
                     {
@@ -187,7 +169,14 @@ AUSNAHME: Wenn du eine deutsche Phrase ins Englische übersetzen sollst, darfst 
             this.logger.warn('No text in Gemini response:', JSON.stringify(data));
             return 'Entschuldigung, ich konnte keine Antwort generieren.';
         }
-        this.testGeminiConnection();
+        history.push({
+            role: 'model',
+            parts: [{ text: text }]
+        });
+        if (history.length > 20) {
+            history.splice(0, 2);
+            this.logger.log('Trimmed conversation history');
+        }
         text = text
             .replace(/\*\*\*/g, '')
             .replace(/\*\*/g, '')

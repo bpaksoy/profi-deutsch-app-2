@@ -11,10 +11,13 @@ export declare class ChatController {
     private readonly logger;
     constructor(chatService: ChatService, ragService: RAGService, azureSpeechService: AzureSpeechService, assistantService: AssistantService);
     getTtsStream(text: string, res: Response): Promise<void>;
-    transcribeAndProcess(file: Express.Multer.File, body: any): Promise<{
+    transcribeAndProcess(file: Express.Multer.File, body: any, session: Record<string, any>): Promise<{
         transcript: string;
         responseText: any;
         audioBase64: string;
+    }>;
+    resetConversation(session: Record<string, any>): Promise<{
+        success: boolean;
     }>;
     testGemini(): Promise<{
         status: string;
