@@ -11,9 +11,9 @@ interface SettingsSidebarProps {
 }
 
 const navItems = [
-  { name: 'Profile', icon: 'person', section: 'profile' },
-  { name: 'Preferences', icon: 'tune', section: 'preferences' },
-  { name: 'Privacy', icon: 'shield_person', section: 'privacy' },
+  { name: 'Profil', icon: 'person', section: 'profile' },
+  { name: 'Einstellungen', icon: 'tune', section: 'preferences' },
+  { name: 'Sicherheit', icon: 'shield_person', section: 'privacy' },
 ];
 
 export const SettingsSidebar: React.FC<SettingsSidebarProps> = ({ username, email, userAvatar, activeSection }) => {
@@ -63,7 +63,7 @@ export const SettingsSidebar: React.FC<SettingsSidebarProps> = ({ username, emai
         <div className="flex flex-col gap-1">
           <button className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-border-light dark:hover:bg-card-dark cursor-pointer text-text-light dark:text-text-dark">
             <span className="material-symbols-outlined text-gray-700 dark:text-gray-300 text-2xl">logout</span>
-            <p className="text-sm font-medium leading-normal">Log Out</p>
+            <p className="text-sm font-medium leading-normal">Ausloggen</p>
           </button>
         </div>
       </div>

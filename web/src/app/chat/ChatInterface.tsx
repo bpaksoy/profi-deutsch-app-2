@@ -26,7 +26,7 @@ interface AudioRecorderControls {
 
 
 const chatHistory : ChatMessageData[] = [
-  { type: 'ai', sender: 'bot', message: 'Hallo! Ich bin Ihr KI-Assistent. Worüber möchten Sie heute sprechen? Sie können ein Szenario wie \'Vorstellungsgespräch\' wählen oder einfach eine Frage stellen.', avatar: AI_AVATAR },
+  { type: 'ai', sender: 'bot', message: 'Hallo! Ich bin Flo und unterstütze dich beim Lernen. Worüber möchtest du heute reden? Du kannst ein Szenario wie \'Vorstellungsgespräch\' wählen oder du hast eine eigene Idee.', avatar: AI_AVATAR },
   { type: 'user', sender: 'user', message: 'Ich möchte ein Vorstellungsgespräch üben.', avatar: USER_AVATAR },
   // { type: 'ai', sender: 'bot', message: '', avatar: AI_AVATAR, isTyping: true }, // <-- TEMPORARILY COMMENT OUT
 ];
@@ -125,7 +125,7 @@ export const ChatInterface = (props: {
         // Replace the 'Transcribing...' message with the actual transcript
         setMessages(current => current.map(msg => 
             msg.message === 'Transcribing...' 
-                ? { ...msg, message: jsonResponse.transcript || "Audio not clear." } 
+                ? { ...msg, message: jsonResponse.transcript || "Stimme war undeutlich." } 
                 : msg
         ));
 
@@ -201,7 +201,7 @@ export const ChatInterface = (props: {
         // to match what the server renders.
         return (
             <div className="flex h-[calc(100vh-64px)] w-full">
-                <div className="flex-1 flex items-center justify-center">Loading Chat...</div>
+                <div className="flex-1 flex items-center justify-center">Chat wird geladen...</div>
             </div>
         ); 
     }
@@ -229,7 +229,7 @@ export const ChatInterface = (props: {
             
             {/* Mobile Header (Hidden on MD) */}
             <header className="flex md:hidden items-center justify-between p-4 border-b border-border-light dark:border-border-dark">
-                <h2 className="text-lg font-bold">German AI Agent</h2>
+                <h2 className="text-lg font-bold">Sprech-Buddy</h2>
                 <button className="p-2">
                     <span className="material-symbols-outlined">menu</span>
                 </button>
@@ -263,7 +263,7 @@ export const ChatInterface = (props: {
                     <div className="flex w-full flex-1 items-stretch rounded-xl h-12 bg-gray-100 dark:bg-gray-800">
                         <input 
                             className="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-xl text-text-light dark:text-text-dark focus:outline-0 focus:ring-2 focus:ring-primary/50 border-none bg-transparent h-full placeholder:text-gray-500 dark:placeholder:text-gray-400 px-4 text-base font-normal leading-normal" 
-                            placeholder="Type your response..." 
+                            placeholder="Tippe das Mikro an und sprich..." 
                         />
                         <div className="flex items-center justify-center pr-2">
                             <div className="flex items-center gap-1">

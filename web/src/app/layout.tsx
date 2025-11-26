@@ -12,8 +12,8 @@ const manrope = Manrope({
 });
 
 export const metadata: Metadata = {
-  title: 'ProfiDeutsch',
-  description: 'AI-powered professional German tutor for internship candidates.',
+  title: 'Sigsag',
+  description: 'Sprachassistent zum Deutschlernen für Erwachsene mit B2-Kenntnissen',
 };
 
 export default function RootLayout({

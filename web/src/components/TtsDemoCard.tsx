@@ -7,7 +7,7 @@ import { twMerge } from 'tailwind-merge';
 const API_BASE_URL = process.env.API_BASE_URL || 'http://localhost:8000';
 
 export const TtsDemoCard: React.FC = () => {
-    const [text, setText] = useState('Hallo! Klicken Sie auf den Knopf, um meine Stimme zu hören.');
+    const [text, setText] = useState('Hallo! Klicke auf den Button, um meine Stimme zu hören.');
     const [isLoading, setIsLoading] = useState(false);
     const audioRef = useRef<HTMLAudioElement | null>(null);
 
@@ -32,7 +32,7 @@ export const TtsDemoCard: React.FC = () => {
             audioRef.current.onended = () => setIsLoading(false);
         } catch (error) {
             console.error('TTS Playback Error:', error);
-            alert("Fehler beim Abspielen der Stimme. Prüfen Sie die Konsole und das Backend!");
+            alert("Fehler beim Abspielen der Stimme. Überprüfe bitte die Konsole und das Backend.");
             setIsLoading(false);
         }
     };
@@ -50,7 +50,7 @@ export const TtsDemoCard: React.FC = () => {
                     "w-full p-3 rounded-lg border border-border-light dark:border-border-dark bg-background-light dark:bg-background-dark text-text-light dark:text-text-dark focus:ring-primary focus:border-primary resize-none",
                     "placeholder:text-gray-500"
                 )}
-                placeholder="Geben Sie hier Text ein..."
+                placeholder="Gib hier Text ein..."
             />
 
             {/* Play Button */}
@@ -63,7 +63,7 @@ export const TtsDemoCard: React.FC = () => {
                 )}
             >
                 {isLoading ? (
-                    "Spreche..."
+                    "Sag etwas..."
                 ) : (
                     <>
                         <span className="material-symbols-outlined mr-2">volume_up</span>

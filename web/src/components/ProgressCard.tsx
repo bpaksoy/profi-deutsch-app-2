@@ -17,7 +17,7 @@ const ProgressCard: React.FC<ProgressCardProps> = ({ title, progress }) => {
                     }}
                 />
             </div>
-            <p style={styles.progressText}>{progress}% completed</p>
+            <p style={styles.progressText}>{progress}% erledigt</p>
         </div>
     );
 };

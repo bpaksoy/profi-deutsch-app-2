@@ -56,7 +56,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ message, sender, isTyping = f
                     maxWidth: '70%',
                     padding: '10px',
                     borderRadius: '10px',
-                    backgroundColor: isUser ? '#0078d4' : '#e1e1e1',
+                    backgroundColor: isUser ? '#008073' : '#e1e1e1',
                     color: isUser ? '#fff' : '#000',
                 }}
             >
@@ -74,9 +74,9 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ message, sender, isTyping = f
                         cursor: 'pointer',
                         background: 'transparent',
                         border: 'none',
-                        color: isUser ? '#0078d4' : '#555', // Adjust color as needed
+                        color: isUser ? 'audio' : '#555', // Adjust color as needed
                     }}
-                    title="Listen to message"
+                    title="Anhören"
                 >
                     {/* Material Symbols Outlined is assumed to be imported globally */}
                     <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>volume_up</span>

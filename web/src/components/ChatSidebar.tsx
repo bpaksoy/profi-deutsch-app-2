@@ -10,7 +10,7 @@ interface ChatSidebarProps {
 const ChatSidebar: React.FC<ChatSidebarProps> = ({ conversations, onSelectConversation }) => {
     return (
         <div style={{ width: '250px', borderRight: '1px solid #ccc', padding: '10px' }}>
-            <h3>Conversations</h3>
+            <h3>Gespräche</h3>
             <ul style={{ listStyleType: 'none', padding: 0 }}>
                 {conversations.map((conversation) => (
                     <li

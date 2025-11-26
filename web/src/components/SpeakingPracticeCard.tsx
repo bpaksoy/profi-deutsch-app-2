@@ -17,7 +17,7 @@ const SpeakingPracticeCard: React.FC<SpeakingPracticeCardProps> = ({ question, o
         <div style={styles.card}>
             <h2 style={styles.question}>{question}</h2>
             <button style={styles.button} onClick={handleAnswer}>
-                Answer
+                Antworten
             </button>
         </div>
     );
