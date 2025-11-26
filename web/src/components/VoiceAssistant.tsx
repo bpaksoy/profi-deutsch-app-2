@@ -39,7 +39,7 @@ const useAudioRecorder = (submitCallback: (blob: Blob) => Promise<void>) => {
             recorder.start();
             setIsRecording(true);
         } catch (err) {
-            console.error("Microphone access denied or error:", err);
+            console.error("Zugriff auf Mikrofon verweigert oder Fehler:", err);
             setIsRecording(false);
         }
     };
@@ -188,7 +188,7 @@ const SmileyFace: React.FC<{
 
 export const VoiceAssistant: React.FC<VoiceAssistantProps> = ({ onClose }) => {
     const [messages, setMessages] = useState<Message[]>([
-        { id: 1, text: 'Hallo! Drücken Sie auf das Mikrofon und sprechen Sie auf Deutsch oder Englisch. Ich antworte auf Deutsch! 😊', sender: 'assistant' }
+        { id: 1, text: 'Hallo! Tippe auf das Mikrofon und sprich Deutsch mit mir. Ich antworte auf Deutsch! 😊', sender: 'assistant' }
     ]);
     const [isProcessing, setIsProcessing] = useState(false);
     const [isAssistantSpeaking, setIsAssistantSpeaking] = useState(false);
@@ -225,17 +225,17 @@ export const VoiceAssistant: React.FC<VoiceAssistantProps> = ({ onClose }) => {
                 body: JSON.stringify({
                     german: phraseToSave,
                     category: category.toLowerCase().replace(/\s+/g, '-'),
-                    context: 'From conversation with Flo'
+                    context: 'Aus deinen Gesprächen'
                 })
             });
             
             window.dispatchEvent(new CustomEvent('phraseAdded'));
             setShowCategoryModal(false);
             setPhraseToSave(null);
-            alert('Phrase saved successfully!');
+            alert('Redemittel erfolgreich gespeichert!');
         } catch (error) {
             console.error('Failed to save phrase:', error);
-            alert('Failed to save phrase');
+            alert('Speichern des Redemittels fehlgeschlagen.');
         }
     };
 
@@ -263,7 +263,7 @@ export const VoiceAssistant: React.FC<VoiceAssistantProps> = ({ onClose }) => {
             // Don't show user's transcribed message, only AI response
             const aiMessage: Message = {
                 id: Date.now(),
-                text: jsonResponse.responseText || "Entschuldigung, ich konnte keine Antwort generieren.",
+                text: jsonResponse.responseText || "Tut mir leid, ich konnte keine Antwort generieren.",
                 sender: 'assistant'
             };
 
@@ -280,7 +280,7 @@ export const VoiceAssistant: React.FC<VoiceAssistantProps> = ({ onClose }) => {
             console.error('Submission Failed:', error);
             setMessages(current => [...current, {
                 id: Date.now(),
-                text: 'Entschuldigung, es gab einen Fehler.',
+                text: 'Oje, das hat nicht geklappt.',
                 sender: 'assistant'
             }]);
         } finally {
@@ -309,7 +309,7 @@ export const VoiceAssistant: React.FC<VoiceAssistantProps> = ({ onClose }) => {
                 
                 audio.onerror = () => {
                     URL.revokeObjectURL(audioUrl);
-                    reject(new Error('Audio playback failed'));
+                    reject(new Error('Audio-Wiedergabe fehlgeschlagen'));
                 };
                 
                 audio.play().catch(reject);
@@ -347,8 +347,8 @@ export const VoiceAssistant: React.FC<VoiceAssistantProps> = ({ onClose }) => {
                         {/* Outer pulsating rings */}
                         {(isRecording || isAssistantSpeaking) && (
                             <>
-                                <div className="absolute inset-0 rounded-full bg-yellow-400/20 animate-ping"></div>
-                                <div className="absolute -inset-4 rounded-full bg-yellow-300/30 animate-pulse"></div>
+                                <div className="absolute inset-0 rounded-full bg-signal-400/20 animate-ping"></div>
+                                <div className="absolute -inset-4 rounded-full bg-signal-300/30 animate-pulse"></div>
                             </>
                         )}
                         
@@ -368,10 +368,10 @@ export const VoiceAssistant: React.FC<VoiceAssistantProps> = ({ onClose }) => {
                     {/* Status Text */}
                     <div className="mt-8 text-center">
                         <p className="text-2xl font-bold text-gray-800 dark:text-white mb-2">
-                            {isRecording ? 'Ich höre zu...' : isAssistantSpeaking ? 'Ich spreche...' : isProcessing ? 'Ich denke...' : 'Bereit zum Sprechen'}
+                            {isRecording ? 'Ich höre zu...' : isAssistantSpeaking ? 'Ich spreche...' : isProcessing ? 'Ich überlege...' : 'Bereit, um dir zuzuhören.'}
                         </p>
                         <p className="text-sm text-gray-600 dark:text-gray-400">
-                            {isRecording ? 'Sprechen Sie jetzt auf Deutsch oder Englisch' : 'Drücken Sie das Mikrofon unten'}
+                            {isRecording ? 'Sprich Deutsch mit mir.' : 'Tippe unten auf das Mikrofon.'}
                         </p>
                     </div>
 
@@ -398,8 +398,8 @@ export const VoiceAssistant: React.FC<VoiceAssistantProps> = ({ onClose }) => {
                 {/* RIGHT SIDE - Message Display */}
                 <div className="lg:w-1/2 flex flex-col bg-white dark:bg-gray-900">
                     <div className="p-6 border-b border-gray-200 dark:border-gray-700">
-                        <h3 className="text-xl font-bold">Konversation</h3>
-                        <p className="text-sm text-gray-500 dark:text-gray-400">Sprechen Sie auf Deutsch oder Englisch - ich antworte auf Deutsch</p>
+                        <h3 className="text-xl font-bold">Gespräch</h3>
+                        <p className="text-sm text-gray-500 dark:text-gray-400">Sprich mit mir Deutsch. Denk dir ein Thema aus oder frage mich, ob ich eine Idee habe.</p>
                     </div>
 
                     {/* Messages */}
@@ -423,7 +423,7 @@ export const VoiceAssistant: React.FC<VoiceAssistantProps> = ({ onClose }) => {
                                             className="self-start flex items-center gap-1 text-xs text-gray-500 hover:text-primary transition-colors"
                                         >
                                             <span className="material-symbols-outlined text-base">add_circle</span>
-                                            <span>Zur Phrasenliste hinzufügen</span>
+                                            <span>Zu Redemitteln hinzufügen</span>
                                         </button>
                                     )}
                                 </div>

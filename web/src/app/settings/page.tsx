@@ -41,7 +41,7 @@ export default function SettingsPage() {
             {/* ---------------------------------------------------- */}
             <section id="profile">
               <div className="flex flex-wrap justify-between gap-3 p-4">
-                <h2 className="text-text-light dark:text-text-dark text-3xl font-black leading-tight tracking-[-0.033em] min-w-72">Profile Settings</h2>
+                <h2 className="text-text-light dark:text-text-dark text-3xl font-bold leading-tight tracking-[-0.033em] min-w-72">Profil-Einstellungen</h2>
               </div>
               <div className="bg-card-light dark:bg-card-dark/50 rounded-xl p-4 sm:p-6 border border-border-light dark:border-border-dark">
                 {/* Photo & Name Section */}
@@ -59,7 +59,7 @@ export default function SettingsPage() {
                       </div>
                     </div>
                     <button className="flex min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-border-light dark:bg-border-dark text-text-light dark:text-text-dark text-sm font-bold leading-normal tracking-[0.015em] w-full max-w-[480px] @[480px]:w-auto hover:bg-gray-300 dark:hover:bg-slate-700">
-                      <span className="truncate">Change Photo</span>
+                      <span className="truncate">Foto ändern</span>
                     </button>
                   </div>
                 </div>
@@ -70,29 +70,29 @@ export default function SettingsPage() {
                   <div className="flex flex-col sm:flex-row items-end gap-4">
                     {/* First Name */}
                     <label className="flex flex-col min-w-40 flex-1">
-                      <p className="text-text-light dark:text-text-dark text-base font-medium leading-normal pb-2">First Name</p>
+                      <p className="text-text-light dark:text-text-dark text-base font-medium leading-normal pb-2">Vorname</p>
                       <input className={twMerge("form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-text-light dark:text-text-dark focus:outline-0 focus:ring-2 focus:ring-primary/50 border border-border-light dark:border-border-dark bg-background-light dark:bg-background-dark focus:border-primary dark:focus:border-primary h-14 placeholder:text-gray-400 p-[15px] text-base font-normal leading-normal")} placeholder="Klaus" value="Klaus"/>
                     </label>
                     {/* Last Name */}
                     <label className="flex flex-col min-w-40 flex-1">
-                      <p className="text-text-light dark:text-text-dark text-base font-medium leading-normal pb-2">Last Name</p>
+                      <p className="text-text-light dark:text-text-dark text-base font-medium leading-normal pb-2">Nachname</p>
                       <input className={twMerge("form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-text-light dark:text-text-dark focus:outline-0 focus:ring-2 focus:ring-primary/50 border border-border-light dark:border-border-dark bg-background-light dark:bg-background-dark focus:border-primary dark:focus:border-primary h-14 placeholder:text-gray-400 p-[15px] text-base font-normal leading-normal")} placeholder="Meier" value="Meier"/>
                     </label>
                   </div>
                   {/* Email */}
                   <div className="flex flex-wrap items-end gap-4">
                     <label className="flex flex-col min-w-40 flex-1">
-                      <p className="text-text-light dark:text-text-dark text-base font-medium leading-normal pb-2">Email Address</p>
+                      <p className="text-text-light dark:text-text-dark text-base font-medium leading-normal pb-2">E-Mail-Adresse</p>
                       <input className={twMerge("form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-text-light dark:text-text-dark focus:outline-0 focus:ring-2 focus:ring-primary/50 border border-border-light dark:border-border-dark bg-background-light dark:bg-background-dark focus:border-primary dark:focus:border-primary h-14 placeholder:text-gray-400 p-[15px] text-base font-normal leading-normal")} placeholder="klaus.meier@email.de" value="klaus.meier@email.de"/>
                     </label>
                   </div>
                   {/* Save/Cancel Buttons */}
                   <div className="flex justify-end gap-3 pt-4">
                     <button className="flex min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-12 px-5 bg-border-light dark:bg-border-dark text-text-light dark:text-text-dark text-base font-bold leading-normal hover:bg-gray-300 dark:hover:bg-slate-700">
-                      <span className="truncate">Cancel</span>
+                      <span className="truncate">Abbrechen</span>
                     </button>
                     <button className="flex min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-12 px-5 bg-primary text-white text-base font-bold leading-normal hover:bg-primary/90">
-                      <span className="truncate">Save Changes</span>
+                      <span className="truncate">Speichern</span>
                     </button>
                   </div>
                 </div>
@@ -104,26 +104,26 @@ export default function SettingsPage() {
             {/* ---------------------------------------------------- */}
             <section id="preferences">
               <div className="flex flex-wrap justify-between gap-3 p-4">
-                <h2 className="text-text-light dark:text-text-dark text-3xl font-black leading-tight tracking-[-0.033em] min-w-72">App Preferences</h2>
+                <h2 className="text-text-light dark:text-text-dark text-3xl font-bold leading-tight tracking-[-0.033em] min-w-72">App-Einstellungen</h2>
               </div>
               <div className="bg-card-light dark:bg-card-dark/50 rounded-xl border border-border-light dark:border-border-dark p-4 sm:p-6 space-y-8">
                 
                 {/* AI Agent Settings */}
                 <div>
-                  <h3 className="text-lg font-bold text-text-light dark:text-text-dark">AI Agent</h3>
-                  <p className="text-gray-500 dark:text-gray-400 mt-1 text-sm">Customize your AI learning partner.</p>
+                  <h3 className="text-lg font-bold text-text-light dark:text-text-dark">Lern-Buddy</h3>
+                  <p className="text-gray-500 dark:text-gray-400 mt-1 text-sm">Passe den Lern-Buddy an.</p>
                   <div className="mt-6 space-y-6">
                     <div>
-                      <p className="text-text-light dark:text-text-dark text-base font-medium leading-normal pb-2">Agent Voice</p>
+                      <p className="text-text-light dark:text-text-dark text-base font-medium leading-normal pb-2">Stimme ändern</p>
                       <div className="flex flex-col sm:flex-row gap-4">
                         {/* Radio buttons (using has-[:checked] for styling) */}
                         <label className="flex-1 flex items-center p-4 rounded-lg border border-border-light dark:border-border-dark has-[:checked]:border-primary has-[:checked]:bg-primary/10 cursor-pointer">
                           <input className="form-radio text-primary focus:ring-primary/50" name="agent-voice" type="radio" value="male"/>
-                          <span className="ml-3 text-text-light dark:text-text-dark">Male</span>
+                          <span className="ml-3 text-text-light dark:text-text-dark">Männlich</span>
                         </label>
                         <label className="flex-1 flex items-center p-4 rounded-lg border border-border-light dark:border-border-dark has-[:checked]:border-primary has-[:checked]:bg-primary/10 cursor-pointer">
                           <input defaultChecked className="form-radio text-primary focus:ring-primary/50" name="agent-voice" type="radio" value="female"/>
-                          <span className="ml-3 text-text-light dark:text-text-dark">Female</span>
+                          <span className="ml-3 text-text-light dark:text-text-dark">Weiblich</span>
                         </label>
                         <label className="flex-1 flex items-center p-4 rounded-lg border border-border-light dark:border-border-dark has-[:checked]:border-primary has-[:checked]:bg-primary/10 cursor-pointer">
                           <input className="form-radio text-primary focus:ring-primary/50" name="agent-voice" type="radio" value="neutral"/>
@@ -138,14 +138,14 @@ export default function SettingsPage() {
                 
                 {/* Notification Settings */}
                 <div>
-                  <h3 className="text-lg font-bold text-text-light dark:text-text-dark">Notifications</h3>
-                  <p className="text-gray-500 dark:text-gray-400 mt-1 text-sm">Manage how you receive updates from us.</p>
+                  <h3 className="text-lg font-bold text-text-light dark:text-text-dark">Mitteilungen</h3>
+                  <p className="text-gray-500 dark:text-gray-400 mt-1 text-sm">Bestimme selbst, in welcher Form du Updates erhältst.</p>
                   <div className="mt-6 space-y-4">
                     {/* Email Toggle */}
                     <div className="flex items-center justify-between p-4 rounded-lg border border-border-light dark:border-border-dark">
                       <div>
-                        <p className="text-text-light dark:text-text-dark font-medium">Email Notifications</p>
-                        <p className="text-gray-500 dark:text-gray-400 text-sm">Get practice reminders and progress updates.</p>
+                        <p className="text-text-light dark:text-text-dark font-medium">E-Mails empfangen</p>
+                        <p className="text-gray-500 dark:text-gray-400 text-sm">Lass dir Erinnerungen und Updates zu deinem Lernfortschritt schicken.</p>
                       </div>
                       <label className="relative inline-flex items-center cursor-pointer">
                         <input defaultChecked className="sr-only peer" type="checkbox" value=""/>
@@ -156,8 +156,8 @@ export default function SettingsPage() {
                     {/* Push Toggle */}
                     <div className="flex items-center justify-between p-4 rounded-lg border border-border-light dark:border-border-dark">
                       <div>
-                        <p className="text-text-light dark:text-text-dark font-medium">Push Notifications</p>
-                        <p className="text-gray-500 dark:text-gray-400 text-sm">Receive alerts directly on your device.</p>
+                        <p className="text-text-light dark:text-text-dark font-medium">Push-Nachrichten</p>
+                        <p className="text-gray-500 dark:text-gray-400 text-sm">Erhalte Nachrichten direkt auf dein Mobiltelefon.</p>
                       </div>
                       <label className="relative inline-flex items-center cursor-pointer">
                         <input className="sr-only peer" type="checkbox" value=""/>
@@ -171,15 +171,15 @@ export default function SettingsPage() {
                 
                 {/* Appearance */}
                 <div>
-                  <h3 className="text-lg font-bold text-text-light dark:text-text-dark">Appearance</h3>
-                  <p className="text-gray-500 dark:text-gray-400 mt-1 text-sm">Switch between light and dark themes.</p>
+                  <h3 className="text-lg font-bold text-text-light dark:text-text-dark">Modus</h3>
+                  <p className="text-gray-500 dark:text-gray-400 mt-1 text-sm">Wechsle zwischen hellem und dunklen Modus.</p>
                   <div className="mt-6">
                     <label className="flex flex-col min-w-40 flex-1">
                       <p className="text-text-light dark:text-text-dark text-base font-medium leading-normal pb-2">Theme</p>
                       <select className={twMerge("form-select flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-text-light dark:text-text-dark focus:outline-0 focus:ring-2 focus:ring-primary/50 border border-border-light dark:border-border-dark bg-background-light dark:bg-background-dark focus:border-primary dark:focus:border-primary h-14 placeholder:text-gray-400 px-4 text-base font-normal leading-normal")}>
-                        <option value="light">Light Mode</option>
-                        <option value="dark">Dark Mode</option>
-                        <option value="system">System Default</option>
+                        <option value="light">Hell</option>
+                        <option value="dark">Dunkel</option>
+                        <option value="system">Vom System übernehmen</option>
                       </select>
                     </label>
                   </div>
@@ -188,7 +188,7 @@ export default function SettingsPage() {
                 {/* Save Preferences Button */}
                 <div className="flex justify-end gap-3 pt-4">
                   <button className="flex min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-12 px-5 bg-primary text-white text-base font-bold leading-normal hover:bg-primary/90">
-                    <span className="truncate">Save Preferences</span>
+                    <span className="truncate">Einstellungen speichern</span>
                   </button>
                 </div>
               </div>
@@ -199,16 +199,16 @@ export default function SettingsPage() {
             {/* ---------------------------------------------------- */}
             <section id="danger-zone">
               <div className="flex flex-wrap justify-between gap-3 p-4">
-                <h2 className="text-red-600 dark:text-red-500 text-3xl font-black leading-tight tracking-[-0.033em] min-w-72">Danger Zone</h2>
+                <h2 className="text-red-600 dark:text-red-500 text-3xl font-bold leading-tight tracking-[-0.033em] min-w-72">Gefahrenzone</h2>
               </div>
               <div className="bg-card-light dark:bg-card-dark/50 rounded-xl border border-red-500/50 p-4 sm:p-6 space-y-6">
                 <div>
-                  <h3 className="text-lg font-bold text-text-light dark:text-text-dark">Delete Account</h3>
-                  <p className="text-gray-500 dark:text-gray-400 mt-1 max-w-2xl">Once you delete your account, there is no going back. Please be certain before proceeding. This action will permanently erase all your data, including your learning progress and personal information.</p>
+                  <h3 className="text-lg font-bold text-text-light dark:text-text-dark">Nutzerkonto löschen</h3>
+                  <p className="text-gray-500 dark:text-gray-400 mt-1 max-w-2xl">Achtung, wenn du deinen Account löschst, gibt es kein zurück. Bitte überlege gut, ob du das wirklich möchtest. Diese Aktion löscht dauerhaft deine Daten, auch deinen Lernfortschritt, Redemittel und persönliche Angaben.</p>
                 </div>
                 <div className="flex justify-start">
                   <button className="flex min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-12 px-5 bg-red-600 text-white text-base font-bold leading-normal hover:bg-red-700">
-                    <span className="truncate">Delete My Account</span>
+                    <span className="truncate">Nutzerkonto löschen</span>
                   </button>
                 </div>
               </div>
