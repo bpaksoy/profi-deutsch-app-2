@@ -142,8 +142,8 @@ export const PhrasebookCard: React.FC = () => {
                     </div>
                     <div className="relative">
                         <input
-                            className="w-full sm:w-auto pl-10 pr-4 py-2 rounded-full bg-background-light dark:bg-background-dark border border-border-light dark:border-border-dark focus:ring-2 focus:ring-primary/50 focus:border-primary outline-none transition-all"
-                            placeholder="Phrasen suchen..."
+                            className="w-full sm:w-auto pl-10 pr-4 py-2 rounded-full bg-accent/10 dark:bg-background-dark border border-border-light dark:border-border-dark focus:ring-2 focus:ring-primary/50 focus:border-primary outline-none transition-all"
+                            placeholder="Redemittel suchen..."
                             type="text"
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
@@ -156,7 +156,7 @@ export const PhrasebookCard: React.FC = () => {
                 <ul className="mt-6 space-y-4">
                     {filteredPhrases.length === 0 ? (
                         <li className="text-center py-8 text-gray-500">
-                            Noch keine Phrasen gespeichert. Fügen Sie Phrasen aus Ihren Gesprächen mit Flo hinzu!
+                            Noch keine Redemittel gespeichert. Füge hier Redemittel aus deinen Gesprächen ein.
                         </li>
                     ) : (
                         filteredPhrases.map(phrase => (
@@ -176,14 +176,14 @@ export const PhrasebookCard: React.FC = () => {
                                 <div className="flex items-center gap-3">
                                     <button
                                         onClick={() => playPhrase(phrase.german)}
-                                        aria-label="Listen to phrase"
+                                        aria-label="Anhören"
                                         className="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-white/10 transition-colors"
                                     >
                                         <span className="material-symbols-outlined">volume_up</span>
                                     </button>
                                     <button
                                         onClick={() => deletePhrase(phrase.id)}
-                                        aria-label="Delete phrase"
+                                        aria-label="Löschen"
                                         className="p-2 rounded-full hover:bg-red-100 dark:hover:bg-red-900/20 text-red-600 transition-colors"
                                     >
                                         <span className="material-symbols-outlined">delete</span>

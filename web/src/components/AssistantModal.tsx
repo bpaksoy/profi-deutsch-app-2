@@ -61,7 +61,7 @@ export const AssistantModal: React.FC<{ onClose: () => void }> = ({ onClose }) =
             {/* Modal Box */}
             <div className="bg-white dark:bg-card-dark w-full max-w-sm rounded-lg shadow-xl flex flex-col h-[60vh]">
                 <div className="flex justify-between items-center p-4 border-b">
-                    <h3 className="font-bold">Profi Assistant</h3>
+                    <h3 className="font-bold">Lern-Buddy</h3>
                     <button onClick={onClose}>X</button>
                 </div>
                 {/* Message History Area */}
@@ -73,11 +73,11 @@ export const AssistantModal: React.FC<{ onClose: () => void }> = ({ onClose }) =
                             </div>
                         </div>
                     ))}
-                    {isLoading && <p className="text-sm text-gray-500">Assistant is thinking...</p>}
+                    {isLoading && <p className="text-sm text-gray-500">Muss noch überlegen...</p>}
                 </div>
                 {/* Input Composer */}
                 <form onSubmit={(e) => { e.preventDefault(); sendMessage(input); }} className="p-4 border-t flex gap-2">
-                    <input type="text" value={input} onChange={(e) => setInput(e.target.value)} disabled={isLoading} placeholder="Ihre Frage..." className="flex-1 p-2 border rounded-lg" />
+                    <input type="text" value={input} onChange={(e) => setInput(e.target.value)} disabled={isLoading} placeholder="Deine Frage..." className="flex-1 p-2 border rounded-lg" />
                     <button type="submit" disabled={isLoading} className="bg-primary text-white p-2 rounded-lg">Send</button>
                 </form>
             </div>

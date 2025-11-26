@@ -3,7 +3,7 @@ import React from 'react';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'ProfiDeutsch AI Dashboard',
+  title: 'Sigsag Lern-Buddy Dashboard',
 };
 
 // This layout component simply wraps the page.tsx content

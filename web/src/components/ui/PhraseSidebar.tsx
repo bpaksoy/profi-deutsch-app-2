@@ -28,8 +28,8 @@ export const PhraseSidebar: React.FC<PhraseSidebarProps> = ({ activeCategory = '
       <div className="flex h-full flex-col justify-between">
         <div className="flex flex-col gap-4">
           <div className="flex flex-col gap-1 px-2 pt-2">
-            <h1 className="text-text-light dark:text-text-dark text-base font-semibold">Categories</h1>
-            <p className="text-gray-500 dark:text-gray-400 text-sm">Browse by topic</p>
+            <h1 className="text-text-light dark:text-text-dark text-base font-semibold">Kategorien</h1>
+            <p className="text-gray-500 dark:text-gray-400 text-sm">Thema suchen</p>
           </div>
           <nav className="flex flex-col gap-1">
             {categories.map((item) => (
@@ -57,12 +57,12 @@ export const PhraseSidebar: React.FC<PhraseSidebarProps> = ({ activeCategory = '
               style={{ backgroundImage: `url("${aiAvatar}")` }}
             ></div>
             <div className="flex flex-col">
-              <h2 className="text-text-light dark:text-text-dark text-base font-medium leading-normal">ProfiDeutsch AI</h2>
-              <p className="text-gray-500 dark:text-gray-400 text-sm leading-normal">Your learning assistant</p>
+              <h2 className="text-text-light dark:text-text-dark text-base font-medium leading-normal">Sigsag</h2>
+              <p className="text-gray-500 dark:text-gray-400 text-sm leading-normal">Dein Sprech-Buddy</p>
             </div>
           </div>
           <button className="flex h-10 min-w-[84px] w-full cursor-pointer items-center justify-center overflow-hidden rounded-lg bg-primary px-4 text-sm font-bold text-card-light transition-colors hover:bg-primary/90">
-            <span className="truncate">Get Help</span>
+            <span className="truncate">Hilfe</span>
           </button>
         </div>
       </div>

@@ -9,8 +9,9 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        "primary": "#003366",
-        "accent": "#FFCC00",
+        "primary": "#008073",
+        "accent": "#FFDF0C",
+        "audio" : "#238CE8", // Not in use yet, can be added
         "background-light": "#F5F7FA",
         "background-dark": "#101922",
         "text-light": "#333333",
@@ -21,7 +22,7 @@ const config: Config = {
         "border-dark": "#334155"
       },
       fontFamily: {
-        "display": ["Manrope", "sans-serif"] // <--- Important for your font-display class
+        "display": ["Zain", "sans-serif"] // <--- Important for your font-display class
       },
       borderRadius: { // <--- These were in the original HTML
         "DEFAULT": "0.5rem",
