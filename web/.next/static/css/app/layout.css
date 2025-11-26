@@ -1256,6 +1256,12 @@ select{
   --tw-bg-opacity: 1;
   background-color: rgb(255 223 12 / var(--tw-bg-opacity, 1));
 }
+.bg-accent\/10{
+  background-color: rgb(255 223 12 / 0.1);
+}
+.bg-accent\/30{
+  background-color: rgb(255 223 12 / 0.3);
+}
 .bg-background-light{
   --tw-bg-opacity: 1;
   background-color: rgb(245 247 250 / var(--tw-bg-opacity, 1));
@@ -1315,24 +1321,9 @@ select{
   --tw-bg-opacity: 1;
   background-color: rgb(254 249 195 / var(--tw-bg-opacity, 1));
 }
-.bg-yellow-300\/30{
-  background-color: rgb(253 224 71 / 0.3);
-}
-.bg-yellow-400\/20{
-  background-color: rgb(250 204 21 / 0.2);
-}
 .bg-yellow-600{
   --tw-bg-opacity: 1;
   background-color: rgb(202 138 4 / var(--tw-bg-opacity, 1));
-}
-.bg-accent\/10{
-  background-color: rgb(255 223 12 / 0.1);
-}
-.bg-accent\/30{
-  background-color: rgb(255 223 12 / 0.3);
-}
-.bg-accent\/15{
-  background-color: rgb(255 223 12 / 0.15);
 }
 .bg-gradient-to-br{
   background-image: linear-gradient(to bottom right, var(--tw-gradient-stops));
@@ -1557,10 +1548,6 @@ select{
 .text-gray-900{
   --tw-text-opacity: 1;
   color: rgb(17 24 39 / var(--tw-text-opacity, 1));
-}
-.text-green-600{
-  --tw-text-opacity: 1;
-  color: rgb(22 163 74 / var(--tw-text-opacity, 1));
 }
 .text-primary{
   --tw-text-opacity: 1;
@@ -2100,14 +2087,6 @@ select{
   .lg\:text-4xl{
     font-size: 2.25rem;
     line-height: 2.5rem;
-  }
-  .lg\:text-2xl{
-    font-size: 1.5rem;
-    line-height: 2rem;
-  }
-  .lg\:text-6xl{
-    font-size: 3.75rem;
-    line-height: 1;
   }
 }
 /*!*********************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************!*\

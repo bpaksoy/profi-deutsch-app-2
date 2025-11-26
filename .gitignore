@@ -3,3 +3,10 @@ node_modules/
 web/node_modules/
 api/node_modules/
 api/.env
+
+# Next.js
+web/.next
+web/out
+
+# TypeScript build
+api/dist
