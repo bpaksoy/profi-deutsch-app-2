@@ -28,7 +28,7 @@ const TopNavBar: React.FC<{ activeNav?: string }> = ({ activeNav }) => (
       <Link href="/dashboard" className={twMerge("text-text-light dark:text-text-dark text-sm font-medium leading-normal hover:text-primary dark:hover:text-accent transition-colors", activeNav === 'dashboard' && 'text-primary dark:text-accent')}>Start</Link>
       <Link href="/phrases" className={twMerge("text-text-light dark:text-text-dark text-sm font-medium leading-normal hover:text-primary dark:hover:text-accent transition-colors", activeNav === 'phrases' && 'text-primary dark:text-accent')}>Redemittel</Link>
       <Link href="/chat" className={twMerge("text-text-light dark:text-text-dark text-sm font-medium leading-normal hover:text-primary dark:hover:text-accent transition-colors", activeNav === 'chat' && 'text-primary dark:text-accent')}>Chat</Link>
-      <Link href="/profile" className={twMerge("text-text-light dark:text-text-dark text-sm font-medium leading-normal hover:text-primary dark:hover:text-accent transition-colors", activeNav === 'profile' && 'text-primary dark:text-accent')}>Profil</Link>
+      <Link href="/profile" className={twMerge("text-text-light dark:text-text-dark text-sm font-medium leading-normal hover:text-primary dark:hover:text-accent transition-colors", activeNav === 'profile' && 'text-primary dark:text-accent')}>Hilfe</Link>
       <Link href="/settings" className={twMerge("text-text-light dark:text-text-dark text-sm font-medium leading-normal hover:text-primary dark:hover:text-accent transition-colors", activeNav === 'settings' && 'text-primary dark:text-accent')}>Einstellungen</Link>
     </nav>
     <div className="flex items-center gap-3">

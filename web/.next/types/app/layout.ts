@@ -1,4 +1,4 @@
-// File: /Users/banupaksoy/Desktop/Kathrin/profi-deutsch-app/web/src/app/layout.tsx
+// File: /Users/kathringrenzdoerffer/Desktop/WebApp ProfiGerman/profi-deutsch-app-2/web/src/app/layout.tsx
 import * as entry from '../../../src/app/layout.js'
 import type { ResolvingMetadata, ResolvingViewport } from 'next/dist/lib/metadata/types/metadata-interface.js'
 

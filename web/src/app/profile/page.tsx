@@ -1,5 +1,8 @@
+'use client';
+import React, { useState } from 'react';
+import { FAQItem } from './components/FAQItem';
+
 // web/src/app/profile/page.tsx
-import React from 'react';
 // import { SpeakingPracticeCard } from './components/SpeakingPracticeCard';
 // import { PhrasebookCard } from './components/PhrasebookCard';
 // import { ProgressCard } from './components/ProgressCard';
@@ -17,17 +20,17 @@ export default function ProfilePage() {
         {/* Page Heading (Matches the Dashboard heading) */}
         <div className="flex flex-wrap justify-between items-center gap-4">
           <div className="flex flex-col gap-1">
-            <p className="text-3xl lg:text-4xl font-black leading-tight tracking-[-0.033em]">Hallo {username}!</p>
-            <p className="text-gray-500 dark:text-gray-400 text-base font-normal leading-normal">Übe das freie Sprechen und erhalte Feedback.</p>
+            <p className="text-3xl font-bold leading-tight tracking-[-0.033em]">Hilfe</p>
+            <p className="text-gray-500 dark:text-gray-400 text-base font-normal leading-normal">Hier findest du Antworten auf häufige Fragen.</p>
           </div>
         </div>
 
         {/* Main Grid: lg:grid-cols-3 */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
 
-          {/* Left Column (Main Content) - lg:col-span-2 */}
+          {/* Left Column (FAQ) - lg:col-span-2 */}
           <div className="lg:col-span-2 flex flex-col gap-8">
-            {/* <SpeakingPracticeCard /> */}
+            {/* <FAQItem /> */}
 
             {/* SectionHeader for Phrasebook */}
             <h2 className="text-2xl font-bold leading-tight tracking-[-0.015em] pt-5">Gespeicherte Redemittel</h2>
