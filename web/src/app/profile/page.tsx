@@ -1,6 +1,6 @@
 'use client';
 import React, { useState } from 'react';
-import { FAQItem } from './components/FAQItem';
+import FAQCard from '../../components/FAQCard';
 
 // web/src/app/profile/page.tsx
 // import { SpeakingPracticeCard } from './components/SpeakingPracticeCard';
@@ -27,24 +27,13 @@ export default function ProfilePage() {
 
         {/* Main Grid: lg:grid-cols-3 */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-
           {/* Left Column (FAQ) - lg:col-span-2 */}
           <div className="lg:col-span-2 flex flex-col gap-8">
-            {/* <FAQItem /> */}
-
-            {/* SectionHeader for Phrasebook */}
-            <h2 className="text-2xl font-bold leading-tight tracking-[-0.015em] pt-5">Gespeicherte Redemittel</h2>
-            
-            {/* <PhrasebookCard /> */}
-          </div>
-
-          {/* Right Column (Progress) - lg:col-span-1 */}
-          <div className="lg:col-span-1 flex flex-col gap-8">
-            {/* SectionHeader for Progress */}
-            <h2 className="text-2xl font-bold leading-tight tracking-[-0.015em]">Lern-Fortschritt</h2>
-            
-            {/* <ProgressCard />
-            <RecentActivityCard /> */}
+            {/* <FAQCard /> */}
+                {/* SectionHeader for FAQ */}
+                <h2 className="text-2xl font-bold leading-tight tracking-[-0.015em] pt-5">FAQ</h2>
+                {/* FAQCard */}
+                <FAQCard />
           </div>
         </div>
       </div>
@@ -52,4 +41,4 @@ export default function ProfilePage() {
   );
 }
 
-// NOTE: You must create the components directory and the four components inside it.
+// NOTE: You must create the components directory and the components inside it.
