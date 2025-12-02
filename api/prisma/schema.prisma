@@ -1,0 +1,121 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL") 
+}
+
+model User {
+  id            String         @id @default(uuid())
+  email         String?        @unique
+  name          String?
+  level         String         @default("B1") // Current German level
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  
+  conversations Conversation[]
+  phrases       Phrase[]
+  progress      Progress[]
+}
+
+// Conversation sessions with Flo
+model Conversation {
+  id          String    @id @default(uuid())
+  userId      String?
+  sessionId   String    @unique
+  startedAt   DateTime  @default(now())
+  endedAt     DateTime?
+  topic       String?   // e.g., "Job Interview", "Kino"
+  
+  user        User?     @relation(fields: [userId], references: [id])
+  messages    Message[]
+}
+
+// Individual messages in conversations
+model Message {
+  id             String       @id @default(uuid())
+  conversationId String
+  role           String       // "user" or "assistant"
+  content        String
+  transcription  String?      // Original transcribed text if from audio
+  timestamp      DateTime     @default(now())
+  
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  
+  @@index([conversationId])
+}
+
+// Knowledge base documents for RAG
+model KnowledgeDocument {
+  id          String   @id @default(uuid())
+  title       String
+  content     String   // Full document text
+  category    String   // e.g., "grammar", "business", "culture"
+  language    String   @default("de") // "de" or "en"
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  chunks      KnowledgeChunk[]
+}
+
+// Chunked content for semantic search
+model KnowledgeChunk {
+  id         String            @id @default(uuid())
+  documentId String
+  content    String
+  chunkIndex Int
+  // embedding  String?         // For future vector search
+  
+  document   KnowledgeDocument @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  
+  @@index([documentId])
+}
+
+// User's saved phrases
+model Phrase {
+  id          String   @id @default(uuid())
+  userId      String?
+  german      String
+  english     String?
+  context     String?
+  category    String
+  createdAt   DateTime @default(now())
+  
+  user        User?    @relation(fields: [userId], references: [id])
+  
+  @@index([userId])
+  @@index([category])
+}
+
+// Category for organizing phrases
+model Category {
+  id          String   @id @default(uuid())
+  name        String   @unique
+  slug        String   @unique
+  phraseCount Int      @default(0)
+  createdAt   DateTime @default(now())
+}
+
+// User progress tracking
+model Progress {
+  id              String   @id @default(uuid())
+  userId          String
+  practiceTime    Int      @default(0) // in minutes
+  wordsMastered   Int      @default(0)
+  conversationCount Int    @default(0)
+  lastPracticeAt  DateTime @default(now())
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  user            User     @relation(fields: [userId], references: [id])
+  
+  @@unique([userId])
+}
