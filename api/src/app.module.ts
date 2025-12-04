@@ -3,6 +3,7 @@ import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config'; 
 import { ChatModule } from './chat/chat.module'; 
 import { PhrasebookModule } from './phrasebook/phrasebook.module';
+import { PrismaModule } from './prisma/prisma.module';
 
 
 @Module({
@@ -13,7 +14,8 @@ import { PhrasebookModule } from './phrasebook/phrasebook.module';
       envFilePath: '.env', 
     }),
     ChatModule,
-    PhrasebookModule
+    PhrasebookModule,
+    PrismaModule,
   ],
   controllers: [],
   providers: [],

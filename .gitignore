@@ -10,3 +10,6 @@ web/out
 
 # TypeScript build
 api/dist
+/generated/prisma
+
+web/.env.local

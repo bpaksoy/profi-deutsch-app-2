@@ -3,6 +3,7 @@ import { Manrope } from 'next/font/google';
 import '../styles/global.css';
 import { CustomLayout } from '../components/ui/Layout'; // Adjust the path as needed
 import React from 'react';
+import { ClerkProvider } from '@clerk/nextjs';
 
 
 const manrope = Manrope({
@@ -22,6 +23,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
+    <ClerkProvider>
     <html lang="en" className={`${manrope.variable} light`}>
       <body className="font-display bg-background-light dark:bg-background-dark text-text-light dark:text-text-dark">
         <CustomLayout>
@@ -30,5 +32,6 @@ export default function RootLayout({
         
       </body>
     </html>
+    </ClerkProvider>
   );
 }
