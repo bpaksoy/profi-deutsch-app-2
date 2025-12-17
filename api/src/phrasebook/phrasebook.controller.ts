@@ -1,59 +1,36 @@
-import { Controller, Get, Post, Delete, Body, Param, Query, Logger } from '@nestjs/common';
-import { PhrasebookService, Phrase, Category } from './phrasebook.service';
+import { Controller, Get, Post, Body, Query, InternalServerErrorException, Logger } from '@nestjs/common';
+import { PhrasebookService } from './phrasebook.service';
 
 @Controller('phrasebook')
 export class PhrasebookController {
     private readonly logger = new Logger(PhrasebookController.name);
 
-    constructor(private readonly phrasebookService: PhrasebookService) {}
+    constructor(private readonly phrasebookService: PhrasebookService) { }
 
-    @Get('categories')
-    getCategories(): Category[] {
-        return this.phrasebookService.getCategories();
-    }
+    @Post('phrases')
+    async savePhrase(@Body() body: { german: string, context?: string, conversationId?: string, category?: string }) {
+        // Dummy user ID for now
+        const userId = 'user_default';
 
-    @Post('categories')
-    createCategory(@Body() body: { name: string }): Category {
-        return this.phrasebookService.createCategory(body.name);
-    }
+        if (!body.german) {
+            throw new InternalServerErrorException('German text is required');
+        }
 
-    @Delete('categories/:id')
-    deleteCategory(@Param('id') id: string): { success: boolean } {
-        const success = this.phrasebookService.deleteCategory(id);
-        return { success };
+        return this.phrasebookService.savePhrase(userId, body);
     }
 
     @Get('phrases')
-    getPhrases(@Query('category') category?: string): Phrase[] {
-        if (category) {
-            return this.phrasebookService.getPhrasesByCategory(category);
-        }
-        return this.phrasebookService.getAllPhrases();
+    async getPhrases(@Query('category') category?: string) {
+        const userId = 'user_default';
+        return this.phrasebookService.getPhrases(userId, category);
     }
 
-    @Post('phrases')
-    addPhrase(@Body() body: { 
-        german: string; 
-        category: string; 
-        english?: string;
-        context?: string;
-    }): Phrase {
-        return this.phrasebookService.addPhrase(
-            body.german,
-            body.category,
-            body.english,
-            body.context
-        );
-    }
-
-    @Delete('phrases/:id')
-    deletePhrase(@Param('id') id: string): { success: boolean } {
-        const success = this.phrasebookService.deletePhrase(id);
-        return { success };
-    }
-
-    @Get('search')
-    searchPhrases(@Query('q') query: string): Phrase[] {
-        return this.phrasebookService.searchPhrases(query);
+    @Get('categories')
+    async getCategories() {
+        // Return dummy categories or fetch from DB if we had a Category model populated
+        return [
+            { id: 'General', name: 'General', phraseCount: 0 },
+            { id: 'Business', name: 'Business', phraseCount: 0 }
+        ];
     }
 }

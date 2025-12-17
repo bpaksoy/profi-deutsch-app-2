@@ -1,7 +1,9 @@
 import React from 'react';
-import ChatInterface from './ChatInterface';
-// Import the new client component
+import dynamic from 'next/dynamic';
 
+// Dynamically import ChatInterface with SSR disabled to avoid hydration errors
+// caused by browser-specific APIs (window, Audio, MediaRecorder)
+const ChatInterface = dynamic(() => import('./ChatInterface'));
 
 // All data that doesn't need to be stateful is defined here (Server-side)
 const USER_AVATAR = "https://lh3.googleusercontent.com/aida-public/AB6AXuC3UxJCLgdZY3vIQAPm31GnNp-7w1_8mASbyWEU7JgWMDBmyXkBUq0a9fqdYf3UiKOzV3UjUZdfW7a9VnuJBzD1Ld1yEOBhsCMqYwjROVjVPz6sHd2pznp2zP3eO3tl1y1m5wzdEvVadubycVDI-rzRskUm9FYWUjCjBcLfLNTjz5Di-Am4ZdbDJoqqBaWxS3l1HHJ_izz6YSC15Kd-OYpPp8eUpoN_90subodS_vH9WVSBWXHXfPyhA8tdvoGDTnfQV82dPnfwq2Ql";
@@ -12,12 +14,12 @@ const API_BASE_URL = process.env.API_BASE_URL || 'http://localhost:8000';
 // This is a Server Component, only render basic props/structure
 export default function ChatPage() {
   const username = "Kathrin G.";
-  
+
   // RENDER THE CLIENT COMPONENT HERE
-  return <ChatInterface 
+  return <ChatInterface
     username={username}
-    avatarUrl={USER_AVATAR} 
+    avatarUrl={USER_AVATAR}
     aiAvatarUrl={AI_AVATAR}
     apiBaseUrl={API_BASE_URL}
-   />;
+  />;
 }

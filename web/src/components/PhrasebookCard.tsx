@@ -55,30 +55,49 @@ export const PhrasebookCard: React.FC = () => {
     const loadCategories = async () => {
         try {
             const response = await fetch(`${API_BASE_URL}/phrasebook/categories`);
-            const data = await response.json();
-            setCategories(data);
+            if (response.ok) {
+                const data = await response.json();
+                if (Array.isArray(data)) {
+                    setCategories(data);
+                } else {
+                    setCategories([]);
+                }
+            } else {
+                setCategories([]);
+            }
         } catch (error) {
             console.error('Failed to load categories:', error);
+            setCategories([]);
         }
     };
 
     const loadPhrases = async (category: string) => {
         try {
             const response = await fetch(`${API_BASE_URL}/phrasebook/phrases?category=${category}`);
-            const data = await response.json();
-            setPhrases(data);
+            if (response.ok) {
+                const data = await response.json();
+                setPhrases(Array.isArray(data) ? data : []);
+            } else {
+                setPhrases([]);
+            }
         } catch (error) {
             console.error('Failed to load phrases:', error);
+            setPhrases([]);
         }
     };
 
     const loadAllPhrases = async () => {
         try {
             const response = await fetch(`${API_BASE_URL}/phrasebook/phrases`);
-            const data = await response.json();
-            setPhrases(data);
+            if (response.ok) {
+                const data = await response.json();
+                setPhrases(Array.isArray(data) ? data : []);
+            } else {
+                setPhrases([]);
+            }
         } catch (error) {
             console.error('Failed to load phrases:', error);
+            setPhrases([]);
         }
     };
 
@@ -107,9 +126,9 @@ export const PhrasebookCard: React.FC = () => {
         }
     };
 
-    const filteredPhrases = phrases.filter(phrase =>
+    const filteredPhrases = Array.isArray(phrases) ? phrases.filter(phrase =>
         phrase.german.toLowerCase().includes(searchQuery.toLowerCase())
-    );
+    ) : [];
 
     return (
         <div className="bg-card-light dark:bg-card-dark rounded-xl shadow-sm border border-border-light dark:border-border-dark">
@@ -118,23 +137,21 @@ export const PhrasebookCard: React.FC = () => {
                     <div className="flex gap-2 flex-wrap">
                         <button
                             onClick={() => setSelectedCategory('')}
-                            className={`px-4 py-2 rounded-full text-sm font-semibold transition-colors ${
-                                !selectedCategory
-                                    ? 'bg-primary/10 text-primary dark:bg-accent dark:text-primary'
-                                    : 'hover:bg-gray-100 dark:hover:bg-white/10'
-                            }`}
+                            className={`px-4 py-2 rounded-full text-sm font-semibold transition-colors ${!selectedCategory
+                                ? 'bg-primary/10 text-primary dark:bg-accent dark:text-primary'
+                                : 'hover:bg-gray-100 dark:hover:bg-white/10'
+                                }`}
                         >
                             Alle ({phrases.length})
                         </button>
-                        {categories.map(cat => (
+                        {Array.isArray(categories) && categories.map(cat => (
                             <button
                                 key={cat.id}
                                 onClick={() => setSelectedCategory(cat.id)}
-                                className={`px-4 py-2 rounded-full text-sm font-semibold transition-colors ${
-                                    selectedCategory === cat.id
-                                        ? 'bg-primary/10 text-primary dark:bg-accent dark:text-primary'
-                                        : 'hover:bg-gray-100 dark:hover:bg-white/10'
-                                }`}
+                                className={`px-4 py-2 rounded-full text-sm font-semibold transition-colors ${selectedCategory === cat.id
+                                    ? 'bg-primary/10 text-primary dark:bg-accent dark:text-primary'
+                                    : 'hover:bg-gray-100 dark:hover:bg-white/10'
+                                    }`}
                             >
                                 {cat.name} ({cat.phraseCount})
                             </button>
