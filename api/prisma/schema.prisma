@@ -88,6 +88,7 @@ model Phrase {
   english     String?
   context     String?
   category    String
+  conversationId String? // Link to conversation
   createdAt   DateTime @default(now())
   
   user        User?    @relation(fields: [userId], references: [id])
@@ -112,6 +113,7 @@ model Progress {
   practiceTime    Int      @default(0) // in minutes
   wordsMastered   Int      @default(0)
   conversationCount Int    @default(0)
+  totalXp         Int      @default(0) // Experience points
   lastPracticeAt  DateTime @default(now())
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt

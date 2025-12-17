@@ -26,7 +26,7 @@ const TopNavBar: React.FC<{ activeNav?: string }> = ({ activeNav }) => (
     </div>
     <nav className="hidden items-center gap-6 sm:flex">
       <Link href="/dashboard" className={twMerge("text-text-light dark:text-text-dark text-sm font-medium leading-normal hover:text-primary dark:hover:text-accent transition-colors", activeNav === 'dashboard' && 'text-primary dark:text-accent')}>Start</Link>
-      <Link href="/phrases" className={twMerge("text-text-light dark:text-text-dark text-sm font-medium leading-normal hover:text-primary dark:hover:text-accent transition-colors", activeNav === 'phrases' && 'text-primary dark:text-accent')}>Redemittel</Link>
+      <Link href="/phrases" className={twMerge("text-text-light dark:text-text-dark text-sm font-medium leading-normal hover:text-primary dark:hover:text-accent transition-colors", activeNav === 'phrases' && 'text-primary dark:text-accent')}>Meine Redemittel</Link>
       <Link href="/chat" className={twMerge("text-text-light dark:text-text-dark text-sm font-medium leading-normal hover:text-primary dark:hover:text-accent transition-colors", activeNav === 'chat' && 'text-primary dark:text-accent')}>Chat</Link>
       <Link href="/profile" className={twMerge("text-text-light dark:text-text-dark text-sm font-medium leading-normal hover:text-primary dark:hover:text-accent transition-colors", activeNav === 'profile' && 'text-primary dark:text-accent')}>Profil</Link>
       <Link href="/settings" className={twMerge("text-text-light dark:text-text-dark text-sm font-medium leading-normal hover:text-primary dark:hover:text-accent transition-colors", activeNav === 'settings' && 'text-primary dark:text-accent')}>Einstellungen</Link>
@@ -42,68 +42,68 @@ const TopNavBar: React.FC<{ activeNav?: string }> = ({ activeNav }) => (
 );
 
 const Sidebar: React.FC<{ activeNav?: string; username: string; userAvatar: string }> = ({ activeNav, username, userAvatar }) => (
-<>
+  <>
     <aside className="flex-col bg-background-light dark:bg-background-dark border-r border-border-light dark:border-border-dark w-64 p-4 shrink-0 hidden md:flex">
     </aside>
     <div className="flex h-full flex-col justify-between">
-        <div className="flex flex-col gap-4">
-            <div className="flex gap-3 items-center">
-                <div
-                    className="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-10"
-                    style={{ backgroundImage: `url("${userAvatar}")` }}
-                    data-alt="User profile picture"
-                ></div>
-                <div className="flex flex-col">
-                    <h1 className="text-text-light dark:text-text-dark text-base font-medium leading-normal">
-                        {username}
-                    </h1>
-                    <p className="text-gray-500 dark:text-gray-400 text-sm font-normal leading-normal">
-                        Account
-                    </p>
-                </div>
-            </div>
-            <div className="flex flex-col gap-2 mt-4">
-                <Link
-                    href="/chat/history"
-                    className={twMerge(
-                        "flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-white/10 cursor-pointer",
-                        activeNav === "history" &&
-                            "bg-primary/10 dark:bg-primary/20 text-primary dark:text-white"
-                    )}
-                >
-                    <span className="material-symbols-outlined text-base">history</span>
-                    <p className="text-sm font-medium leading-normal">
-                        Vorherige Gespräche
-                    </p>
-                </Link>
-                <Link
-                    href="/phrases"
-                    className={twMerge(
-                        "flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-white/10 cursor-pointer",
-                        activeNav === "scenarios" &&
-                            "bg-primary/10 dark:bg-primary/20 text-primary dark:text-white"
-                    )}
-                />
-            </div>
+      <div className="flex flex-col gap-4">
+        <div className="flex gap-3 items-center">
+          <div
+            className="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-10"
+            style={{ backgroundImage: `url("${userAvatar}")` }}
+            data-alt="User profile picture"
+          ></div>
+          <div className="flex flex-col">
+            <h1 className="text-text-light dark:text-text-dark text-base font-medium leading-normal">
+              {username}
+            </h1>
+            <p className="text-gray-500 dark:text-gray-400 text-sm font-normal leading-normal">
+              Account
+            </p>
+          </div>
         </div>
+        <div className="flex flex-col gap-2 mt-4">
+          <Link
+            href="/chat/history"
+            className={twMerge(
+              "flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-white/10 cursor-pointer",
+              activeNav === "history" &&
+              "bg-primary/10 dark:bg-primary/20 text-primary dark:text-white"
+            )}
+          >
+            <span className="material-symbols-outlined text-base">history</span>
+            <p className="text-sm font-medium leading-normal">
+              Vorherige Gespräche
+            </p>
+          </Link>
+          <Link
+            href="/phrases"
+            className={twMerge(
+              "flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-white/10 cursor-pointer",
+              activeNav === "scenarios" &&
+              "bg-primary/10 dark:bg-primary/20 text-primary dark:text-white"
+            )}
+          />
+        </div>
+      </div>
     </div>
-</>
+  </>
 );
 
 export const CustomLayout: React.FC<LayoutProps> = ({ children, activeNav }) => {
   // You might want to get actual user data here (e.g., from an auth context or prop)
   const username = "Kathrin"; // Placeholder
   const userAvatar = "https://lh3.googleusercontent.com/aida-public/AB6AXuBvX38Y-qL9Gh9IAJbemO9swZwkQqPlmTIRMYELCU7FgtxKDHsrlbSRdHvXoIoX50_rmgKBO-eK3TKSVLGOWKALuXay7a-6ZYtqPDQk3VU4B1rnL6jvuQnCrMJA8CByo3aHgp0oABGMSv30DWCdzGNP4Z_AdZWuCJ1TSw_4ogi045TBcboWTPI79N3-JrXicBPa5DT2YXipQE5XS8bTsdIkmu6BvtUCKsjReWRDZpo8Vq24iayebT62ODfmyoByKkGPjXtkgcRgbU6E"; // Placeholder
-  const showPhraseSidebar = activeNav === 'phrases'; 
+  const showPhraseSidebar = activeNav === 'phrases';
 
   return (
     <div className="flex flex-col min-h-screen"> {/* Overall flex container */}
-      <TopNavBar activeNav={activeNav} /> 
+      <TopNavBar activeNav={activeNav} />
 
       <div className="flex flex-grow"> {/* Container for sidebar and main content */}
-         {showPhraseSidebar && <PhraseSidebar />} 
-        
-        
+        {showPhraseSidebar && <PhraseSidebar />}
+
+
         <main className="flex-grow p-4"> {/* Main content area */}
           {children} {/* This is where the page content will go */}
         </main>

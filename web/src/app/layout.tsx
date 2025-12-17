@@ -15,6 +15,9 @@ const manrope = Manrope({
 export const metadata: Metadata = {
   title: 'Sigsag',
   description: 'Sprachassistent zum Deutschlernen für Erwachsene mit B2-Kenntnissen',
+  other: {
+    google: 'notranslate',
+  },
 };
 
 export default function RootLayout({
@@ -24,14 +27,14 @@ export default function RootLayout({
 }) {
   return (
     <ClerkProvider>
-    <html lang="en" className={`${manrope.variable} light`}>
-      <body className="font-display bg-background-light dark:bg-background-dark text-text-light dark:text-text-dark">
-        <CustomLayout>
-          {children}
-        </CustomLayout>
-        
-      </body>
-    </html>
+      <html lang="de" className={`${manrope.variable} light`}>
+        <body className="font-display bg-background-light dark:bg-background-dark text-text-light dark:text-text-dark">
+          <CustomLayout>
+            {children}
+          </CustomLayout>
+
+        </body>
+      </html>
     </ClerkProvider>
   );
 }

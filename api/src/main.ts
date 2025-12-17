@@ -48,8 +48,20 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
   // Enable CORS for your Next.js frontend
+  // Enable CORS for your Next.js frontend
   app.enableCors({
-    origin: 'http://localhost:3000',
+    origin: (origin, callback) => {
+      // Allow requests with no origin (like mobile apps or curl requests)
+      if (!origin) return callback(null, true);
+
+      // Allow any localhost origin
+      if (origin.match(/^http:\/\/localhost:\d+$/)) {
+        return callback(null, true);
+      }
+
+      // Block others
+      callback(new Error('Not allowed by CORS'));
+    },
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     credentials: true,
   });
