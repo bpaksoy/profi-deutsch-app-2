@@ -1,7 +1,7 @@
 
 import { Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config'; 
-import { ChatModule } from './chat/chat.module'; 
+import { ConfigModule } from '@nestjs/config';
+import { ChatModule } from './chat/chat.module';
 import { PhrasebookModule } from './phrasebook/phrasebook.module';
 import { PrismaModule } from './prisma/prisma.module';
 
@@ -10,8 +10,8 @@ import { PrismaModule } from './prisma/prisma.module';
   imports: [
     // Configure ConfigModule to load environment variables
     ConfigModule.forRoot({
-      isGlobal: true, 
-      envFilePath: '.env', 
+      isGlobal: true,
+      envFilePath: ['api/.env', '.env'],
     }),
     ChatModule,
     PhrasebookModule,
@@ -20,4 +20,4 @@ import { PrismaModule } from './prisma/prisma.module';
   controllers: [],
   providers: [],
 })
-export class AppModule {}
+export class AppModule { }
