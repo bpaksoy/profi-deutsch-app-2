@@ -27,10 +27,6 @@ export class PhrasebookController {
 
     @Get('categories')
     async getCategories() {
-        // Return dummy categories or fetch from DB if we had a Category model populated
-        return [
-            { id: 'General', name: 'General', phraseCount: 0 },
-            { id: 'Business', name: 'Business', phraseCount: 0 }
-        ];
+        return this.phrasebookService.getCategories();
     }
 }
