@@ -20,6 +20,8 @@ export class ChatService {
 
     this.SPEECH_CONFIG = sdk.SpeechConfig.fromSubscription(key, region);
     this.SPEECH_CONFIG.speechSynthesisOutputFormat = sdk.SpeechSynthesisOutputFormat.Audio48Khz192KBitRateMonoMp3;
+    // Set explicit German voice to avoid English default
+    this.SPEECH_CONFIG.speechSynthesisVoiceName = "de-DE-KatjaNeural";
   }
 
   // --- TEXT-TO-SPEECH (TTS) ---
