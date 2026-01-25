@@ -8,6 +8,19 @@ export class ConversationService {
     constructor(private readonly prisma: PrismaService) { }
 
     async createConversation(userId: string, topic: string = 'General') {
+        // Ensure user exists (for development with 'user_default')
+        await this.prisma.user.upsert({
+            where: { id: userId },
+            update: {},
+            create: {
+                id: userId,
+                clerkId: userId, // Assuming unique constraint
+                email: `${userId}@example.com`,
+                name: 'Default User',
+                level: 'B1'
+            }
+        });
+
         const sessionId = `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
         return this.prisma.conversation.create({
             data: {

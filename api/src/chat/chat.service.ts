@@ -31,8 +31,8 @@ export class ChatService {
       // Timeout to prevent hanging
       const timeout = setTimeout(() => {
         synthesizer.close();
-        reject(new Error('TTS generation timed out after 10 seconds'));
-      }, 10000);
+        reject(new Error('TTS generation timed out after 30 seconds'));
+      }, 30000);
 
       synthesizer.speakTextAsync(
         text,
