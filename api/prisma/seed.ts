@@ -1,5 +1,5 @@
 import { PrismaClient } from '@prisma/client';
-const prisma = new PrismaClient({} as any); 
+const prisma = new PrismaClient({} as any);
 
 async function main() {
     // Clear existing data
@@ -56,6 +56,80 @@ Always use "Sie" (formal you) in business contexts unless invited to use "du".`,
 - Relative clauses with different cases
 - Subjunctive mood for reported speech
 - Complex sentence structures with subordinate clauses`,
+                category: 'grammar',
+                language: 'de'
+            },
+            {
+                title: 'Nominalisieren von Verben',
+                content: `Nominalisierung verwandelt Verben oder Adjektive in Nomen. 
+Wichtig für gehobene Sprache (B2/C1).
+- Verben: "essen" -> "das Essen". "Beim Essen nicht sprechen."
+- Adjektive: "gut" -> "das Gute". "Ich glaube an das Gute im Menschen."
+- Endungen: -ung, -heit, -keit, -nis.
+- Beispiel: "Wir diskutieren über das Projekt." -> "Die Diskussion über das Projekt war lang."`,
+                category: 'grammar',
+                language: 'de'
+            },
+            {
+                title: 'Nebensätze verwenden',
+                content: `Nebensätze werden durch Konjunktionen eingeleitet. Das konjugierte Verb steht am ENDE.
+- weil/da (Grund): "Ich lerne Deutsch, weil ich in Deutschland arbeiten möchte."
+- obwohl (Gegensatz): "Ich gehe spazieren, obwohl es regnet."
+- dass (Objektsatz): "Ich weiß, dass Deutsch schwer ist."
+- wenn/als (Zeit): "Wenn ich Zeit habe, lese ich."`,
+                category: 'grammar',
+                language: 'de'
+            },
+            {
+                title: 'Passiv (Vorgangspassiv & Zustandspassiv)',
+                content: `Das Passiv betont die Handlung, nicht den Täter.
+- Vorgangspassiv: werden + Partizip II.
+  "Der Brief wird geschrieben." (Präsens)
+  "Der Brief wurde geschrieben." (Präteritum)
+- Zustandspassiv: sein + Partizip II.
+  "Der Brief ist geschrieben." (Ergebnis ist fertig).
+- Mit Modalverben: "Die Arbeit muss gemacht werden."`,
+                category: 'grammar',
+                language: 'de'
+            },
+            {
+                title: 'Konjunktiv II (Wünsche & Höflichkeit)',
+                content: `Verwendung: Irreale Wünsche, Höflichkeit, Ratschläge, Hypothesen.
+- Höflichkeit: "Ich hätte gern einen Kaffee." "Könnten Sie mir helfen?"
+- Ratschlag: "Du solltest mehr schlafen."
+- Wunsch: "Wenn ich doch reich wäre!"
+- Bildung: würde + Infinitiv (meistens) ODER Originalformen (wäre, hätte, käme, ginge).`,
+                category: 'grammar',
+                language: 'de'
+            },
+            {
+                title: 'Syntax (Satzbau)',
+                content: `Deutsche Wortstellung (Topologie):
+1. Verb an Position 2 im Hauptsatz. IMMER.
+2. Verb am Ende im Nebensatz.
+3. TeKaMoLo (Temporal, Kausal, Modal, Lokal) für Angaben im Mittelfeld.
+   "Ich fahre [heute] [wegen des Wetters] [mit dem Auto] [nach München]."
+4. Inversion: Wenn der Satz mit etwas anderem als dem Subjekt beginnt, rutscht das Subjekt hinter das Verb.`,
+                category: 'grammar',
+                language: 'de'
+            },
+            {
+                title: 'Konjugation der Verben',
+                content: `Regelmäßige und unregelmäßige Verben.
+- Präsens: ich gehe, du gehst, er geht.
+- Präteritum: ich ging, du gingst.
+- Perfekt: ich bin gegangen (Bewegung) / ich habe geschlafen.
+- Achte auf Vokalwechsel bei starken Verben (sehen -> du siehst, fahren -> du fährst).`,
+                category: 'grammar',
+                language: 'de'
+            },
+            {
+                title: 'Inversion (Subjekt-Verb-Umstellung)',
+                content: `Wenn Position 1 im Satz besetzt ist (z.B. durch eine Zeitangabe), tauschen Subjekt und Verb den Platz.
+- Normal: "Ich gehe heute ins Kino."
+- Inversion: "Heute gehe ich ins Kino." (Verb bleibt auf Pos 2!)
+- Inversion: "Vielleicht gehe ich ins Kino."
+- Falsch wäre: "Heute ich gehe..." (Das ist der häufigste Fehler!).`,
                 category: 'grammar',
                 language: 'de'
             }
