@@ -96,9 +96,6 @@ export class RAGService {
             parts: [{ text: userInput }]
         });
 
-        // ✅ Retrieve relevant knowledge from database
-        const knowledgeContext = await this.getRelevantKnowledge(userInput);
-
         const systemPrompt = `# Persönlichkeit
 Du bist Flo, ein freundlicher, geduldiger und motivierender Sprachlernpartner für Deutsch.
 Dein Ziel ist es, dem Benutzer zu helfen, selbstbewusst Deutsch zu sprechen und das B2-Niveau zu erreichen.
@@ -118,80 +115,100 @@ Du korrigierst Fehler sanft, aber nicht pedantisch. Wenn der Benutzer einen Fehl
 
         this.logger.log(`Calling Gemini API (gemini-1.5-flash) with ${history.length} messages...`);
 
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 15000); // 15s timeout
+        let attempt = 0;
+        const maxRetries = 3;
 
-        try {
-            const response = await fetch(url, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    contents: history,
-                    generationConfig: {
-                        temperature: 0.7,
-                        maxOutputTokens: 400,
-                        topP: 0.8,
-                        topK: 40
+        while (attempt < maxRetries) {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 60000); // 60s timeout for retries
+
+            try {
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
                     },
-                    systemInstruction: {
-                        parts: [{ text: systemPrompt }]
-                    },
-                    safetySettings: [
-                        {
-                            category: "HARM_CATEGORY_HARASSMENT",
-                            threshold: "BLOCK_ONLY_HIGH"
+                    body: JSON.stringify({
+                        contents: history,
+                        generationConfig: {
+                            temperature: 0.7,
+                            maxOutputTokens: 400,
+                            topP: 0.8,
+                            topK: 40
                         },
-                        {
-                            category: "HARM_CATEGORY_HATE_SPEECH",
-                            threshold: "BLOCK_ONLY_HIGH"
+                        systemInstruction: {
+                            parts: [{ text: systemPrompt }]
                         },
-                        {
-                            category: "HARM_CATEGORY_SEXUALLY_EXPLICIT",
-                            threshold: "BLOCK_ONLY_HIGH"
-                        },
-                        {
-                            category: "HARM_CATEGORY_DANGEROUS_CONTENT",
-                            threshold: "BLOCK_ONLY_HIGH"
-                        }
-                    ]
-                }),
-                signal: controller.signal
-            });
-            clearTimeout(timeoutId);
+                        safetySettings: [
+                            { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_ONLY_HIGH" },
+                            { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_ONLY_HIGH" },
+                            { category: "HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold: "BLOCK_ONLY_HIGH" },
+                            { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "BLOCK_ONLY_HIGH" }
+                        ]
+                    }),
+                    signal: controller.signal
+                });
+                clearTimeout(timeoutId);
 
-            if (!response.ok) {
-                const errorText = await response.text();
-                this.logger.error('Gemini API error:', errorText);
-                throw new Error(`Gemini API request failed: ${response.status}`);
+                if (response.status === 429) {
+                    attempt++;
+                    if (attempt >= maxRetries) {
+                        const errorText = await response.text();
+                        this.logger.error('Gemini API 429 error (Max Retries Reached):', errorText);
+                        throw new Error(`Gemini API request failed: ${response.status} - Quota Exceeded`);
+                    }
+
+                    // Default backoff 2s, 4s, 8s, unless Retry-After header is present
+                    let delay = 2000 * Math.pow(2, attempt);
+                    const retryAfter = response.headers.get('Retry-After');
+                    if (retryAfter) {
+                        delay = parseInt(retryAfter, 10) * 1000;
+                    }
+
+                    this.logger.warn(`Gemini API 429 Too Many Requests. Retrying in ${delay}ms... (Attempt ${attempt}/${maxRetries})`);
+                    await new Promise(res => setTimeout(res, delay));
+                    continue;
+                }
+
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    this.logger.error('Gemini API error:', errorText);
+                    throw new Error(`Gemini API request failed: ${response.status}`);
+                }
+
+                const data = await response.json();
+                let text = data.candidates?.[0]?.content?.parts?.[0]?.text;
+
+                if (!text) {
+                    this.logger.warn('No text in Gemini response');
+                    return 'Entschuldigung, ich konnte keine Antwort generieren.';
+                }
+
+                // Clean up response
+                text = text
+                    .replace(/\*\*\*/g, '')
+                    .replace(/\*\*/g, '')
+                    .replace(/\*/g, '')
+                    .replace(/#{1,6}\s/g, '')
+                    .replace(/`{1,3}/g, '')
+                    .replace(/^Hallo!\s*/gi, '')
+                    .replace(/^Na klar!\s*/gi, '')
+                    .trim();
+
+                return text;
+
+            } catch (error) {
+                clearTimeout(timeoutId);
+                // If it's the last attempt or not a retry-able error (like abort), throw
+                if (attempt >= maxRetries - 1 || error.name === 'AbortError') {
+                    throw error;
+                }
+                attempt++;
+                this.logger.error(`Error calling Gemini (Attempt ${attempt}):`, error);
+                await new Promise(res => setTimeout(res, 1000)); // Generic wait for network errors
             }
-
-            const data = await response.json();
-            let text = data.candidates?.[0]?.content?.parts?.[0]?.text;
-
-            if (!text) {
-                this.logger.warn('No text in Gemini response');
-                return 'Entschuldigung, ich konnte keine Antwort generieren.';
-            }
-
-            // Clean up response
-            text = text
-                .replace(/\*\*\*/g, '')
-                .replace(/\*\*/g, '')
-                .replace(/\*/g, '')
-                .replace(/#{1,6}\s/g, '')
-                .replace(/`{1,3}/g, '')
-                .replace(/^Hallo!\s*/gi, '')
-                .replace(/^Na klar!\s*/gi, '')
-                .trim();
-
-            return text;
-
-        } catch (error) {
-            clearTimeout(timeoutId);
-            throw error;
         }
+        throw new Error('Gemini API failed after max retries');
     }
 
     // ✅ Retrieve relevant knowledge from database
