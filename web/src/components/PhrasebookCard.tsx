@@ -30,11 +30,7 @@ export const PhrasebookCard: React.FC = () => {
 
         const handlePhraseAdded = () => {
             loadCategories();
-            if (selectedCategory) {
-                loadPhrases(selectedCategory);
-            } else {
-                loadAllPhrases();
-            }
+            loadAllPhrases();
         };
 
         window.addEventListener('phraseAdded', handlePhraseAdded);
@@ -42,7 +38,11 @@ export const PhrasebookCard: React.FC = () => {
         return () => {
             window.removeEventListener('phraseAdded', handlePhraseAdded);
         };
-    }, [selectedCategory]);
+    }, []);
+
+    // Filter phrases locally since the dashboard view is small, or fetch by category if preferred
+    // For dashboard, fetching all (limited by API usually) and filtering locally for UX is often smoother if list is small.
+    // However, sticking to the API filter pattern for consistency.
 
     useEffect(() => {
         if (selectedCategory) {
@@ -57,17 +57,16 @@ export const PhrasebookCard: React.FC = () => {
             const response = await fetch(`${API_BASE_URL}/phrasebook/categories`);
             if (response.ok) {
                 const data = await response.json();
-                if (Array.isArray(data)) {
-                    setCategories(data);
-                } else {
-                    setCategories([]);
-                }
-            } else {
-                setCategories([]);
+                // Map API response to Component Category interface
+                const mappedCategories = data.map((cat: any) => ({
+                    id: cat.name, // The API uses name as the key for filtering
+                    name: cat.name,
+                    phraseCount: cat.phraseCount || 0
+                }));
+                setCategories(mappedCategories);
             }
         } catch (error) {
             console.error('Failed to load categories:', error);
-            setCategories([]);
         }
     };
 
@@ -77,8 +76,6 @@ export const PhrasebookCard: React.FC = () => {
             if (response.ok) {
                 const data = await response.json();
                 setPhrases(Array.isArray(data) ? data : []);
-            } else {
-                setPhrases([]);
             }
         } catch (error) {
             console.error('Failed to load phrases:', error);
@@ -92,8 +89,6 @@ export const PhrasebookCard: React.FC = () => {
             if (response.ok) {
                 const data = await response.json();
                 setPhrases(Array.isArray(data) ? data : []);
-            } else {
-                setPhrases([]);
             }
         } catch (error) {
             console.error('Failed to load phrases:', error);
@@ -106,7 +101,9 @@ export const PhrasebookCard: React.FC = () => {
             await fetch(`${API_BASE_URL}/phrasebook/phrases/${phraseId}`, {
                 method: 'DELETE'
             });
-            setPhrases(phrases.filter(p => p.id !== phraseId));
+            // Optimistic update
+            setPhrases(prev => prev.filter(p => p.id !== phraseId));
+            // Reload categories to update counts
             loadCategories();
         } catch (error) {
             console.error('Failed to delete phrase:', error);
@@ -142,9 +139,9 @@ export const PhrasebookCard: React.FC = () => {
                                 : 'hover:bg-gray-100 dark:hover:bg-white/10'
                                 }`}
                         >
-                            Alle ({phrases.length})
+                            Alle
                         </button>
-                        {Array.isArray(categories) && categories.map(cat => (
+                        {categories.map(cat => (
                             <button
                                 key={cat.id}
                                 onClick={() => setSelectedCategory(cat.id)}

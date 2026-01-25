@@ -5,20 +5,49 @@ import { twMerge } from 'tailwind-merge';
 
 interface PhraseSidebarProps {
   // Can be used to highlight the active category
-  activeCategory?: 'all' | 'meetings' | 'written' | 'networking' | 'phone' | 'problems'; 
+  activeCategory?: 'all' | 'meetings' | 'written' | 'networking' | 'phone' | 'problems';
 }
 
-// Sidebar Data (Could come from an API later)
-const categories = [
-  { name: 'All Phrases', href: '#', icon: 'list_alt', key: 'all' },
-  { name: 'Meetings & Presentations', href: '#', icon: 'slideshow', key: 'meetings' },
-  { name: 'Written Communication', href: '#', icon: 'mail', key: 'written' },
-  { name: 'Networking & Small Talk', href: '#', icon: 'groups', key: 'networking' },
-  { name: 'On the Phone', href: '#', icon: 'call', key: 'phone' },
-  { name: 'Problem Solving', href: '#', icon: 'report', key: 'problems' },
-];
+// Sidebar Data (Dynamic)
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
 
 export const PhraseSidebar: React.FC<PhraseSidebarProps> = ({ activeCategory = 'all' }) => {
+  const [categories, setCategories] = React.useState<{ name: string, href: string, icon: string, key: string }[]>([
+    { name: 'Alle', href: '/phrases?category=all', icon: 'list_alt', key: 'all' }
+  ]);
+
+  const fetchCategories = async () => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/phrasebook/categories`);
+      if (response.ok) {
+        const data = await response.json();
+        // Transform API data to sidebar format
+        const dynamicVars = data.map((cat: any) => ({
+          name: cat.name,
+          href: `/phrases?category=${cat.name}`,
+          icon: 'label', // Generic icon for dynamic categories
+          key: cat.name
+        }));
+
+        setCategories([
+          { name: 'Alle', href: '/phrases?category=all', icon: 'list_alt', key: 'all' },
+          ...dynamicVars
+        ]);
+      }
+    } catch (error) {
+      console.error('Failed to load categories', error);
+    }
+  };
+
+  React.useEffect(() => {
+    fetchCategories();
+
+    // Listen for updates (when a new phrase/category is added)
+    const handleUpdate = () => fetchCategories();
+    window.addEventListener('phraseAdded', handleUpdate);
+    return () => window.removeEventListener('phraseAdded', handleUpdate);
+  }, []);
+
   const aiAvatar = "https://lh3.googleusercontent.com/aida-public/AB6AXuDEGa6tENvPktljzXtvEqHQBAbyB_Da8qoQRkavV3xSD-B9jHdfLZ2wDN4rW2fmHB8CFZ4TazMfRjjSfiOIiw3A0LpQ1xThwyjvJxktSEVNd5fGOFZMKdcA8QXWydiqLmMRWu1feLZcNQXppzgMQR8Nno0sdHrhAZmB3CloxcWskwlAKO4J7kBiVTURrHp-notJYJV9saCQr8-vJTyrbZVJZBl7un6SMekYzdcJyRqX5yEqcNyrKJJtRgRYJTI2py";
 
   return (

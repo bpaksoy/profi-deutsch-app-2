@@ -17,13 +17,25 @@ export class PhrasebookService {
             create: { id: userId, clerkId: userId, email: `user_${userId}@example.com` }
         }).catch(() => { });
 
+        const categoryName = data.category || 'General';
+
+        // ✅ Upsert Category to ensure it exists in the list
+        await this.prisma.category.upsert({
+            where: { name: categoryName },
+            update: { phraseCount: { increment: 1 } },
+            create: {
+                name: categoryName,
+                slug: categoryName.toLowerCase().replace(/ /g, '-').replace(/[^\w-]+/g, '')
+            }
+        });
+
         return this.prisma.phrase.create({
             data: {
                 userId,
                 german: data.german,
                 context: data.context,
                 conversationId: data.conversationId,
-                category: data.category || 'General'
+                category: categoryName
             }
         });
     }
@@ -36,6 +48,12 @@ export class PhrasebookService {
         return this.prisma.phrase.findMany({
             where,
             orderBy: { createdAt: 'desc' }
+        });
+    }
+
+    async getCategories() {
+        return this.prisma.category.findMany({
+            orderBy: { name: 'asc' }
         });
     }
 }
