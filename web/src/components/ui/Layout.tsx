@@ -6,6 +6,7 @@ import { twMerge } from 'tailwind-merge';
 
 import { Button } from './Button'; // Assuming you've created this
 import { PhraseSidebar } from './PhraseSidebar';
+import { Footer } from './Footer';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -109,8 +110,7 @@ export const CustomLayout: React.FC<LayoutProps> = ({ children, activeNav }) => 
         </main>
       </div>
 
-      {/* You could add a footer here if you have one */}
-      {/* <footer>...</footer> */}
+      <Footer />
     </div>
   );
 };
