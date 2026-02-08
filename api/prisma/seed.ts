@@ -132,6 +132,24 @@ Wichtig für gehobene Sprache (B2/C1).
 - Falsch wäre: "Heute ich gehe..." (Das ist der häufigste Fehler!).`,
                 category: 'grammar',
                 language: 'de'
+            },
+            {
+                title: 'Wortschatz (Vocabulary Assessment)',
+                content: `Kriterien zur Bewertung des Wortschatzes auf B2-Niveau:
+
+Der User kann:
+- Synonyme und Umschreibungen verwenden (z.B. "großartig" statt immer nur "gut")
+- Etwas begründen und einen Standpunkt vertreten ("Ich bin der Meinung, dass... weil...")
+- Vor- und Nachteile nennen ("Einerseits..., andererseits...")
+
+Beispiel für SCHLECHTEN Wortschatz:
+Der User wiederholt immer dieselben Worte, um etwas zu erklären.
+"Das ist gut. Ich finde das gut. Das ist sehr gut für mich."
+
+Beispiel für GUTEN Wortschatz:
+"Das ist vorteilhaft. Ich halte das für sinnvoll. Das erscheint mir als eine ausgezeichnete Lösung."`,
+                category: 'vocabulary',
+                language: 'de'
             }
         ]
     });
