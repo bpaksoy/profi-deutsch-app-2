@@ -150,6 +150,26 @@ Beispiel für GUTEN Wortschatz:
 "Das ist vorteilhaft. Ich halte das für sinnvoll. Das erscheint mir als eine ausgezeichnete Lösung."`,
                 category: 'vocabulary',
                 language: 'de'
+            },
+            {
+                title: 'Strategien beim Sprechen (Speaking Strategies)',
+                content: `Kriterien zur Bewertung der Sprechstrategien auf B2-Niveau:
+
+Der User kann:
+- Reaktionen passend zum Input zeigen (z.B. "Ach so!", "Verstehe", "Interessant!")
+- Logische argumentative Zusammenhänge wiedergeben (z.B. "deshalb", "folglich", "aus diesem Grund")
+- Einen klaren Aufbau von Erzählungen verwenden, mit Beginn, Mitte und Schluss
+- Sich selbst korrigieren ("Also, ich meine...", "Besser gesagt...")
+- Sachverhalte umschreiben, wenn ein Wort fehlt
+
+WICHTIG: Der Voice Agent soll positiv hervorheben, wenn Modalpartikeln und Gradpartikeln verwendet werden.
+Beispiele: "Das ist ja interessant!", "Das ist wohl richtig", "ziemlich gut", "besonders wichtig"
+
+Beispiel für SCHLECHTE Strategien beim Sprechen:
+Der User wechselt abrupt zwischen Themen ohne Überleitung.
+"Ich war gestern im Kino. Meine Katze ist krank. Das Wetter ist schön."`,
+                category: 'speaking-strategies',
+                language: 'de'
             }
         ]
     });
