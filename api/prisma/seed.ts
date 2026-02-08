@@ -170,6 +170,20 @@ Der User wechselt abrupt zwischen Themen ohne Überleitung.
 "Ich war gestern im Kino. Meine Katze ist krank. Das Wetter ist schön."`,
                 category: 'speaking-strategies',
                 language: 'de'
+            },
+            {
+                title: 'GER B2 - Globalskala für selbstständige Sprachverwendung',
+                content: `Der User kann sich mit Muttersprachlern in Gesprächen verständigen und sich aktiv an Diskussionen beteiligen.
+
+Globalskala für selbstständige Sprachverwendung laut GER auf B2-Niveau:
+
+Die Person kann die Hauptinhalte komplexer Texte zu konkreten und abstrakten Themen verstehen; versteht im eigenen Spezialgebiet auch Fachdiskussionen. Kann sich spontan und fließend verständigen, dass ein normales Gespräch mit Muttersprachlern ohne größere Anstrengung auf beiden Seiten gut möglich ist. Kann sich zu einem breiten Themenspektrum klar und detailliert ausdrücken, einen Standpunkt zu einer aktuellen Frage erläutern und die Vor- und Nachteile verschiedener Möglichkeiten angeben.
+
+Globale Anforderungen ans Sprechen:
+
+Kann sich so spontan und fließend verständigen, dass ein normales Gespräch mit einem Muttersprachler recht gut möglich ist. Er/sie kann sich in vertrauten Situationen aktiv an einer Diskussion beteiligen und seine/ihre Ansichten begründen und verteidigen. Er/sie kann zu vielen Themen aus seinen/ihren Interessengebieten eine klare und detaillierte Darstellung geben. Er/sie kann einen Standpunkt zu einer aktuellen Frage erläutern und Vor- und Nachteile verschiedener Möglichkeiten angeben.`,
+                category: 'cefr-standards',
+                language: 'de'
             }
         ]
     });
