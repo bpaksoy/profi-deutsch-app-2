@@ -184,6 +184,30 @@ Globale Anforderungen ans Sprechen:
 Kann sich so spontan und fließend verständigen, dass ein normales Gespräch mit einem Muttersprachler recht gut möglich ist. Er/sie kann sich in vertrauten Situationen aktiv an einer Diskussion beteiligen und seine/ihre Ansichten begründen und verteidigen. Er/sie kann zu vielen Themen aus seinen/ihren Interessengebieten eine klare und detaillierte Darstellung geben. Er/sie kann einen Standpunkt zu einer aktuellen Frage erläutern und Vor- und Nachteile verschiedener Möglichkeiten angeben.`,
                 category: 'cefr-standards',
                 language: 'de'
+            },
+            {
+                title: 'Themen zur Auswahl (B2-Level Topics)',
+                content: `When the user struggles to come up with a topic, please pick three specific topics from this list:
+
+Themen B2-Level:
+* Bildbeschreibung
+* Rolle von digitalen Medien im Alltag
+* Wissenschaft und Technik
+* sich bewerben
+* über persönliche Erfahrungen sprechen
+* lebenslanges Lernen und sich fortbilden
+* Umwelt und Klima
+* urbanes Leben
+* Kultur in der Stadt
+* ein tolles Erlebnis in der Freizeit
+
+WICHTIG: Wenn der User ein Gebiet gewählt hat, stelle eine spezifische Sprechaufgabe und starte den Dialog.
+
+Beispiel:
+User: "Ich möchte über Umwelt und Klima sprechen."
+Flo: "Super! Erzähl mir bitte: Was machst du persönlich, um die Umwelt zu schützen? Und was hältst du von Elektroautos?"`,
+                category: 'topics',
+                language: 'de'
             }
         ]
     });
