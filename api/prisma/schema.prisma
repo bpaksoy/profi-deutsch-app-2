@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -15,89 +9,47 @@ datasource db {
 
 model User {
   id            String         @id @default(uuid())
-  clerkId       String         @unique 
-  email         String?        @unique
+  clerkId       String         @unique
+  email         String         @unique
   name          String?
-  level         String         @default("B1") // Current German level
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
-  
   conversations Conversation[]
-  phrases       Phrase[]
-  progress      Progress[]
+  phrasebook    Phrase[]
+  progress      Progress?
 }
 
-// Conversation sessions with Flo
 model Conversation {
-  id          String    @id @default(uuid())
-  userId      String?
-  sessionId   String    @unique
-  startedAt   DateTime  @default(now())
-  endedAt     DateTime?
-  topic       String?   // e.g., "Job Interview", "Kino"
-  
-  user        User?     @relation(fields: [userId], references: [id])
-  messages    Message[]
+  id        String    @id @default(uuid())
+  topic     String    @default("Neues Gespräch")
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  messages  Message[]
+  userId    String
+  user      User      @relation(fields: [userId], references: [clerkId])
 }
 
-// Individual messages in conversations
 model Message {
   id             String       @id @default(uuid())
-  conversationId String
-  role           String       // "user" or "assistant"
+  role           String
   content        String
-  transcription  String?      // Original transcribed text if from audio
   timestamp      DateTime     @default(now())
-  
-  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
-  
-  @@index([conversationId])
+  conversationId String
+  conversation   Conversation @relation(fields: [conversationId], references: [id])
 }
 
-// Knowledge base documents for RAG
-model KnowledgeDocument {
-  id          String   @id @default(uuid())
-  title       String
-  content     String   // Full document text
-  category    String   // e.g., "grammar", "business", "culture"
-  language    String   @default("de") // "de" or "en"
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  
-  chunks      KnowledgeChunk[]
-}
-
-// Chunked content for semantic search
-model KnowledgeChunk {
-  id         String            @id @default(uuid())
-  documentId String
-  content    String
-  chunkIndex Int
-  // embedding  String?         // For future vector search
-  
-  document   KnowledgeDocument @relation(fields: [documentId], references: [id], onDelete: Cascade)
-  
-  @@index([documentId])
-}
-
-// User's saved phrases
 model Phrase {
-  id          String   @id @default(uuid())
-  userId      String?
-  german      String
-  english     String?
-  context     String?
-  category    String
-  conversationId String? // Link to conversation
-  createdAt   DateTime @default(now())
-  
-  user        User?    @relation(fields: [userId], references: [id])
-  
-  @@index([userId])
-  @@index([category])
+  id             String   @id @default(uuid())
+  german         String
+  english        String?
+  context        String?
+  category       String   @default("General")
+  createdAt      DateTime @default(now())
+  userId         String
+  user           User     @relation(fields: [userId], references: [clerkId])
+  conversationId String?
 }
 
-// Category for organizing phrases
 model Category {
   id          String   @id @default(uuid())
   name        String   @unique
@@ -106,19 +58,32 @@ model Category {
   createdAt   DateTime @default(now())
 }
 
-// User progress tracking
 model Progress {
-  id              String   @id @default(uuid())
-  userId          String
-  practiceTime    Int      @default(0) // in minutes
-  wordsMastered   Int      @default(0)
-  conversationCount Int    @default(0)
-  totalXp         Int      @default(0) // Experience points
-  lastPracticeAt  DateTime @default(now())
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-  
-  user            User     @relation(fields: [userId], references: [id])
-  
-  @@unique([userId])
+  id                String   @id @default(uuid())
+  totalXp           Int      @default(0)
+  level             Int      @default(1)
+  practiceTime      Int      @default(0)
+  conversationCount Int      @default(0)
+  wordsMastered     Int      @default(0)
+  updatedAt         DateTime @updatedAt
+  userId            String   @unique
+  user              User     @relation(fields: [userId], references: [clerkId])
+}
+
+model KnowledgeDocument {
+  id        String           @id @default(uuid())
+  title     String
+  content   String
+  category  String?
+  language  String           @default("de")
+  createdAt DateTime         @default(now())
+  chunks    KnowledgeChunk[]
+}
+
+model KnowledgeChunk {
+  id         String            @id @default(uuid())
+  content    String
+  chunkIndex Int
+  documentId String
+  document   KnowledgeDocument @relation(fields: [documentId], references: [id])
 }

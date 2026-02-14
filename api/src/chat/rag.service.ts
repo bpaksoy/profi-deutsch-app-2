@@ -62,16 +62,16 @@ export class RAGService {
         }
     }
 
-    async clearConversation(sessionId: string): Promise<void> {
+    async clearConversation(id: string): Promise<void> {
         const conversation = await this.prisma.conversation.findUnique({
-            where: { sessionId }
+            where: { id }
         });
 
         if (conversation) {
             await this.prisma.conversation.delete({
                 where: { id: conversation.id }
             });
-            this.logger.log(`Cleared conversation: ${sessionId}`);
+            this.logger.log(`Cleared conversation: ${id}`);
         }
     }
 

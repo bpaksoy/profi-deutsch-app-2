@@ -15,26 +15,9 @@ export class ProgressService {
         });
 
         if (!progress) {
-            // Ensure user exists first (hacky for now, assuming we have a user)
-            // In a real app, we'd ensure the user is created on signup.
-            // For this prototype, we might need to create a dummy user if not exists.
-            const user = await this.prisma.user.upsert({
-                where: { id: userId },
-                update: {},
-                create: { id: userId, clerkId: userId, email: `user_${userId}@example.com` } // Typo in clarkId? Schema said clerkId.
-            }).catch(e => {
-                // If user creation fails (e.g. clerkId constraint), try to find by id again or just log
-                this.logger.error('Failed to ensure user exists', e);
-                return null;
+            progress = await this.prisma.progress.create({
+                data: { userId }
             });
-
-            if (user) {
-                progress = await this.prisma.progress.create({
-                    data: { userId }
-                });
-            } else {
-                return; // Cannot track progress without user
-            }
         }
 
         const updates: any = {};
@@ -47,8 +30,6 @@ export class ProgressService {
             updates.totalXp = { increment: amount * 2 }; // 2 XP per minute
         }
 
-        updates.lastPracticeAt = new Date();
-
         await this.prisma.progress.update({
             where: { userId },
             data: updates
@@ -60,9 +41,9 @@ export class ProgressService {
             where: { userId }
         });
 
-        if (!progress) return { totalXp: 0, level: 1, practiceTime: 0, conversationCount: 0 };
+        if (!progress) return { totalXp: 0, level: 1, practiceTime: 0, conversationCount: 0, wordsMastered: 0 };
 
-        // Calculate level based on XP
+        // Calculate level based on XP (simple formula)
         const level = Math.floor(progress.totalXp / 500) + 1;
 
         return {
