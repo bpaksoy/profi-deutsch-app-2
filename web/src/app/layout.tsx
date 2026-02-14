@@ -15,6 +15,9 @@ const manrope = Manrope({
 export const metadata: Metadata = {
   title: 'Sigsag',
   description: 'Sprachassistent zum Deutschlernen für Erwachsene mit B2-Kenntnissen',
+  icons: {
+    icon: '/icon.svg',
+  },
   other: {
     google: 'notranslate',
   },
