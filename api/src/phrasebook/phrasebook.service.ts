@@ -10,16 +10,9 @@ export class PhrasebookService {
     async savePhrase(userId: string, data: { german: string, context?: string, conversationId?: string, category?: string }) {
         this.logger.log(`Saving phrase for user ${userId}: ${data.german}`);
 
-        // Ensure user exists (similar hack)
-        await this.prisma.user.upsert({
-            where: { id: userId },
-            update: {},
-            create: { id: userId, clerkId: userId, email: `user_${userId}@example.com` }
-        }).catch(() => { });
-
         const categoryName = data.category || 'General';
 
-        // ✅ Upsert Category to ensure it exists in the list
+        // Upsert Category
         await this.prisma.category.upsert({
             where: { name: categoryName },
             update: { phraseCount: { increment: 1 } },
@@ -31,7 +24,7 @@ export class PhrasebookService {
 
         return this.prisma.phrase.create({
             data: {
-                userId,
+                userId, // This is Clerk ID
                 german: data.german,
                 context: data.context,
                 conversationId: data.conversationId,

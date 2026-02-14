@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useAuth } from '@clerk/nextjs';
 
 interface ProgressData {
     totalXp: number;
@@ -9,23 +10,22 @@ interface ProgressData {
 }
 
 export const ProgressDashboard = ({ apiBaseUrl }: { apiBaseUrl: string }) => {
+    const { getToken } = useAuth();
     const [progress, setProgress] = useState<ProgressData | null>(null);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        // Fetch progress from API
-        // We need a new endpoint for this, let's assume GET /progress/stats
-        // For now, mock it or implement the endpoint
         const fetchProgress = async () => {
             try {
-                // TODO: Implement GET /progress/stats in backend
-                // For prototype, we'll use a mock if fetch fails
-                const response = await fetch(`${apiBaseUrl}/progress/stats`);
+                const token = await getToken();
+                const response = await fetch(`${apiBaseUrl}/progress/stats`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
                 if (response.ok) {
                     const data = await response.json();
                     setProgress(data);
                 } else {
-                    // Mock data
+                    // Mock data if not established on backend yet
                     setProgress({
                         totalXp: 120,
                         level: 1,
@@ -49,7 +49,7 @@ export const ProgressDashboard = ({ apiBaseUrl }: { apiBaseUrl: string }) => {
         };
 
         fetchProgress();
-    }, [apiBaseUrl]);
+    }, [apiBaseUrl, getToken]);
 
     if (loading) return <div className="p-4">Lade Fortschritt...</div>;
     if (!progress) return null;

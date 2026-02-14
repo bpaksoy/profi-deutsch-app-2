@@ -4,9 +4,10 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { twMerge } from 'tailwind-merge';
 
-import { Button } from './Button'; // Assuming you've created this
+import { Button } from './Button';
 import { PhraseSidebar } from './PhraseSidebar';
 import { Footer } from './Footer';
+import { UserButton, SignedIn, SignedOut, SignInButton, useUser } from '@clerk/nextjs';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -33,8 +34,14 @@ const TopNavBar: React.FC<{ activeNav?: string }> = ({ activeNav }) => (
       <Link href="/settings" className={twMerge("text-text-light dark:text-text-dark text-sm font-medium leading-normal hover:text-primary dark:hover:text-accent transition-colors", activeNav === 'settings' && 'text-primary dark:text-accent')}>Einstellungen</Link>
     </nav>
     <div className="flex items-center gap-3">
-      {/* User profile picture */}
-      <div className="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-10 border-2 border-primary" style={{ backgroundImage: `url("https://lh3.googleusercontent.com/aida-public/AB6AXuBvX38Y-qL9Gh9IAJbemO9swZwkQqPlmTIRMYELCU7FgtxKDHsrlbSRdHvXoIoX50_rmgKBO-eK3TKSVLGOWKALuXay7a-6ZYtqPDQk3VU4B1rnL6jvuQnCrMJA8CByo3aHgp0oABGMSv30DWCdzGNP4Z_AdZWuCJ1TSw_4ogi045TBcboWTPI79N3-JrXicBPa5DT2YXipQE5XS8bTsdIkmu6BvtUCKsjReWRDZpo8Vq24iayebT62ODfmyoByKkGPjXtkgcRgbU6E")` }} data-alt="User's profile picture"></div>
+      <SignedIn>
+        <UserButton afterSignOutUrl="/" />
+      </SignedIn>
+      <SignedOut>
+        <SignInButton mode="modal">
+          <button className="text-sm font-medium text-primary hover:underline">Anmelden</button>
+        </SignInButton>
+      </SignedOut>
       <button className="sm:hidden p-2 rounded-md text-text-light dark:text-text-dark hover:bg-gray-100 dark:hover:bg-gray-800">
         <span className="material-symbols-outlined">menu</span>
       </button>
@@ -42,25 +49,25 @@ const TopNavBar: React.FC<{ activeNav?: string }> = ({ activeNav }) => (
   </header>
 );
 
-const Sidebar: React.FC<{ activeNav?: string; username: string; userAvatar: string }> = ({ activeNav, username, userAvatar }) => (
+const Sidebar: React.FC<{ activeNav?: string; user: any }> = ({ activeNav, user }) => (
   <>
     <aside className="flex-col bg-background-light dark:bg-background-dark border-r border-border-light dark:border-border-dark w-64 p-4 shrink-0 hidden md:flex">
     </aside>
     <div className="flex h-full flex-col justify-between">
       <div className="flex flex-col gap-4">
         <div className="flex gap-3 items-center">
-          <div
-            className="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-10"
-            style={{ backgroundImage: `url("${userAvatar}")` }}
-            data-alt="User profile picture"
-          ></div>
-          <div className="flex flex-col">
-            <h1 className="text-text-light dark:text-text-dark text-base font-medium leading-normal">
-              {username}
-            </h1>
-            <p className="text-gray-500 dark:text-gray-400 text-sm font-normal leading-normal">
-              Account
-            </p>
+          <div className="flex gap-3 items-center">
+            <SignedIn>
+              <UserButton />
+              <div className="flex flex-col">
+                <h1 className="text-text-light dark:text-text-dark text-base font-medium leading-normal">
+                  {user?.firstName || 'Entdecker'}
+                </h1>
+                <p className="text-gray-500 dark:text-gray-400 text-sm font-normal leading-normal">
+                  Konto
+                </p>
+              </div>
+            </SignedIn>
           </div>
         </div>
         <div className="flex flex-col gap-2 mt-4">
@@ -92,10 +99,10 @@ const Sidebar: React.FC<{ activeNav?: string; username: string; userAvatar: stri
 );
 
 export const CustomLayout: React.FC<LayoutProps> = ({ children, activeNav }) => {
-  // You might want to get actual user data here (e.g., from an auth context or prop)
-  const username = "Kathrin"; // Placeholder
-  const userAvatar = "https://lh3.googleusercontent.com/aida-public/AB6AXuBvX38Y-qL9Gh9IAJbemO9swZwkQqPlmTIRMYELCU7FgtxKDHsrlbSRdHvXoIoX50_rmgKBO-eK3TKSVLGOWKALuXay7a-6ZYtqPDQk3VU4B1rnL6jvuQnCrMJA8CByo3aHgp0oABGMSv30DWCdzGNP4Z_AdZWuCJ1TSw_4ogi045TBcboWTPI79N3-JrXicBPa5DT2YXipQE5XS8bTsdIkmu6BvtUCKsjReWRDZpo8Vq24iayebT62ODfmyoByKkGPjXtkgcRgbU6E"; // Placeholder
+  const { user, isLoaded } = useUser();
   const showPhraseSidebar = activeNav === 'phrases';
+
+  if (!isLoaded) return null;
 
   return (
     <div className="flex flex-col min-h-screen"> {/* Overall flex container */}

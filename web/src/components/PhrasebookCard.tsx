@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { useAuth } from '@clerk/nextjs';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
 
@@ -19,6 +20,7 @@ interface Category {
 }
 
 export const PhrasebookCard: React.FC = () => {
+    const { getToken } = useAuth();
     const [categories, setCategories] = useState<Category[]>([]);
     const [selectedCategory, setSelectedCategory] = useState<string>('');
     const [phrases, setPhrases] = useState<Phrase[]>([]);
@@ -34,15 +36,8 @@ export const PhrasebookCard: React.FC = () => {
         };
 
         window.addEventListener('phraseAdded', handlePhraseAdded);
-
-        return () => {
-            window.removeEventListener('phraseAdded', handlePhraseAdded);
-        };
+        return () => window.removeEventListener('phraseAdded', handlePhraseAdded);
     }, []);
-
-    // Filter phrases locally since the dashboard view is small, or fetch by category if preferred
-    // For dashboard, fetching all (limited by API usually) and filtering locally for UX is often smoother if list is small.
-    // However, sticking to the API filter pattern for consistency.
 
     useEffect(() => {
         if (selectedCategory) {
@@ -54,12 +49,14 @@ export const PhrasebookCard: React.FC = () => {
 
     const loadCategories = async () => {
         try {
-            const response = await fetch(`${API_BASE_URL}/phrasebook/categories`);
+            const token = await getToken();
+            const response = await fetch(`${API_BASE_URL}/phrasebook/categories`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
             if (response.ok) {
                 const data = await response.json();
-                // Map API response to Component Category interface
                 const mappedCategories = data.map((cat: any) => ({
-                    id: cat.name, // The API uses name as the key for filtering
+                    id: cat.name,
                     name: cat.name,
                     phraseCount: cat.phraseCount || 0
                 }));
@@ -72,7 +69,10 @@ export const PhrasebookCard: React.FC = () => {
 
     const loadPhrases = async (category: string) => {
         try {
-            const response = await fetch(`${API_BASE_URL}/phrasebook/phrases?category=${category}`);
+            const token = await getToken();
+            const response = await fetch(`${API_BASE_URL}/phrasebook/phrases?category=${category}`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
             if (response.ok) {
                 const data = await response.json();
                 setPhrases(Array.isArray(data) ? data : []);
@@ -85,7 +85,10 @@ export const PhrasebookCard: React.FC = () => {
 
     const loadAllPhrases = async () => {
         try {
-            const response = await fetch(`${API_BASE_URL}/phrasebook/phrases`);
+            const token = await getToken();
+            const response = await fetch(`${API_BASE_URL}/phrasebook/phrases`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
             if (response.ok) {
                 const data = await response.json();
                 setPhrases(Array.isArray(data) ? data : []);
@@ -98,12 +101,12 @@ export const PhrasebookCard: React.FC = () => {
 
     const deletePhrase = async (phraseId: string) => {
         try {
+            const token = await getToken();
             await fetch(`${API_BASE_URL}/phrasebook/phrases/${phraseId}`, {
-                method: 'DELETE'
+                method: 'DELETE',
+                headers: { 'Authorization': `Bearer ${token}` }
             });
-            // Optimistic update
             setPhrases(prev => prev.filter(p => p.id !== phraseId));
-            // Reload categories to update counts
             loadCategories();
         } catch (error) {
             console.error('Failed to delete phrase:', error);
@@ -112,12 +115,17 @@ export const PhrasebookCard: React.FC = () => {
 
     const playPhrase = async (text: string) => {
         try {
-            const response = await fetch(`${API_BASE_URL}/chat/tts?text=${encodeURIComponent(text)}`);
-            const audioBlob = await response.blob();
-            const audioUrl = URL.createObjectURL(audioBlob);
-            const audio = new Audio(audioUrl);
-            audio.play();
-            audio.onended = () => URL.revokeObjectURL(audioUrl);
+            const token = await getToken();
+            const response = await fetch(`${API_BASE_URL}/chat/tts?text=${encodeURIComponent(text)}`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (response.ok) {
+                const audioBlob = await response.blob();
+                const audioUrl = URL.createObjectURL(audioBlob);
+                const audio = new Audio(audioUrl);
+                audio.play();
+                audio.onended = () => URL.revokeObjectURL(audioUrl);
+            }
         } catch (error) {
             console.error('Failed to play phrase:', error);
         }

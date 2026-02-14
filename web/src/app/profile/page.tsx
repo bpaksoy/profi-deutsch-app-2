@@ -1,23 +1,25 @@
-// web/src/app/profile/page.tsx
-import React from 'react';
-// import { SpeakingPracticeCard } from './components/SpeakingPracticeCard';
-// import { PhrasebookCard } from './components/PhrasebookCard';
-// import { ProgressCard } from './components/ProgressCard';
-// import { RecentActivityCard } from './components/RecentActivityCard';
+'use client';
 
-// This is the ProfilePage content component.
+import React from 'react';
+import { useUser } from '@clerk/nextjs';
+import { PhrasebookCard } from '../../components/PhrasebookCard';
+import { ProgressDashboard } from '../../components/ProgressDashboard';
+
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
+
 export default function ProfilePage() {
-  const username = "Kathrin"; // Placeholder for user name
+  const { user, isLoaded } = useUser();
+
+  if (!isLoaded) return null;
 
   return (
-    // This div matches the flex-1 container mx-auto structure from your HTML
     <div className="flex-1 container mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <div className="layout-content-container flex flex-col gap-8">
 
         {/* Page Heading (Matches the Dashboard heading) */}
         <div className="flex flex-wrap justify-between items-center gap-4">
           <div className="flex flex-col gap-1">
-            <p className="text-3xl lg:text-4xl font-black leading-tight tracking-[-0.033em]">Hallo {username}!</p>
+            <p className="text-3xl lg:text-4xl font-black leading-tight tracking-[-0.033em]">Hallo {user?.firstName || 'Entdecker'}!</p>
             <p className="text-gray-500 dark:text-gray-400 text-base font-normal leading-normal">Übe das freie Sprechen und erhalte Feedback.</p>
           </div>
         </div>
@@ -27,21 +29,16 @@ export default function ProfilePage() {
 
           {/* Left Column (Main Content) - lg:col-span-2 */}
           <div className="lg:col-span-2 flex flex-col gap-8">
-            {/* <SpeakingPracticeCard /> */}
-
             {/* SectionHeader for Phrasebook */}
             <h2 className="text-2xl font-bold leading-tight tracking-[-0.015em] pt-5">Gespeicherte Redemittel</h2>
-            
-            {/* <PhrasebookCard /> */}
+            <PhrasebookCard />
           </div>
 
           {/* Right Column (Progress) - lg:col-span-1 */}
           <div className="lg:col-span-1 flex flex-col gap-8">
             {/* SectionHeader for Progress */}
             <h2 className="text-2xl font-bold leading-tight tracking-[-0.015em]">Lern-Fortschritt</h2>
-            
-            {/* <ProgressCard />
-            <RecentActivityCard /> */}
+            <ProgressDashboard apiBaseUrl={API_BASE_URL} />
           </div>
         </div>
       </div>

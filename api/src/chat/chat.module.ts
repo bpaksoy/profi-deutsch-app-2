@@ -4,20 +4,20 @@ import { ChatService } from './chat.service';
 import { RAGService } from './rag.service';
 import { AzureSpeechService } from './azure-speech.service';
 import { AssistantService } from './assistant-service';
-import { ProgressService } from '../progress/progress.service';
 import { ConversationService } from './conversation.service';
+import { ProgressModule } from '../progress/progress.module';
+import { PrismaModule } from '../prisma/prisma.module';
 
 @Module({
-  imports: [/* If you had other modules */],
+  imports: [ProgressModule, PrismaModule],
   controllers: [ChatController],
   providers: [
     ChatService,
     RAGService,
     AzureSpeechService,
     AssistantService,
-    ProgressService,
     ConversationService
   ],
-  exports: [ChatService, RAGService, AzureSpeechService, AssistantService, ConversationService] // Export the service if other modules will use it
+  exports: [ChatService, RAGService, AzureSpeechService, AssistantService, ConversationService]
 })
 export class ChatModule { }

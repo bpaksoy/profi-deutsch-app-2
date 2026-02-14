@@ -1,6 +1,8 @@
+
 'use client';
 
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
+import { useAuth } from '@clerk/nextjs';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
 
@@ -54,93 +56,40 @@ const useAudioRecorder = (submitCallback: (blob: Blob) => Promise<void>) => {
     return { isRecording, startRecording, stopRecording };
 };
 
-// Animated Smiley Face Component
-// Animated Smiley Face Component
 const SmileyFace: React.FC<{
     isRecording: boolean;
     isAssistantSpeaking: boolean;
     isProcessing: boolean;
 }> = ({ isRecording, isAssistantSpeaking, isProcessing }) => {
     return (
-        <svg
-            width="192"
-            height="192"
-            viewBox="0 0 192 192"
-            className="drop-shadow-2xl"
-        >
-            {/* Face circle */}
-            <circle
-                cx="96"
-                cy="96"
-                r="90"
-                fill={isRecording ? '#10b981' : isAssistantSpeaking ? '#3b82f6' : '#fbbf24'}
-                className="transition-colors duration-300"
-            />
+        <svg width="192" height="192" viewBox="0 0 192 192" className="drop-shadow-2xl">
+            <circle cx="96" cy="96" r="90" fill={isRecording ? '#10b981' : isAssistantSpeaking ? '#3b82f6' : '#fbbf24'} className="transition-colors duration-300" />
 
-            {/* Left eye - attentive when recording */}
             {isRecording ? (
-                // Focused eye when listening
                 <g>
                     <ellipse cx="70" cy="80" rx="8" ry="10" fill="#1f2937" />
                     <circle cx="70" cy="78" r="3" fill="#ffffff" />
                 </g>
             ) : (
-                <circle
-                    cx="70"
-                    cy="80"
-                    r={isAssistantSpeaking ? "8" : "6"}
-                    fill="#1f2937"
-                    className="transition-all duration-200"
-                >
-                    {isAssistantSpeaking && (
-                        <animate
-                            attributeName="r"
-                            values="6;8;6"
-                            dur="0.6s"
-                            repeatCount="indefinite"
-                        />
-                    )}
+                <circle cx="70" cy="80" r={isAssistantSpeaking ? "8" : "6"} fill="#1f2937" className="transition-all duration-200">
+                    {isAssistantSpeaking && <animate attributeName="r" values="6;8;6" dur="0.6s" repeatCount="indefinite" />}
                 </circle>
             )}
 
-            {/* Right eye - attentive when recording */}
             {isRecording ? (
-                // Focused eye when listening
                 <g>
                     <ellipse cx="122" cy="80" rx="8" ry="10" fill="#1f2937" />
                     <circle cx="122" cy="78" r="3" fill="#ffffff" />
                 </g>
             ) : (
-                <circle
-                    cx="122"
-                    cy="80"
-                    r={isAssistantSpeaking ? "8" : "6"}
-                    fill="#1f2937"
-                    className="transition-all duration-200"
-                >
-                    {isAssistantSpeaking && (
-                        <animate
-                            attributeName="r"
-                            values="6;8;6"
-                            dur="0.6s"
-                            repeatCount="indefinite"
-                        />
-                    )}
+                <circle cx="122" cy="80" r={isAssistantSpeaking ? "8" : "6"} fill="#1f2937" className="transition-all duration-200">
+                    {isAssistantSpeaking && <animate attributeName="r" values="6;8;6" dur="0.6s" repeatCount="indefinite" />}
                 </circle>
             )}
 
-            {/* Mouth - changes based on state */}
             {isRecording ? (
-                // Gentle smile with sound waves when recording (listening attentively)
                 <g>
-                    <path
-                        d="M 70 115 Q 96 130 122 115"
-                        stroke="#1f2937"
-                        strokeWidth="4"
-                        fill="none"
-                        strokeLinecap="round"
-                    />
-                    {/* Sound wave indicators */}
+                    <path d="M 70 115 Q 96 130 122 115" stroke="#1f2937" strokeWidth="4" fill="none" strokeLinecap="round" />
                     <g opacity="0.6">
                         <path d="M 140 96 Q 145 96 145 96" stroke="#1f2937" strokeWidth="2" fill="none" strokeLinecap="round">
                             <animate attributeName="d" values="M 140 96 Q 145 96 145 96;M 140 90 Q 150 96 140 102;M 140 96 Q 145 96 145 96" dur="1s" repeatCount="indefinite" />
@@ -151,35 +100,13 @@ const SmileyFace: React.FC<{
                     </g>
                 </g>
             ) : isProcessing ? (
-                // Thinking mouth
-                <path
-                    d="M 70 115 Q 96 115 122 115"
-                    stroke="#1f2937"
-                    strokeWidth="4"
-                    fill="none"
-                    strokeLinecap="round"
-                />
+                <path d="M 70 115 Q 96 115 122 115" stroke="#1f2937" strokeWidth="4" fill="none" strokeLinecap="round" />
             ) : (
-                // Happy smile
-                <path
-                    d="M 70 110 Q 96 135 122 110"
-                    stroke="#1f2937"
-                    strokeWidth="5"
-                    fill="none"
-                    strokeLinecap="round"
-                >
-                    {isAssistantSpeaking && (
-                        <animate
-                            attributeName="d"
-                            values="M 70 110 Q 96 135 122 110;M 70 110 Q 96 130 122 110;M 70 110 Q 96 135 122 110"
-                            dur="0.5s"
-                            repeatCount="indefinite"
-                        />
-                    )}
+                <path d="M 70 110 Q 96 135 122 110" stroke="#1f2937" strokeWidth="5" fill="none" strokeLinecap="round">
+                    {isAssistantSpeaking && <animate attributeName="d" values="M 70 110 Q 96 135 122 110;M 70 110 Q 96 130 122 110;M 70 110 Q 96 135 122 110" dur="0.5s" repeatCount="indefinite" />}
                 </path>
             )}
 
-            {/* Rosy cheeks */}
             <circle cx="60" cy="100" r="10" fill="#ff6b9d" opacity="0.4" />
             <circle cx="132" cy="100" r="10" fill="#ff6b9d" opacity="0.4" />
         </svg>
@@ -196,12 +123,13 @@ export const VoiceAssistant: React.FC<VoiceAssistantProps> = ({ onClose }) => {
     const [phraseToSave, setPhraseToSave] = useState<string | null>(null);
     const [selection, setSelection] = useState<{ text: string, x: number, y: number } | null>(null);
     const [categories, setCategories] = useState<string[]>([]);
+    const { getToken } = useAuth();
 
-    React.useEffect(() => {
+    useEffect(() => {
         loadCategories();
     }, []);
 
-    React.useEffect(() => {
+    useEffect(() => {
         const handleSelection = () => {
             const selectionObj = window.getSelection();
             if (selectionObj && selectionObj.toString().trim().length > 0) {
@@ -210,14 +138,13 @@ export const VoiceAssistant: React.FC<VoiceAssistantProps> = ({ onClose }) => {
                 setSelection({
                     text: selectionObj.toString().trim(),
                     x: rect.left + window.scrollX,
-                    y: rect.top + window.scrollY - 40 // Position above
+                    y: rect.top + window.scrollY - 40
                 });
             } else {
                 setSelection(null);
             }
         };
 
-        // Only add listener when modal is open
         document.addEventListener('mouseup', handleSelection);
         return () => document.removeEventListener('mouseup', handleSelection);
     }, []);
@@ -232,7 +159,10 @@ export const VoiceAssistant: React.FC<VoiceAssistantProps> = ({ onClose }) => {
 
     const loadCategories = async () => {
         try {
-            const response = await fetch(`${API_BASE_URL}/phrasebook/categories`);
+            const token = await getToken();
+            const response = await fetch(`${API_BASE_URL}/phrasebook/categories`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
             const data = await response.json();
             setCategories(data.map((cat: any) => cat.name));
         } catch (error) {
@@ -249,9 +179,13 @@ export const VoiceAssistant: React.FC<VoiceAssistantProps> = ({ onClose }) => {
         if (!phraseToSave) return;
 
         try {
+            const token = await getToken();
             await fetch(`${API_BASE_URL}/phrasebook/phrases`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
                 body: JSON.stringify({
                     german: phraseToSave,
                     category: category,
@@ -269,55 +203,6 @@ export const VoiceAssistant: React.FC<VoiceAssistantProps> = ({ onClose }) => {
         }
     };
 
-
-
-    const handleSubmitAudio = async (audioBlob: Blob) => {
-        const formData = new FormData();
-        formData.append('audio', audioBlob, 'voice_input.webm');
-
-        setIsProcessing(true);
-
-        try {
-            const response = await fetch(`${API_BASE_URL}/chat/stt`, {
-                method: 'POST',
-                body: formData,
-            });
-
-            if (!response.ok) {
-                throw new Error('Backend failed to transcribe/respond.');
-            }
-
-            const jsonResponse = await response.json();
-            console.log("Backend Response:", jsonResponse);
-
-            // Don't show user's transcribed message, only AI response
-            const aiMessage: Message = {
-                id: Date.now(),
-                text: jsonResponse.responseText || "Tut mir leid, ich konnte keine Antwort generieren.",
-                sender: 'assistant'
-            };
-
-            setMessages(current => [...current, aiMessage]);
-
-            // Play the audio response
-            if (jsonResponse.audioBase64) {
-                setIsAssistantSpeaking(true);
-                await playAudioFromBase64(jsonResponse.audioBase64);
-                setIsAssistantSpeaking(false);
-            }
-
-        } catch (error) {
-            console.error('Submission Failed:', error);
-            setMessages(current => [...current, {
-                id: Date.now(),
-                text: 'Oje, das hat nicht geklappt.',
-                sender: 'assistant'
-            }]);
-        } finally {
-            setIsProcessing(false);
-        }
-    };
-
     const playAudioFromBase64 = (base64Audio: string): Promise<void> => {
         return new Promise((resolve, reject) => {
             try {
@@ -328,7 +213,6 @@ export const VoiceAssistant: React.FC<VoiceAssistantProps> = ({ onClose }) => {
                 }
                 const byteArray = new Uint8Array(byteNumbers);
                 const blob = new Blob([byteArray], { type: 'audio/mpeg' });
-
                 const audioUrl = URL.createObjectURL(blob);
                 const audio = new Audio(audioUrl);
 
@@ -349,19 +233,55 @@ export const VoiceAssistant: React.FC<VoiceAssistantProps> = ({ onClose }) => {
         });
     };
 
+    const handleSubmitAudio = async (audioBlob: Blob) => {
+        const formData = new FormData();
+        formData.append('audio', audioBlob, 'voice_input.webm');
+        setIsProcessing(true);
+
+        try {
+            const token = await getToken();
+            const response = await fetch(`${API_BASE_URL}/chat/stt`, {
+                method: 'POST',
+                headers: { 'Authorization': `Bearer ${token}` },
+                body: formData,
+            });
+
+            if (!response.ok) throw new Error('Backend failed to transcribe/respond.');
+
+            const jsonResponse = await response.json();
+            const aiMessage: Message = {
+                id: Date.now(),
+                text: jsonResponse.responseText || "Tut mir leid, ich konnte keine Antwort generieren.",
+                sender: 'assistant'
+            };
+            setMessages(current => [...current, aiMessage]);
+
+            if (jsonResponse.audioBase64) {
+                setIsAssistantSpeaking(true);
+                await playAudioFromBase64(jsonResponse.audioBase64);
+                setIsAssistantSpeaking(false);
+            }
+        } catch (error) {
+            console.error('Submission Failed:', error);
+            setMessages(current => [...current, {
+                id: Date.now(),
+                text: 'Oje, das hat nicht geklappt.',
+                sender: 'assistant'
+            }]);
+        } finally {
+            setIsProcessing(false);
+        }
+    };
+
     const { isRecording, startRecording, stopRecording } = useAudioRecorder(handleSubmitAudio);
 
     const handleMicClick = () => {
-        if (isRecording) {
-            stopRecording();
-        } else {
-            startRecording();
-        }
+        if (isRecording) stopRecording();
+        else startRecording();
     };
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-            {/* Save Phrase Tooltip */}
             {selection && (
                 <div
                     className="fixed z-[70] bg-black text-white px-3 py-1 rounded-lg shadow-lg cursor-pointer flex items-center gap-2 animate-in fade-in zoom-in duration-200"
@@ -378,40 +298,23 @@ export const VoiceAssistant: React.FC<VoiceAssistantProps> = ({ onClose }) => {
             )}
 
             <div className="bg-white dark:bg-card-dark w-full max-w-4xl rounded-2xl shadow-2xl flex flex-col lg:flex-row overflow-hidden h-[80vh]">
-
-                {/* LEFT SIDE - Pulsating Smiley Face */}
                 <div className="lg:w-1/2 bg-gradient-to-br from-yellow-100 to-orange-100 dark:from-yellow-900/20 dark:to-orange-900/20 flex flex-col items-center justify-center p-8 relative">
-                    <button
-                        onClick={onClose}
-                        className="absolute top-4 right-4 p-2 rounded-full hover:bg-white/20 transition-colors"
-                    >
+                    <button onClick={onClose} className="absolute top-4 right-4 p-2 rounded-full hover:bg-white/20 transition-colors">
                         <span className="material-symbols-outlined">close</span>
                     </button>
 
-                    {/* Pulsating Orb with Smiley Face */}
                     <div className="relative">
-                        {/* Outer pulsating rings */}
                         {(isRecording || isAssistantSpeaking) && (
                             <>
                                 <div className="absolute inset-0 rounded-full bg-signal-400/20 animate-ping"></div>
                                 <div className="absolute -inset-4 rounded-full bg-signal-300/30 animate-pulse"></div>
                             </>
                         )}
-
-                        {/* Smiley Face */}
-                        <div className={`
-                            relative transition-all duration-300
-                            ${(isRecording || isAssistantSpeaking) ? 'scale-110' : 'scale-100'}
-                        `}>
-                            <SmileyFace
-                                isRecording={isRecording}
-                                isAssistantSpeaking={isAssistantSpeaking}
-                                isProcessing={isProcessing}
-                            />
+                        <div className={`relative transition-all duration-300 ${(isRecording || isAssistantSpeaking) ? 'scale-110' : 'scale-100'}`}>
+                            <SmileyFace isRecording={isRecording} isAssistantSpeaking={isAssistantSpeaking} isProcessing={isProcessing} />
                         </div>
                     </div>
 
-                    {/* Status Text */}
                     <div className="mt-8 text-center">
                         <p className="text-2xl font-bold text-gray-800 dark:text-white mb-2">
                             {isRecording ? 'Ich höre zu...' : isAssistantSpeaking ? 'Ich spreche...' : isProcessing ? 'Ich überlege...' : 'Bereit, um dir zuzuhören.'}
@@ -421,53 +324,28 @@ export const VoiceAssistant: React.FC<VoiceAssistantProps> = ({ onClose }) => {
                         </p>
                     </div>
 
-                    {/* Mic Button */}
                     <button
                         onClick={handleMicClick}
                         disabled={isProcessing || isAssistantSpeaking}
-                        className={`
-                            mt-8 p-6 rounded-full shadow-lg transition-all
-                            ${isRecording
-                                ? 'bg-red-500 hover:bg-red-600 animate-pulse'
-                                : 'bg-primary hover:bg-primary/90'
-                            }
-                            ${(isProcessing || isAssistantSpeaking) ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
-                            text-white
-                        `}
+                        className={`mt-8 p-6 rounded-full shadow-lg transition-all ${isRecording ? 'bg-red-500 hover:bg-red-600 animate-pulse' : 'bg-primary hover:bg-primary/90'} ${(isProcessing || isAssistantSpeaking) ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'} text-white`}
                     >
-                        <span className="material-symbols-outlined text-4xl">
-                            {isRecording ? 'stop' : 'mic'}
-                        </span>
+                        <span className="material-symbols-outlined text-4xl">{isRecording ? 'stop' : 'mic'}</span>
                     </button>
                 </div>
 
-                {/* RIGHT SIDE - Message Display */}
                 <div className="lg:w-1/2 flex flex-col bg-white dark:bg-gray-900">
                     <div className="p-6 border-b border-gray-200 dark:border-gray-700">
                         <h3 className="text-xl font-bold">Gespräch</h3>
                         <p className="text-sm text-gray-500 dark:text-gray-400">Sprich mit mir Deutsch. Denk dir ein Thema aus oder frage mich, ob ich eine Idee habe.</p>
                     </div>
 
-                    {/* Messages */}
                     <div className="flex-1 overflow-y-auto p-6 space-y-4">
                         {messages.map(msg => (
-                            <div
-                                key={msg.id}
-                                className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}
-                            >
-                                <div className={`
-                                    max-w-[80%] p-4 rounded-2xl
-                                    ${msg.sender === 'user'
-                                        ? 'bg-primary text-white rounded-br-sm'
-                                        : 'bg-yellow-100 dark:bg-yellow-900/30 text-gray-900 dark:text-white rounded-bl-sm border-2 border-yellow-300 dark:border-yellow-700'
-                                    }
-                                `}>
+                            <div key={msg.id} className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}>
+                                <div className={`max-w-[80%] p-4 rounded-2xl ${msg.sender === 'user' ? 'bg-primary text-white rounded-br-sm' : 'bg-yellow-100 dark:bg-yellow-900/30 text-gray-900 dark:text-white rounded-bl-sm border-2 border-yellow-300 dark:border-yellow-700'}`}>
                                     <p className="text-sm leading-relaxed">{msg.text}</p>
                                     {msg.sender === 'assistant' && (
-                                        <button
-                                            onClick={() => handleAddPhrase(msg.text)}
-                                            className="self-start flex items-center gap-1 text-xs text-gray-500 hover:text-primary transition-colors"
-                                        >
+                                        <button onClick={() => handleAddPhrase(msg.text)} className="self-start flex items-center gap-1 text-xs text-gray-500 hover:text-primary transition-colors">
                                             <span className="material-symbols-outlined text-base">add_circle</span>
                                             <span>Zu Redemitteln hinzufügen</span>
                                         </button>
@@ -475,7 +353,6 @@ export const VoiceAssistant: React.FC<VoiceAssistantProps> = ({ onClose }) => {
                                 </div>
                             </div>
                         ))}
-
                         {isProcessing && (
                             <div className="flex justify-start">
                                 <div className="bg-yellow-100 dark:bg-yellow-900/30 p-4 rounded-2xl rounded-bl-sm border-2 border-yellow-300 dark:border-yellow-700">
@@ -490,7 +367,7 @@ export const VoiceAssistant: React.FC<VoiceAssistantProps> = ({ onClose }) => {
                     </div>
                 </div>
             </div>
-            {/* Category Selection Modal */}
+
             {showCategoryModal && (
                 <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/50 p-4">
                     <div className="bg-white dark:bg-gray-800 rounded-xl p-6 max-w-md w-full">
@@ -498,28 +375,15 @@ export const VoiceAssistant: React.FC<VoiceAssistantProps> = ({ onClose }) => {
                         <p className="text-sm text-gray-500 mb-4">"{phraseToSave}" speichern in:</p>
                         <div className="space-y-2">
                             {categories.map(cat => (
-                                <button
-                                    key={cat}
-                                    onClick={() => savePhrase(cat)}
-                                    className="w-full p-3 text-left rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-                                >
+                                <button key={cat} onClick={() => savePhrase(cat)} className="w-full p-3 text-left rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
                                     {cat}
                                 </button>
                             ))}
-                            <button
-                                onClick={() => {
-                                    const newCat = prompt('Neue Kategorie:');
-                                    if (newCat) savePhrase(newCat);
-                                }}
-                                className="w-full p-3 text-left rounded-lg border-2 border-dashed border-gray-300 hover:border-primary transition-colors"
-                            >
+                            <button onClick={() => { const newCat = prompt('Neue Kategorie:'); if (newCat) savePhrase(newCat); }} className="w-full p-3 text-left rounded-lg border-2 border-dashed border-gray-300 hover:border-primary transition-colors">
                                 + Neue Kategorie erstellen
                             </button>
                         </div>
-                        <button
-                            onClick={() => setShowCategoryModal(false)}
-                            className="mt-4 w-full p-2 bg-gray-200 dark:bg-gray-700 rounded-lg"
-                        >
+                        <button onClick={() => setShowCategoryModal(false)} className="mt-4 w-full p-2 bg-gray-200 dark:bg-gray-700 rounded-lg">
                             Abbrechen
                         </button>
                     </div>

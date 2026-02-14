@@ -23,6 +23,7 @@
         "test:e2e": "jest --config ./test/jest-e2e.json"
     },
     "dependencies": {
+        "@clerk/backend": "^2.31.0",
         "@elevenlabs/client": "^0.8.1",
         "@google/genai": "^1.30.0",
         "@langchain/community": "^1.0.5",
