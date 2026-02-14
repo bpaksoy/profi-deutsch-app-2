@@ -13,3 +13,5 @@ api/dist
 /generated/prisma
 
 web/.env.local
+
+.env
