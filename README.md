@@ -1,89 +1,97 @@
-# ProfiDeutsch App
+# Sigsag - Dein KI-Deutschlehrer für den Beruf
 
-Welcome to ProfiDeutsch, your AI-powered professional German tutor for internships in Germany! This monorepo contains both the frontend (Next.js/React) and the backend (NestJS) for the application.
+Willkommen bei **Sigsag**, deiner KI-gestützten Plattform zum Deutschlernen mit Fokus auf den Berufsalltag. Sigsag kombiniert modernste Sprachmodelle (Gemini), Retrieval-Augmented Generation (RAG) und Sprachtechnologien, um ein immersives Lernerlebnis auf B2-Niveau zu ermöglichen.
 
-## Table of Contents
+## 🚀 Kernfunktionen
 
--   [Features](#features)
--   [Technologies Used](#technologies-used)
--   [Project Structure](#project-structure)
--   [Getting Started](#getting-started)
-    -   [Prerequisites](#prerequisites)
-    -   [Frontend Setup](#frontend-setup)
-    -   [Backend Setup](#backend-setup)
--   [Environment Variables](#environment-variables)
--   [AI Agent Integration (ElevenLabs)](#ai-agent-integration-elevenlabs)
--   [Roadmap](#roadmap)
--   [Contributing](#contributing)
--   [License](#license)
+-   **KI-Sprachtraining:** Übe freies Sprechen mit "Flo", deinem KI-Lern-Buddy, spezialisiert auf berufliche Szenarien.
+-   **RAG-gestütztes Wissen:** Der KI-Agent nutzt eine dedizierte Wissensdatenbank für korrekte deutsche Grammatik, Business-Etikette und B2-spezifisches Vokabular.
+-   **Professionelles Phrasenbuch:** Speichere wichtige Redemittel direkt aus deinen Gesprächen und kategorisiere sie (Meetings, E-Mails, Telefonate).
+-   **Lern-Dashboard:** Verfolge deinen Fortschritt, gesammelte XP und gemeisterte Wörter.
+-   **Echtzeit-Feedback:** Erhalte sofortige Rückmeldungen zu deiner Aussprache und Grammatik (integriert via Azure Speech & Gemini).
 
-## Features
-
--   **Professional Phrasebook:** Browse and learn key German phrases for workplace scenarios.
--   **AI Speaking Practice:** Engage in conversational practice with an AI agent for various professional situations (e.g., meetings, job interviews).
--   **Progress Tracking:** Monitor your learning progress, including fluency, grammar, and pronunciation.
--   **Mobile-Responsive Design:** Seamless experience across desktop and mobile devices.
--   **Dark Mode:** User-friendly interface with light and dark themes.
-
-## Technologies Used
+## 🛠 Technologien
 
 ### Frontend (`web/`)
-
--   **React:** A JavaScript library for building user interfaces.
--   **Next.js:** A React framework for building full-stack web applications.
--   **TypeScript:** Strongly typed programming language that builds on JavaScript.
--   **Tailwind CSS:** A utility-first CSS framework for rapidly building custom designs.
+-   **Framework:** Next.js 14 (App Router)
+-   **Styling:** Tailwind CSS & Vanilla CSS Hybrid
+-   **Authentifizierung:** Clerk (Social Login & Account Management)
+-   **State & APIs:** React Hooks, Fetch API mit JWT Integration
 
 ### Backend (`api/`)
+-   **Framework:** NestJS
+-   **Datenbank:** PostgreSQL & Prisma ORM
+-   **KI & LLM:** Google Gemini API (RAG-basiert)
+-   **Speech-to-Text & TTS:** Microsoft Azure Speech Services
+-   **Authentifizierung:** @clerk/backend (JWT Verification & User Sync)
+-   **Wissensbasis:** Integrierter Vektorspeicher (Prisma-basiert) für RAG
 
--   **NestJS:** A progressive Node.js framework for building efficient and scalable server-side applications.
--   **TypeScript:** (Same as frontend)
--   **ElevenLabs API:** For Text-to-Speech (TTS) and potentially Speech-to-Text (STT) for the AI agent.
--   **Your Gemini LLM:** (Integration will be done via NestJS backend)
--   **Other APIs (TBD):** For Speech-to-Text (e.g., Google Cloud Speech-to-Text) if ElevenLabs STT is not sufficient for German.
+## 🏗 Projektstruktur
 
-## Project Structure
+```bash
 profi-deutsch-app/
-├── README.md
-├── package.json
-├── web/ # Next.js (React) Frontend
-│ ├── public/
-│ ├── src/
-│ │ ├── app/ # Next.js App Router structure
-│ │ │ ├── layout.tsx
-│ │ │ ├── page.tsx
-│ │ │ ├── dashboard/
-│ │ │ │ └── page.tsx
-│ │ │ ├── phrases/
-│ │ │ │ └── page.tsx
-│ │ │ ├── chat/
-│ │ │ │ └── page.tsx
-│ │ ├── components/
-│ │ │ ├── ui/
-│ │ │ ├── Layout.tsx
-│ │ │ ├── PhraseCard.tsx
-│ │ │ ├── ChatMessage.tsx
-│ │ │ └── ...
-│ │ ├── styles/
-│ │ │ └── global.css
-│ │ ├── lib/
-│ │ └── types/
-│ ├── tailwind.config.ts
-│ ├── tsconfig.json
-│ ├── next.config.mjs
-│ └── package.json
-└── api/ # NestJS Backend
-├── src/
-│ ├── main.ts
-│ ├── app.controller.ts
-│ ├── app.service.ts
-│ ├── chat/
-│ │ ├── chat.controller.ts
-│ │ ├── chat.service.ts
-│ │ └── chat.module.ts
-│ ├── auth/
-│ │ └── ...
-│ └── common/
-├── tsconfig.json
-├── nest-cli.json
-└── package.json
+├── web/              # Next.js Frontend
+│   ├── src/app/      # Pages & Routing (Clerk-geschützt)
+│   ├── src/components/ # Wiederverwendbare UI-Komponenten
+│   └── next.config.mjs # Redirects & Config
+└── api/              # NestJS Backend
+    ├── prisma/       # Schema & Seeding (Knowledge Base)
+    ├── src/auth/     # Clerk Authentication Guard & Service
+    ├── src/chat/     # RAG Service, Chat Logic, Speech Integration
+    ├── src/phrasebook/ # Redemittel Verwaltung
+    └── src/progress/ # Fortschritts-Tracker
+```
+
+## 🏁 Erste Schritte
+
+### Voraussetzungen
+-   Node.js (v18+)
+-   PostgreSQL (lokal oder Docker)
+-   API Keys für: Clerk, Gemini (Google AI), Azure Speech
+
+### Installation
+
+1.  **Repository klonen**
+2.  **Abhängigkeiten installieren:**
+    ```bash
+    npm install
+    ```
+3.  **Umgebungsvariablen konfigurieren:**
+    Erstelle eine `.env` im Stammverzeichnis und eine `.env.local` in `web/` (siehe unten).
+
+4.  **Datenbank einrichten:**
+    ```bash
+    cd api
+    npx prisma generate
+    npx prisma db push
+    npx prisma db seed # Kategorien & Basis-Daten
+    npx ts-node prisma/seed-knowledge.ts # Wissensbasis für RAG laden
+    ```
+
+5.  **Starten:**
+    -   Backend: `cd api && npm run start:dev`
+    -   Frontend: `cd web && npm run dev`
+
+## 🔑 Umgebungsvariablen
+
+### Backend (`api/.env`)
+-   `DATABASE_URL`: PostgreSQL Connection String
+-   `CLERK_SECRET_KEY`: Clerk Secret
+-   `GEMINI_API_KEY`: API Key für Google Gemini
+-   `AZURE_SPEECH_KEY`: Schlüssel für Azure Speech Services
+-   `AZURE_SPEECH_REGION`: Region für Azure (z.B. `westeurope`)
+
+### Frontend (`web/.env.local`)
+-   `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY`: Clerk Public Key
+-   `CLERK_SECRET_KEY`: Clerk Secret
+-   `NEXT_PUBLIC_API_BASE_URL`: URL zum Backend (Standard `http://localhost:8000`)
+
+## 🛣 Roadmap
+-   [x] Clerk Auth Integration
+-   [x] RAG System für Grammatik-Feedback
+-   [x] Phrasenbuch-Kategorisierung
+-   [ ] Gamification (Badges & Streak)
+-   [ ] Prüfungsvorbereitung für TestDaF/Goethe B2
+
+## 📄 Lizenz
+Dieses Projekt ist lizenziert unter der MIT-Lizenz.
