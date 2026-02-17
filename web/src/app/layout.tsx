@@ -31,6 +31,12 @@ export default function RootLayout({
   return (
     <ClerkProvider>
       <html lang="de" className={`${manrope.variable} light`}>
+        <head>
+          <link
+            rel="stylesheet"
+            href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
+          />
+        </head>
         <body className="font-display bg-background-light dark:bg-background-dark text-text-light dark:text-text-dark">
           <CustomLayout>
             {children}

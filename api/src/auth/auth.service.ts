@@ -1,6 +1,6 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { createClerkClient } from '@clerk/backend';
+import { createClerkClient, verifyToken } from '@clerk/backend';
 
 @Injectable()
 export class AuthService {
@@ -12,7 +12,9 @@ export class AuthService {
 
     async validateToken(token: string) {
         try {
-            const decoded = await this.clerkClient.verifyToken(token);
+            const decoded = await verifyToken(token, {
+                secretKey: process.env.CLERK_SECRET_KEY,
+            });
 
             // Ensure user exists in our local DB
             await this.getOrCreateUser(decoded.sub);
