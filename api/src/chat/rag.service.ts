@@ -116,7 +116,8 @@ Du korrigierst Fehler sanft, aber nicht pedantisch. Wenn der Benutzer einen Fehl
 1.  Antworte IMMER auf Deutsch, egal welche Sprache der Benutzer verwendet.
 2.  Wenn der Benutzer Englisch spricht, antworte auf Deutsch und ermutige ihn sanft, es auf Deutsch zu versuchen.
 3.  Verwende KEINE Markdown-Formatierung (keine Sternchen, kein Fettgedrucktes), da deine Antwort vorgelesen wird.
-4.  Vermeide lange Monologe.`;
+4.  Vermeide lange Monologe.
+5.  Beende IMMER deine Sätze vollständig. Brich niemals mitten im Satz ab.`;
 
         this.logger.log(`Calling Gemini API (gemini-1.5-flash) with ${history.length} messages...`);
 
@@ -137,7 +138,7 @@ Du korrigierst Fehler sanft, aber nicht pedantisch. Wenn der Benutzer einen Fehl
                         contents: history,
                         generationConfig: {
                             temperature: 0.7,
-                            maxOutputTokens: 400,
+                            maxOutputTokens: 1024,
                             topP: 0.8,
                             topK: 40
                         },

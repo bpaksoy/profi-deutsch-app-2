@@ -1,43 +1,92 @@
-import React from 'react';
+'use client';
+
+import React, { useCallback } from 'react';
+import { useAuth } from '@clerk/nextjs';
 
 interface ChatMessageProps {
     message: string;
-    type: 'ai' | 'user'; // Type is a good key for styling
-    sender: 'user' | 'bot'; // Sender is used for logic/display
+    type: 'ai' | 'user';
+    sender: 'user' | 'bot';
     avatarUrl: string;
     isTyping?: boolean;
 }
-const API_BASE_URL = 'http://localhost:8000'; // BASE_URL is correct
 
-const ChatMessage: React.FC<ChatMessageProps> = ({ message, sender, isTyping = false  }) => {
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
+
+const ChatMessage: React.FC<ChatMessageProps> = ({ message, sender, isTyping = false }) => {
     const isUser = sender === 'user';
-    const isBot = sender === 'bot'; // Use 'bot' to trigger TTS
+    const isBot = sender === 'bot';
+    const { getToken } = useAuth();
     const audioRef = React.useRef<HTMLAudioElement | null>(null);
+    const [playbackState, setPlaybackState] = React.useState<'idle' | 'loading' | 'playing'>('idle');
 
-    // Function to call NestJS and stream the audio
-    const playAudio = async () => {
+    const handleAudioClick = useCallback(async () => {
         if (!isBot || !message) return;
 
-        // 1. Construct the URL with URLSearchParams for safe encoding
-        const params = new URLSearchParams({ text: message });
-        const ttsUrl = `${API_BASE_URL}/chat/tts?${params.toString()}`;
+        // If currently playing → pause/stop
+        if (playbackState === 'playing' && audioRef.current) {
+            audioRef.current.pause();
+            audioRef.current.currentTime = 0;
+            setPlaybackState('idle');
+            return;
+        }
 
+        // If loading, ignore extra clicks
+        if (playbackState === 'loading') return;
+
+        // Otherwise → fetch and play
         try {
-            // 2. Create or reuse an invisible audio element
+            setPlaybackState('loading');
+            const token = await getToken();
+            const params = new URLSearchParams({ text: message });
+            const ttsUrl = `${API_BASE_URL}/chat/tts?${params.toString()}`;
+
+            const response = await fetch(ttsUrl, {
+                headers: { 'Authorization': `Bearer ${token}` },
+            });
+
+            if (!response.ok) {
+                throw new Error(`TTS request failed: ${response.status}`);
+            }
+
+            const audioBlob = await response.blob();
+            const audioUrl = URL.createObjectURL(audioBlob);
+
             if (!audioRef.current) {
                 audioRef.current = new Audio();
-                // Optionally append to body if necessary, though not always needed
-                // document.body.appendChild(audioRef.current);
             }
-            
-            // 3. Set the source to the NestJS endpoint
-            audioRef.current.src = ttsUrl;
-            
-            // 4. Play the audio
+
+            audioRef.current.src = audioUrl;
+            audioRef.current.onended = () => {
+                URL.revokeObjectURL(audioUrl);
+                setPlaybackState('idle');
+            };
+            audioRef.current.onerror = () => {
+                URL.revokeObjectURL(audioUrl);
+                setPlaybackState('idle');
+            };
+
             await audioRef.current.play();
-            
+            setPlaybackState('playing');
         } catch (error) {
             console.error('Error playing audio:', error);
+            setPlaybackState('idle');
+        }
+    }, [isBot, message, playbackState, getToken]);
+
+    const getIcon = () => {
+        switch (playbackState) {
+            case 'loading': return 'progress_activity';
+            case 'playing': return 'stop_circle';
+            default: return 'volume_up';
+        }
+    };
+
+    const getTitle = () => {
+        switch (playbackState) {
+            case 'loading': return 'Wird geladen...';
+            case 'playing': return 'Stoppen';
+            default: return 'Anhören';
         }
     };
 
@@ -47,10 +96,10 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ message, sender, isTyping = f
                 display: 'flex',
                 justifyContent: isUser ? 'flex-end' : 'flex-start',
                 margin: '10px 0',
-                alignItems: 'flex-end' // Align elements to the bottom
+                alignItems: 'flex-end',
             }}
         >
-            {/* Message Bubble Container */}
+            {/* Message Bubble */}
             <div
                 style={{
                     maxWidth: '70%',
@@ -62,24 +111,30 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ message, sender, isTyping = f
             >
                 {message}
             </div>
-            
-            {/* TTS Playback Button (Only for the Bot's message) */}
-            {isBot && !isTyping &&  (
-                <button 
-                    onClick={playAudio} 
-                    style={{ 
-                        marginLeft: isUser ? '0' : '5px', 
-                        marginRight: isUser ? '5px' : '0',
+
+            {/* TTS Playback Button (Bot messages only) */}
+            {isBot && !isTyping && (
+                <button
+                    onClick={handleAudioClick}
+                    disabled={playbackState === 'loading'}
+                    style={{
+                        marginLeft: '5px',
                         padding: '5px',
-                        cursor: 'pointer',
+                        cursor: playbackState === 'loading' ? 'wait' : 'pointer',
                         background: 'transparent',
                         border: 'none',
-                        color: isUser ? 'audio' : '#555', // Adjust color as needed
+                        color: playbackState === 'playing' ? '#008073' : '#555',
+                        opacity: playbackState === 'loading' ? 0.5 : 1,
+                        transition: 'all 0.2s',
                     }}
-                    title="Anhören"
+                    title={getTitle()}
                 >
-                    {/* Material Symbols Outlined is assumed to be imported globally */}
-                    <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>volume_up</span>
+                    <span
+                        className={`material-symbols-outlined ${playbackState === 'loading' ? 'animate-spin' : ''}`}
+                        style={{ fontSize: '18px' }}
+                    >
+                        {getIcon()}
+                    </span>
                 </button>
             )}
         </div>

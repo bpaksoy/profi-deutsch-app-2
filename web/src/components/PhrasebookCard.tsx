@@ -75,7 +75,8 @@ export const PhrasebookCard: React.FC = () => {
             });
             if (response.ok) {
                 const data = await response.json();
-                setPhrases(Array.isArray(data) ? data : []);
+                const phraseList = data.phrases ?? (Array.isArray(data) ? data : []);
+                setPhrases(Array.isArray(phraseList) ? phraseList : []);
             }
         } catch (error) {
             console.error('Failed to load phrases:', error);
@@ -91,7 +92,8 @@ export const PhrasebookCard: React.FC = () => {
             });
             if (response.ok) {
                 const data = await response.json();
-                setPhrases(Array.isArray(data) ? data : []);
+                const phraseList = data.phrases ?? (Array.isArray(data) ? data : []);
+                setPhrases(Array.isArray(phraseList) ? phraseList : []);
             }
         } catch (error) {
             console.error('Failed to load phrases:', error);

@@ -72,6 +72,9 @@ export const ChatInterface = (props: {
     const [conversations, setConversations] = useState<{ id: string; topic: string }[]>([]);
     const [currentConversationId, setCurrentConversationId] = useState<string | null>(null);
     const [selection, setSelection] = useState<{ text: string, x: number, y: number } | null>(null);
+    const [showCategoryModal, setShowCategoryModal] = useState(false);
+    const [phraseToSave, setPhraseToSave] = useState<string | null>(null);
+    const [availableCategories, setAvailableCategories] = useState<string[]>([]);
     const messagesEndRef = useRef<HTMLDivElement>(null);
 
     const scrollToBottom = () => {
@@ -84,7 +87,23 @@ export const ChatInterface = (props: {
 
     useEffect(() => {
         loadConversations();
+        loadCategories();
     }, []);
+
+    const loadCategories = async () => {
+        try {
+            const token = await getToken();
+            const response = await fetch(`${props.apiBaseUrl}/phrasebook/categories`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (response.ok) {
+                const data = await response.json();
+                setAvailableCategories(data.map((cat: any) => cat.name));
+            }
+        } catch (error) {
+            console.error('Failed to load categories:', error);
+        }
+    };
 
     useEffect(() => {
         if (currentConversationId) {
@@ -231,10 +250,12 @@ export const ChatInterface = (props: {
         formData.append('audio', audioBlob, 'voice_input.webm');
         if (currentConversationId) formData.append('conversationId', currentConversationId);
 
+        setIsProcessing(true);
+
         const placeholderUserMsg: ChatMessageData = {
             type: 'user',
             sender: 'user',
-            message: 'Transcribing...',
+            message: '…wird verarbeitet',
             avatar: USER_AVATAR,
         };
         setMessages(current => [...current, placeholderUserMsg]);
@@ -251,7 +272,7 @@ export const ChatInterface = (props: {
 
             const jsonResponse = await response.json();
             setMessages(current => current.map(msg =>
-                msg.message === 'Transcribing...'
+                msg.message === '…wird verarbeitet'
                     ? { ...msg, message: jsonResponse.transcript || "Stimme war undeutlich." }
                     : msg
             ));
@@ -273,8 +294,10 @@ export const ChatInterface = (props: {
         } catch (error) {
             console.error('Submission Failed:', error);
             setMessages(current => current.map(msg =>
-                msg.message === 'Transcribing...' ? { ...msg, message: 'Transcription Failed.' } : msg
+                msg.message === '…wird verarbeitet' ? { ...msg, message: 'Transkription fehlgeschlagen.' } : msg
             ));
+        } finally {
+            setIsProcessing(false);
         }
     };
 
@@ -303,8 +326,16 @@ export const ChatInterface = (props: {
         else startRecording();
     };
 
-    const handleSavePhrase = async () => {
+    const handleSavePhrase = () => {
         if (!selection) return;
+        setPhraseToSave(selection.text);
+        setShowCategoryModal(true);
+        setSelection(null);
+        window.getSelection()?.removeAllRanges();
+    };
+
+    const savePhraseWithCategory = async (category: string) => {
+        if (!phraseToSave) return;
         try {
             const token = await getToken();
             const response = await fetch(`${props.apiBaseUrl}/phrasebook/phrases`, {
@@ -313,12 +344,16 @@ export const ChatInterface = (props: {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}`
                 },
-                body: JSON.stringify({ german: selection.text })
+                body: JSON.stringify({
+                    german: phraseToSave,
+                    category: category,
+                    context: 'Aus dem Chat gespeichert'
+                })
             });
             if (response.ok) {
-                alert('Phrase saved!');
-                setSelection(null);
-                window.getSelection()?.removeAllRanges();
+                window.dispatchEvent(new CustomEvent('phraseAdded'));
+                setShowCategoryModal(false);
+                setPhraseToSave(null);
             }
         } catch (e) {
             console.error('Failed to save phrase', e);
@@ -376,6 +411,23 @@ export const ChatInterface = (props: {
                 </div>
 
                 <div className="p-4 md:p-6 lg:p-8 bg-background-light dark:bg-background-dark border-t border-border-light dark:border-border-dark">
+                    {/* Recording / Processing status bar */}
+                    {(isRecording || isProcessing) && (
+                        <div className="flex items-center justify-center gap-2 pb-3 mx-auto max-w-3xl">
+                            {isRecording && (
+                                <>
+                                    <span className="inline-block w-2 h-2 bg-red-500 rounded-full animate-pulse" />
+                                    <span className="text-sm font-medium text-red-500">Aufnahme läuft – tippe erneut zum Stoppen</span>
+                                </>
+                            )}
+                            {isProcessing && !isRecording && (
+                                <>
+                                    <span className="material-symbols-outlined text-base text-primary animate-spin">progress_activity</span>
+                                    <span className="text-sm font-medium text-gray-500">Wird verarbeitet…</span>
+                                </>
+                            )}
+                        </div>
+                    )}
                     <div className="flex items-center gap-3 @container mx-auto max-w-3xl">
                         <div className="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-10 shrink-0 hidden sm:block"
                             style={{ backgroundImage: `url("${USER_AVATAR}")` }}>
@@ -393,16 +445,24 @@ export const ChatInterface = (props: {
                                         handleTextSubmit();
                                     }
                                 }}
-                                disabled={isProcessing}
+                                disabled={isProcessing || isRecording}
                             />
                             <div className="flex items-center justify-center pr-2">
                                 <div className="flex items-center gap-1">
                                     <button
                                         onClick={handleMicClick}
-                                        className={`flex items-center justify-center p-2 rounded-full hover:bg-primary/10 text-gray-500 dark:text-gray-400 hover:text-primary dark:hover:text-accent ${isProcessing ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                        className={`flex items-center justify-center p-2 rounded-full transition-colors ${isRecording
+                                                ? 'bg-red-100 dark:bg-red-900/30 text-red-500 hover:bg-red-200 dark:hover:bg-red-800/40'
+                                                : 'hover:bg-primary/10 text-gray-500 dark:text-gray-400 hover:text-primary dark:hover:text-accent'
+                                            } ${isProcessing ? 'opacity-50 cursor-not-allowed' : ''}`}
                                         disabled={isProcessing}
+                                        title={isRecording ? 'Aufnahme stoppen' : 'Sprachaufnahme starten'}
                                     >
-                                        <ListeningAgentIcon isListening={isRecording} size="sm" />
+                                        {isRecording ? (
+                                            <span className="material-symbols-outlined text-xl text-red-500 animate-pulse">stop_circle</span>
+                                        ) : (
+                                            <ListeningAgentIcon isListening={isRecording} size="sm" />
+                                        )}
                                     </button>
 
                                     <button
@@ -418,6 +478,46 @@ export const ChatInterface = (props: {
                     </div>
                 </div>
             </main>
+
+            {/* Category Selection Modal */}
+            {showCategoryModal && (
+                <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/50 p-4" onClick={() => { setShowCategoryModal(false); setPhraseToSave(null); }}>
+                    <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 max-w-md w-full shadow-2xl" onClick={(e) => e.stopPropagation()}>
+                        <h3 className="text-lg font-bold mb-1">Kategorie wählen</h3>
+                        <p className="text-sm text-gray-500 dark:text-gray-400 mb-4 line-clamp-2">
+                            &quot;{phraseToSave?.substring(0, 80)}{(phraseToSave?.length ?? 0) > 80 ? '...' : ''}&quot; speichern in:
+                        </p>
+                        <div className="space-y-2 max-h-60 overflow-y-auto">
+                            {availableCategories.map(cat => (
+                                <button
+                                    key={cat}
+                                    onClick={() => savePhraseWithCategory(cat)}
+                                    className="w-full p-3 text-left rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors flex items-center gap-3"
+                                >
+                                    <span className="material-symbols-outlined text-base text-primary">folder</span>
+                                    {cat}
+                                </button>
+                            ))}
+                            <button
+                                onClick={() => {
+                                    const newCat = prompt('Neue Kategorie:');
+                                    if (newCat) savePhraseWithCategory(newCat);
+                                }}
+                                className="w-full p-3 text-left rounded-lg border-2 border-dashed border-gray-300 dark:border-gray-600 hover:border-primary transition-colors flex items-center gap-3"
+                            >
+                                <span className="material-symbols-outlined text-base">add</span>
+                                Neue Kategorie erstellen
+                            </button>
+                        </div>
+                        <button
+                            onClick={() => { setShowCategoryModal(false); setPhraseToSave(null); }}
+                            className="mt-4 w-full p-2.5 bg-gray-100 dark:bg-gray-700 rounded-lg text-sm font-medium hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+                        >
+                            Abbrechen
+                        </button>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };
