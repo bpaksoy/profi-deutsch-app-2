@@ -67,12 +67,16 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ message, sender, avatarUrl, i
     return (
         <div className={`flex w-full mb-4 items-end gap-2 ${isUser ? 'justify-end' : 'justify-start'}`}>
             {!isUser && (
-                <div className="size-8 rounded-full overflow-hidden flex items-center justify-center shrink-0 border border-primary/20 shadow-sm">
-                    {avatarUrl ? (
-                         <img src={avatarUrl} alt="Flo" className="size-full object-cover" />
-                    ) : (
-                         <span className="material-symbols-outlined text-primary text-sm">smart_toy</span>
-                    )}
+                <div className="size-8 rounded-full overflow-hidden flex items-center justify-center shrink-0 border border-primary/20 shadow-sm bg-primary/10">
+                    <img 
+                        src={avatarUrl || "https://api.dicebear.com/7.x/bottts/svg?seed=Flo"} 
+                        alt="Flo" 
+                        className="size-full object-cover" 
+                        onError={(e) => {
+                            (e.target as HTMLImageElement).style.display = 'none';
+                            (e.target as HTMLImageElement).parentElement!.innerHTML = '<span class="material-symbols-outlined text-primary text-sm">smart_toy</span>';
+                        }}
+                    />
                 </div>
             )}
             
@@ -120,12 +124,16 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ message, sender, avatarUrl, i
             </div>
 
             {isUser && (
-                <div className="size-8 rounded-full overflow-hidden flex items-center justify-center shrink-0 border border-accent/20 shadow-sm bg-accent">
-                    {avatarUrl ? (
-                         <img src={avatarUrl} alt="Du" className="size-full object-cover" />
-                    ) : (
-                         <span className="material-symbols-outlined text-primary text-sm font-bold">person</span>
-                    )}
+                <div className="size-8 rounded-full overflow-hidden flex items-center justify-center shrink-0 border border-accent/20 shadow-sm bg-accent/10">
+                    <img 
+                        src={avatarUrl || "https://api.dicebear.com/7.x/notionists/svg?seed=User"} 
+                        alt="Du" 
+                        className="size-full object-cover" 
+                        onError={(e) => {
+                            (e.target as HTMLImageElement).style.display = 'none';
+                            (e.target as HTMLImageElement).parentElement!.innerHTML = '<span class="material-symbols-outlined text-primary text-sm font-bold">person</span>';
+                        }}
+                    />
                 </div>
             )}
         </div>
