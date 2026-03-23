@@ -22,7 +22,8 @@ const config: Config = {
         "border-dark": "#334155"
       },
       fontFamily: {
-        "display": ["Zain", "sans-serif"] // <--- Important for your font-display class
+        "display": ["Zain", "sans-serif"],
+        "sans": ["Zain", "sans-serif"]
       },
       borderRadius: { // <--- These were in the original HTML
         "DEFAULT": "0.5rem",

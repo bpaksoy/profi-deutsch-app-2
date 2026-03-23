@@ -85,7 +85,7 @@ export class PhrasebookController {
      * GET /phrasebook/categories — Get all categories
      */
     @Get('categories')
-    async getCategories() {
-        return this.phrasebookService.getCategories();
+    async getCategories(@GetUser() user: any) {
+        return this.phrasebookService.getCategories(user.clerkId);
     }
 }

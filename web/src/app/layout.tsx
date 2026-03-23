@@ -30,7 +30,7 @@ export default function RootLayout({
 }) {
   return (
     <ClerkProvider>
-      <html lang="de" className={`${manrope.variable} light`}>
+      <html lang="de" className="light Zain">
         <head>
           <link
             rel="stylesheet"

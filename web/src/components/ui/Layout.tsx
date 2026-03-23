@@ -11,7 +11,7 @@ import { UserButton, SignedIn, SignedOut, SignInButton, useUser } from '@clerk/n
 
 interface LayoutProps {
   children: React.ReactNode;
-  activeNav?: 'home' | 'phrases' | 'favorites' | 'internships' | 'dashboard' | 'chat' | 'profile' | 'settings' | 'history' | 'scenarios';
+  activeNav?: 'home' | 'phrases' | 'favorites' | 'internships' | 'dashboard' | 'chat' | 'settings' | 'history' | 'scenarios' | 'tipps';
 }
 
 const TopNavBar: React.FC<{ activeNav?: string }> = ({ activeNav }) => (
@@ -29,8 +29,8 @@ const TopNavBar: React.FC<{ activeNav?: string }> = ({ activeNav }) => (
       <Link href="/dashboard" className={twMerge("text-text-light dark:text-text-dark text-sm font-medium leading-normal hover:text-primary dark:hover:text-accent transition-colors", activeNav === 'dashboard' && 'text-primary dark:text-accent')}>Start</Link>
       <Link href="/phrases" className={twMerge("text-text-light dark:text-text-dark text-sm font-medium leading-normal hover:text-primary dark:hover:text-accent transition-colors", activeNav === 'phrases' && 'text-primary dark:text-accent')}>Meine Redemittel</Link>
       <Link href="/chat" className={twMerge("text-text-light dark:text-text-dark text-sm font-medium leading-normal hover:text-primary dark:hover:text-accent transition-colors", activeNav === 'chat' && 'text-primary dark:text-accent')}>Chat</Link>
-      <Link href="/profile" className={twMerge("text-text-light dark:text-text-dark text-sm font-medium leading-normal hover:text-primary dark:hover:text-accent transition-colors", activeNav === 'profile' && 'text-primary dark:text-accent')}>Profil</Link>
-      <Link href="/settings" className={twMerge("text-text-light dark:text-text-dark text-sm font-medium leading-normal hover:text-primary dark:hover:text-accent transition-colors", activeNav === 'settings' && 'text-primary dark:text-accent')}>Einstellungen</Link>
+      <Link href="/tipps" className={twMerge("text-text-light dark:text-text-dark text-sm font-medium leading-normal hover:text-primary dark:hover:text-accent transition-colors", activeNav === 'tipps' && 'text-primary dark:text-accent')}>Tipps</Link>
+      <Link href="/settings" className={twMerge("text-text-light dark:text-text-dark text-sm font-medium leading-normal hover:text-primary dark:hover:text-accent transition-colors", activeNav === 'settings' && 'text-primary dark:text-accent')}>Profil</Link>
     </nav>
     <div className="flex items-center gap-3">
       <SignedIn>

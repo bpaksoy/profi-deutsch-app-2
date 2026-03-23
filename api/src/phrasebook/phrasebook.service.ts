@@ -71,6 +71,7 @@ export class PhrasebookService {
             update: { phraseCount: { increment: 1 } },
             create: {
                 name: categoryName,
+                phraseCount: 1, // Set to 1 on create
                 slug: categoryName.toLowerCase().replace(/ /g, '-').replace(/[^\w-]+/g, ''),
             },
         });
@@ -115,12 +116,29 @@ export class PhrasebookService {
     }
 
     /**
-     * Get all categories (global).
+     * Get all categories with user-specific phrase counts.
      */
-    async getCategories() {
-        return this.prisma.category.findMany({
+    async getCategories(userId: string) {
+        // Get all categories
+        const allCategories = await this.prisma.category.findMany({
             orderBy: { name: 'asc' },
         });
+
+        // Get user-specific phrase counts
+        const userCounts = await this.prisma.phrase.groupBy({
+            by: ['category'],
+            where: { userId },
+            _count: {
+                _all: true,
+            },
+        });
+
+        const countMap = new Map(userCounts.map(c => [c.category, c._count._all]));
+
+        return allCategories.map(cat => ({
+            ...cat,
+            phraseCount: countMap.get(cat.name) || 0, // Override with user count
+        }));
     }
 
     /**

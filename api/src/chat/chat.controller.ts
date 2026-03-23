@@ -1,4 +1,4 @@
-import { Controller, Get, Query, Res, InternalServerErrorException, Header, Logger, Post, UseInterceptors, UploadedFile, Body, Session, Param, UseGuards } from '@nestjs/common';
+import { Controller, Get, Query, Res, InternalServerErrorException, Header, Logger, Post, Patch, Delete, UseInterceptors, UploadedFile, Body, Session, Param, UseGuards } from '@nestjs/common';
 import { Response } from 'express';
 import { ClerkAuthGuard } from '../auth/clerk-auth.guard';
 import { GetUser } from '../auth/get-user.decorator';
@@ -166,7 +166,24 @@ export class ChatController {
 
   @Post('conversations')
   async createConversation(@GetUser() user: any) {
-    return this.conversationService.createConversation(user.clerkId, 'New Chat');
+    return this.conversationService.createConversation(user.clerkId, 'Neues Gespräch');
+  }
+
+  @Patch('conversations/:id')
+  async updateConversation(
+    @Param('id') id: string,
+    @Body() body: { topic: string },
+    @GetUser() user: any
+  ) {
+    return this.conversationService.updateConversation(id, user.clerkId, body.topic);
+  }
+
+  @Delete('conversations/:id')
+  async deleteConversation(
+    @Param('id') id: string,
+    @GetUser() user: any
+  ) {
+    return this.conversationService.deleteConversation(id, user.clerkId);
   }
 
   @Get('test-gemini')

@@ -164,9 +164,9 @@ export const PhrasebookCard: React.FC = () => {
                             </button>
                         ))}
                     </div>
-                    <div className="relative">
+                    <div className="relative w-full sm:w-64">
                         <input
-                            className="w-full sm:w-auto pl-10 pr-4 py-2 rounded-full bg-accent/10 dark:bg-background-dark border border-border-light dark:border-border-dark focus:ring-2 focus:ring-primary/50 focus:border-primary outline-none transition-all"
+                            className="w-full pl-10 pr-4 py-2 rounded-full bg-accent/10 dark:bg-background-dark border border-border-light dark:border-border-dark focus:ring-2 focus:ring-primary/50 focus:border-primary outline-none transition-all"
                             placeholder="Redemittel suchen..."
                             type="text"
                             value={searchQuery}

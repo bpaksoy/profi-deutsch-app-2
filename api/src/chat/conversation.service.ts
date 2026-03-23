@@ -51,4 +51,31 @@ export class ConversationService {
             where: { id }
         });
     }
+
+    async updateConversation(id: string, userId: string, topic: string) {
+        const conv = await this.prisma.conversation.findFirst({
+            where: { id, userId }
+        });
+        if (!conv) throw new Error('Conversation not found or access denied');
+        
+        return this.prisma.conversation.update({
+            where: { id },
+            data: { topic }
+        });
+    }
+
+    async deleteConversation(id: string, userId: string) {
+        const conv = await this.prisma.conversation.findFirst({
+            where: { id, userId }
+        });
+        if (!conv) throw new Error('Conversation not found or access denied');
+
+        // First delete all messages
+        await this.prisma.message.deleteMany({
+            where: { conversationId: id }
+        });
+        return this.prisma.conversation.delete({
+            where: { id }
+        });
+    }
 }

@@ -16,6 +16,7 @@ interface ChatMessageData {
     message: string;
     avatar: string;
     isTyping?: boolean;
+    timestamp?: string;
 }
 
 const useAudioRecorder = (submitCallback: (blob: Blob) => Promise<void>) => {
@@ -145,7 +146,11 @@ export const ChatInterface = (props: {
             });
             if (res.ok) {
                 const data = await res.json();
-                setConversations(data);
+                setConversations(data.map((c: any) => ({
+                    id: c.id,
+                    topic: c.topic,
+                    createdAt: c.createdAt
+                })));
             }
         } catch (e) {
             console.error("Failed to load conversations", e);
@@ -164,12 +169,51 @@ export const ChatInterface = (props: {
                     type: m.role === 'assistant' ? 'ai' : 'user',
                     sender: m.role === 'assistant' ? 'bot' : 'user',
                     message: m.content,
-                    avatar: m.role === 'assistant' ? AI_AVATAR : USER_AVATAR
+                    avatar: m.role === 'assistant' ? AI_AVATAR : USER_AVATAR,
+                    timestamp: m.timestamp
                 }));
                 setMessages(formattedMessages);
             }
         } catch (e) {
             console.error("Failed to load messages", e);
+        }
+    };
+
+    const handleDeleteConversation = async (id: string) => {
+        try {
+            const token = await getToken();
+            const res = await fetch(`${props.apiBaseUrl}/chat/conversations/${id}`, {
+                method: 'DELETE',
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (res.ok) {
+                if (currentConversationId === id) {
+                    setCurrentConversationId(null);
+                    setMessages([]);
+                }
+                loadConversations();
+            }
+        } catch (e) {
+            console.error("Failed to delete conversation", e);
+        }
+    };
+
+    const handleRenameConversation = async (id: string, newTopic: string) => {
+        try {
+            const token = await getToken();
+            const res = await fetch(`${props.apiBaseUrl}/chat/conversations/${id}`, {
+                method: 'PATCH',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ topic: newTopic })
+            });
+            if (res.ok) {
+                loadConversations();
+            }
+        } catch (e) {
+            console.error("Failed to rename conversation", e);
         }
     };
 
@@ -182,9 +226,9 @@ export const ChatInterface = (props: {
             });
             if (res.ok) {
                 const newConv = await res.json();
-                setConversations(prev => [newConv, ...prev]);
+                setConversations(prev => [{ id: newConv.id, topic: newConv.topic, createdAt: newConv.createdAt }, ...prev]);
                 setCurrentConversationId(newConv.id);
-                setMessages([{ type: 'ai', sender: 'bot', message: 'Hallo! Worüber möchtest du sprechen?', avatar: AI_AVATAR }]);
+                setMessages([{ type: 'ai', sender: 'bot', message: 'Hallo! Worüber möchtest du sprechen?', avatar: AI_AVATAR, timestamp: new Date().toISOString() }]);
             }
         } catch (e) {
             console.error("Failed to create new chat", e);
@@ -203,6 +247,7 @@ export const ChatInterface = (props: {
             sender: 'user',
             message: userMessage,
             avatar: USER_AVATAR,
+            timestamp: new Date().toISOString()
         };
         setMessages(current => [...current, newUserMsg]);
 
@@ -228,7 +273,8 @@ export const ChatInterface = (props: {
                 sender: 'bot',
                 message: jsonResponse.responseText || "Entschuldigung, ich konnte keine Antwort generieren.",
                 avatar: AI_AVATAR,
-                isTyping: false
+                isTyping: false,
+                timestamp: new Date().toISOString()
             };
 
             setMessages(current => [...current, aiMessage]);
@@ -282,7 +328,8 @@ export const ChatInterface = (props: {
                 sender: 'bot',
                 message: jsonResponse.responseText || "Entschuldigung, ich konnte keine Antwort generieren.",
                 avatar: AI_AVATAR,
-                isTyping: false
+                isTyping: false,
+                timestamp: new Date().toISOString()
             };
             setMessages(current => [...current, aiMessage]);
 
@@ -378,12 +425,12 @@ export const ChatInterface = (props: {
             )}
 
             <ChatSidebar
-                username={props.username}
-                userAvatar={USER_AVATAR}
                 conversations={conversations}
                 activeConversationId={currentConversationId || undefined}
                 onSelectConversation={setCurrentConversationId}
                 onNewChat={handleNewChat}
+                onDeleteConversation={handleDeleteConversation}
+                onRenameConversation={handleRenameConversation}
             />
 
             <main className="flex flex-1 flex-col">
@@ -404,39 +451,65 @@ export const ChatInterface = (props: {
                                 message={msg.message}
                                 avatarUrl={msg.avatar}
                                 isTyping={msg.isTyping ?? false}
+                                timestamp={msg.timestamp}
                             />
                         ))}
                         <div ref={messagesEndRef} />
                     </div>
                 </div>
 
-                <div className="p-4 md:p-6 lg:p-8 bg-background-light dark:bg-background-dark border-t border-border-light dark:border-border-dark">
-                    {/* Recording / Processing status bar */}
-                    {(isRecording || isProcessing) && (
-                        <div className="flex items-center justify-center gap-2 pb-3 mx-auto max-w-3xl">
-                            {isRecording && (
-                                <>
-                                    <span className="inline-block w-2 h-2 bg-red-500 rounded-full animate-pulse" />
-                                    <span className="text-sm font-medium text-red-500">Aufnahme läuft – tippe erneut zum Stoppen</span>
-                                </>
-                            )}
-                            {isProcessing && !isRecording && (
-                                <>
-                                    <span className="material-symbols-outlined text-base text-primary animate-spin">progress_activity</span>
-                                    <span className="text-sm font-medium text-gray-500">Wird verarbeitet…</span>
-                                </>
-                            )}
-                        </div>
-                    )}
-                    <div className="flex items-center gap-3 @container mx-auto max-w-3xl">
-                        <div className="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-10 shrink-0 hidden sm:block"
+                <div className="p-4 md:p-6 lg:p-8 bg-background-light dark:bg-background-dark border-t border-border-light dark:border-border-dark flex flex-col items-center gap-6">
+                    {/* ISOLATED MIC (Dedicated Voice Area) - FAVOURED FUNCTIONALITY */}
+                    <div className="flex flex-col items-center gap-2">
+                        <button
+                            onClick={handleMicClick}
+                            disabled={isProcessing}
+                            className={`group relative size-20 rounded-full flex items-center justify-center transition-all duration-300 shadow-xl
+                                ${isRecording 
+                                    ? 'bg-red-500 scale-110 shadow-red-500/40 ring-4 ring-red-500/20' 
+                                    : 'bg-primary hover:bg-primary/90 shadow-primary/30'
+                                } ${isProcessing ? 'opacity-50 cursor-wait' : 'cursor-pointer'}`}
+                        >
+                             {isRecording ? (
+                                <span className="material-symbols-outlined text-4xl text-white animate-pulse">stop</span>
+                             ) : (
+                                <ListeningAgentIcon isListening={isRecording} size="lg" />
+                             )}
+                             
+                             {/* Label for Mic */}
+                             <div className="absolute -top-8 left-1/2 -translate-x-1/2 whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity bg-black text-white text-[10px] px-2 py-1 rounded">
+                                 Sprechen & Hören
+                             </div>
+                        </button>
+                        
+                        {(isRecording || isProcessing) && (
+                            <div className="flex items-center justify-center gap-2 pt-1">
+                                {isRecording && (
+                                    <>
+                                        <span className="inline-block w-2 h-2 bg-red-500 rounded-full animate-pulse" />
+                                        <span className="text-sm font-bold text-red-500">Ich höre dir zu...</span>
+                                    </>
+                                )}
+                                {isProcessing && !isRecording && (
+                                    <>
+                                        <span className="material-symbols-outlined text-base text-primary animate-spin">progress_activity</span>
+                                        <span className="text-sm font-medium text-gray-500">Ich überlege...</span>
+                                    </>
+                                )}
+                            </div>
+                        )}
+                    </div>
+
+                    {/* TYPING BOX (Isolated functionality) */}
+                    <div className="flex items-center gap-3 w-full max-w-3xl">
+                        <div className="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-8 shrink-0 hidden sm:block opacity-70"
                             style={{ backgroundImage: `url("${USER_AVATAR}")` }}>
                         </div>
 
-                        <div className="flex w-full flex-1 items-stretch rounded-xl h-12 bg-gray-100 dark:bg-gray-800">
+                        <div className="flex w-full flex-1 items-stretch rounded-2xl h-11 bg-gray-100 dark:bg-gray-800 border-2 border-transparent focus-within:border-primary/20 transition-all">
                             <input
-                                className="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-xl text-text-light dark:text-text-dark focus:outline-0 focus:ring-2 focus:ring-primary/50 border-none bg-transparent h-full placeholder:text-gray-500 dark:placeholder:text-gray-400 px-4 text-base font-normal leading-normal"
-                                placeholder="Tippe eine Nachricht oder nutze das Mikro..."
+                                className="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-2xl text-text-light dark:text-text-dark focus:outline-0 border-none bg-transparent h-full placeholder:text-gray-500 dark:placeholder:text-gray-400 px-4 text-sm font-normal leading-normal"
+                                placeholder={isRecording ? "Warte, ich höre dir gerade zu..." : "Oder hier tippen..."}
                                 value={textInput}
                                 onChange={(e) => setTextInput(e.target.value)}
                                 onKeyDown={(e) => {
@@ -448,31 +521,13 @@ export const ChatInterface = (props: {
                                 disabled={isProcessing || isRecording}
                             />
                             <div className="flex items-center justify-center pr-2">
-                                <div className="flex items-center gap-1">
-                                    <button
-                                        onClick={handleMicClick}
-                                        className={`flex items-center justify-center p-2 rounded-full transition-colors ${isRecording
-                                                ? 'bg-red-100 dark:bg-red-900/30 text-red-500 hover:bg-red-200 dark:hover:bg-red-800/40'
-                                                : 'hover:bg-primary/10 text-gray-500 dark:text-gray-400 hover:text-primary dark:hover:text-accent'
-                                            } ${isProcessing ? 'opacity-50 cursor-not-allowed' : ''}`}
-                                        disabled={isProcessing}
-                                        title={isRecording ? 'Aufnahme stoppen' : 'Sprachaufnahme starten'}
-                                    >
-                                        {isRecording ? (
-                                            <span className="material-symbols-outlined text-xl text-red-500 animate-pulse">stop_circle</span>
-                                        ) : (
-                                            <ListeningAgentIcon isListening={isRecording} size="sm" />
-                                        )}
-                                    </button>
-
-                                    <button
-                                        onClick={handleTextSubmit}
-                                        className={`flex items-center justify-center p-2 rounded-full hover:bg-primary/10 text-gray-500 dark:text-gray-400 hover:text-primary dark:hover:text-accent ${(!textInput.trim() || isProcessing) ? 'opacity-50 cursor-not-allowed' : ''}`}
-                                        disabled={!textInput.trim() || isProcessing}
-                                    >
-                                        <span className="material-symbols-outlined text-lg">send</span>
-                                    </button>
-                                </div>
+                                <button
+                                    onClick={handleTextSubmit}
+                                    className={`flex items-center justify-center p-2 rounded-full hover:bg-primary/10 text-gray-400 hover:text-primary transition-colors ${(!textInput.trim() || isProcessing || isRecording) ? 'opacity-30 cursor-not-allowed' : ''}`}
+                                    disabled={!textInput.trim() || isProcessing || isRecording}
+                                >
+                                    <span className="material-symbols-outlined text-xl">send</span>
+                                </button>
                             </div>
                         </div>
                     </div>
