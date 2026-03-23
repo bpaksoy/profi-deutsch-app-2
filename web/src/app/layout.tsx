@@ -12,16 +12,7 @@ const manrope = Manrope({
   variable: '--font-display',
 });
 
-export const metadata: Metadata = {
-  title: 'Sigsag',
-  description: 'Sprachassistent zum Deutschlernen für Erwachsene mit B2-Kenntnissen',
-  icons: {
-    icon: '/icon.svg',
-  },
-  other: {
-    google: 'notranslate',
-  },
-};
+import { Providers } from '../components/Providers';
 
 export default function RootLayout({
   children,
@@ -29,21 +20,19 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <ClerkProvider>
-      <html lang="de" className="light Zain">
-        <head>
-          <link
-            rel="stylesheet"
-            href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
-          />
-        </head>
-        <body className="font-display bg-background-light dark:bg-background-dark text-text-light dark:text-text-dark">
-          <CustomLayout>
-            {children}
-          </CustomLayout>
-
-        </body>
-      </html>
-    </ClerkProvider>
+    <html lang="de" className="light Zain overflow-x-hidden">
+      <head>
+        <title>Sigsag | Profi-Deutsch Trainer</title>
+        <link
+          rel="stylesheet"
+          href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
+        />
+      </head>
+      <body className="font-sans bg-background-light dark:bg-background-dark text-text-light dark:text-text-dark">
+        <Providers>
+          <CustomLayout>{children}</CustomLayout>
+        </Providers>
+      </body>
+    </html>
   );
 }

@@ -9,6 +9,11 @@ import { PhraseSidebar } from './PhraseSidebar';
 import { Footer } from './Footer';
 import { UserButton, SignedIn, SignedOut, SignInButton, useUser } from '@clerk/nextjs';
 
+const SignedInAny = SignedIn as any;
+const SignedOutAny = SignedOut as any;
+const UserButtonAny = UserButton as any;
+const SignInButtonAny = SignInButton as any;
+
 interface LayoutProps {
   children: React.ReactNode;
   activeNav?: 'home' | 'phrases' | 'favorites' | 'internships' | 'dashboard' | 'chat' | 'settings' | 'history' | 'scenarios' | 'tipps';
@@ -33,14 +38,14 @@ const TopNavBar: React.FC<{ activeNav?: string }> = ({ activeNav }) => (
       <Link href="/settings" className={twMerge("text-text-light dark:text-text-dark text-sm font-medium leading-normal hover:text-primary dark:hover:text-accent transition-colors", activeNav === 'settings' && 'text-primary dark:text-accent')}>Profil</Link>
     </nav>
     <div className="flex items-center gap-3">
-      <SignedIn>
-        <UserButton afterSignOutUrl="/" />
-      </SignedIn>
-      <SignedOut>
-        <SignInButton mode="modal">
+      <SignedInAny>
+        <UserButtonAny afterSignOutUrl="/" />
+      </SignedInAny>
+      <SignedOutAny>
+        <SignInButtonAny mode="modal">
           <button className="text-sm font-medium text-primary hover:underline">Anmelden</button>
-        </SignInButton>
-      </SignedOut>
+        </SignInButtonAny>
+      </SignedOutAny>
       <button className="sm:hidden p-2 rounded-md text-text-light dark:text-text-dark hover:bg-gray-100 dark:hover:bg-gray-800">
         <span className="material-symbols-outlined">menu</span>
       </button>
@@ -56,8 +61,8 @@ const Sidebar: React.FC<{ activeNav?: string; user: any }> = ({ activeNav, user 
       <div className="flex flex-col gap-4">
         <div className="flex gap-3 items-center">
           <div className="flex gap-3 items-center">
-            <SignedIn>
-              <UserButton />
+            <SignedInAny>
+              <UserButtonAny />
               <div className="flex flex-col">
                 <h1 className="text-text-light dark:text-text-dark text-base font-medium leading-normal">
                   {user?.firstName || 'Entdecker'}
@@ -66,7 +71,7 @@ const Sidebar: React.FC<{ activeNav?: string; user: any }> = ({ activeNav, user 
                   Konto
                 </p>
               </div>
-            </SignedIn>
+            </SignedInAny>
           </div>
         </div>
         <div className="flex flex-col gap-2 mt-4">
