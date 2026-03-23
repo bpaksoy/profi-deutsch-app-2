@@ -10,7 +10,7 @@ const PLANS = [
     {
         id: 'CLASSIC',
         name: 'Classic',
-        price: 'XX €', // Placeholder
+        price: '30 €',
         period: 'pro Monat',
         features: [
             '5 Stunden Konversation mit Flo',
@@ -25,7 +25,7 @@ const PLANS = [
     {
         id: 'PRO',
         name: 'Pro',
-        price: 'XX €',
+        price: '60 €',
         period: 'pro Monat',
         features: [
             'Alle Classic-Features',
