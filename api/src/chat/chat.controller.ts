@@ -1,4 +1,5 @@
-import { Controller, Get, Query, Res, InternalServerErrorException, Header, Logger, Post, Patch, Delete, UseInterceptors, UploadedFile, Body, Session, Param, UseGuards } from '@nestjs/common';
+import { Controller, Get, Query, Res, InternalServerErrorException, Header, Logger, Post, Patch, Delete, UseInterceptors, UploadedFile, Body, Session, Param, UseGuards, ForbiddenException } from '@nestjs/common';
+
 import { Response } from 'express';
 import { ClerkAuthGuard } from '../auth/clerk-auth.guard';
 import { GetUser } from '../auth/get-user.decorator';
@@ -55,8 +56,18 @@ export class ChatController {
     @Session() session: Record<string, any>,
     @GetUser() user: any
   ) {
-    this.logger.log(`Received audio file of size: ${file.size} from user ${user.clerkId}`);
     const userId = user.clerkId;
+    
+    // Usage limits check
+    const dbUser = await this.conversationService.validateUserPlan(userId);
+    const progress = await this.progressService.getUserProgress(userId);
+    const LIMIT = 20;
+
+    if (dbUser.planTier === 'FREE' && progress.conversationCount >= LIMIT) {
+      throw new InternalServerErrorException(`Limit reached. Please upgrade to a paid plan to continue chatting with Flo. ${process.env.FRONTEND_URL}/pricing`);
+    }
+
+    this.logger.log(`Received audio file of size: ${file.size} from user ${userId}`);
 
     let conversationId = body.conversationId || session.conversationId;
 
@@ -83,6 +94,8 @@ export class ChatController {
     }
     const audioBuffer = Buffer.concat(audioChunks);
 
+    await this.progressService.trackActivity(userId, 'message', 1);
+
     return {
       transcript: transcription,
       responseText: ragObject.responseText,
@@ -99,6 +112,17 @@ export class ChatController {
   ) {
     const { message } = body;
     const userId = user.clerkId;
+
+    // Usage limits check
+    const dbUser = await this.conversationService.validateUserPlan(userId);
+    const progress = await this.progressService.getUserProgress(userId);
+    const LIMIT = 20;
+
+    if (dbUser.planTier === 'FREE' && progress.conversationCount >= LIMIT) {
+      // Throw 403 Forbidden via InternalServerError (or better)
+      throw new InternalServerErrorException(`Nutzungsgrenze erreicht. Bitte upgrade deinen Plan für unbegrenzte Chats! ${process.env.FRONTEND_URL}/pricing`);
+    }
+
     this.logger.log(`Received text message from ${userId}: ${message} `);
 
     if (!message || message.trim() === '') {

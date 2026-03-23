@@ -263,6 +263,18 @@ export const ChatInterface = (props: {
                 }),
             });
 
+            if (response.status === 403) {
+                setMessages(current => [...current, {
+                    type: 'ai',
+                    sender: 'bot',
+                    message: 'Limit erreicht! 🛑 Du hast deine Gratis-Nachrichten für heute aufgebraucht. Upgrade auf Classic oder Pro, um unbegrenzt mit Flo zu sprechen!',
+                    avatar: props.aiAvatarUrl,
+                    timestamp: new Date().toISOString()
+                }]);
+                setIsProcessing(false);
+                return;
+            }
+
             if (!response.ok) throw new Error('Backend failed to respond.');
 
             const jsonResponse = await response.json();

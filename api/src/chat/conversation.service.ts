@@ -78,4 +78,12 @@ export class ConversationService {
             where: { id }
         });
     }
+    async validateUserPlan(clerkId: string) {
+        const user = await this.prisma.user.findUnique({
+            where: { clerkId },
+            select: { planTier: true }
+        });
+        if (!user) throw new Error('User not found in DB');
+        return user;
+    }
 }
