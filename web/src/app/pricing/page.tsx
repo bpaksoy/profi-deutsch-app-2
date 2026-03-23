@@ -167,8 +167,27 @@ export default function PricingPage() {
                     ))}
                 </div>
 
-                <div className="mt-20 text-center max-w-2xl mx-auto font-light text-gray-500">
-                    <p>Sigsag ist dein Partner für berufliche Weiterentwicklung. Alle Preise inkl. Support.</p>
+                <div className="mt-24 p-10 bg-primary/5 rounded-[2.5rem] border border-primary/10 text-center shadow-inner">
+                    <h2 className="text-2xl font-black mb-2 text-primary">Noch Fragen?</h2>
+                    <p className="text-gray-600 dark:text-gray-400 mb-8 font-light max-w-lg mx-auto">
+                        Wir beraten dich gerne beim Enterprise-Paket oder beantworten technische Fragen.
+                    </p>
+                    <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+                        <button 
+                            onClick={() => window.location.href = '/tipps'}
+                            className="w-full sm:w-auto bg-primary text-white px-10 py-4 rounded-2xl font-bold hover:bg-primary/90 transition-all shadow-xl shadow-primary/20 active:scale-95 flex items-center justify-center gap-2"
+                        >
+                            <span className="material-symbols-outlined">help_outline</span>
+                            Alle FAQs ansehen
+                        </button>
+                        <a 
+                            href="mailto:support@sigsag.de?subject=Preisanfrage Sigsag"
+                            className="w-full sm:w-auto bg-white dark:bg-card-dark text-text-light dark:text-text-dark border-2 border-border-light dark:border-border-dark px-10 py-4 rounded-2xl font-bold hover:bg-gray-50 dark:hover:bg-gray-800 transition-all active:scale-95 flex items-center justify-center gap-2"
+                        >
+                            <span className="material-symbols-outlined">mail</span>
+                            Kontakt aufnehmen
+                        </a>
+                    </div>
                 </div>
             </div>
         </div>

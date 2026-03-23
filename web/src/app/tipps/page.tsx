@@ -85,16 +85,27 @@ export default function TippsPage() {
                     ))}
                 </div>
 
-                <footer className="mt-16 p-8 bg-primary/5 rounded-3xl border border-primary/10 text-center">
-                    <h2 className="text-2xl font-bold mb-2">Noch Fragen?</h2>
-                    <p className="text-gray-600 dark:text-gray-400 mb-6 font-light">
-                        Schreib Flo einfach direkt im Chat oder schau in die Einstellungen für Support.
+                <footer className="mt-16 p-10 bg-primary/5 rounded-[2.5rem] border border-primary/10 text-center shadow-inner">
+                    <h2 className="text-2xl font-black mb-2 text-primary">Noch Fragen?</h2>
+                    <p className="text-gray-600 dark:text-gray-400 mb-8 font-light max-w-lg mx-auto">
+                        Schreib Flo einfach direkt im Chat oder sende uns eine E-Mail, wenn du technische Probleme hast oder Feedback geben möchtest.
                     </p>
-                    <button 
-                        className="bg-primary text-white px-8 py-3 rounded-full font-bold hover:bg-primary/90 transition-all shadow-lg shadow-primary/20"
-                    >
-                        Jetzt loslegen
-                    </button>
+                    <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+                        <button 
+                            onClick={() => window.location.href = '/chat'}
+                            className="w-full sm:w-auto bg-primary text-white px-10 py-4 rounded-2xl font-bold hover:bg-primary/90 transition-all shadow-xl shadow-primary/20 active:scale-95 flex items-center justify-center gap-2"
+                        >
+                            <span className="material-symbols-outlined">chat_bubble</span>
+                            Jetzt loslegen
+                        </button>
+                        <a 
+                            href="mailto:support@sigsag.de?subject=Anfrage von Sigsag Tipps"
+                            className="w-full sm:w-auto bg-white dark:bg-card-dark text-text-light dark:text-text-dark border-2 border-border-light dark:border-border-dark px-10 py-4 rounded-2xl font-bold hover:bg-gray-50 dark:hover:bg-gray-800 transition-all active:scale-95 flex items-center justify-center gap-2"
+                        >
+                            <span className="material-symbols-outlined">mail</span>
+                            Support kontaktieren
+                        </a>
+                    </div>
                 </footer>
             </div>
         </div>
