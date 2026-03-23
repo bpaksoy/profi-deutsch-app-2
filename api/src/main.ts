@@ -45,7 +45,7 @@ async function bootstrap() {
   await killIfBusy(port);
 
   // Create the NestJS app
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create(AppModule, { rawBody: true });
 
   // Enable CORS for your Next.js frontend
   // Enable CORS for your Next.js frontend

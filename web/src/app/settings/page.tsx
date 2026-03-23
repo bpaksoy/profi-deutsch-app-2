@@ -5,6 +5,8 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useUser, useClerk, useAuth } from '@clerk/nextjs';
 import { twMerge } from 'tailwind-merge';
 
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
+
 type ThemeMode = 'light' | 'dark' | 'system';
 type VoiceOption = 'male' | 'female' | 'neutral';
 
@@ -41,7 +43,11 @@ export default function SettingsPage() {
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
 
   // Active sidebar section
-  const [activeSection, setActiveSection] = useState<'profile' | 'preferences' | 'danger-zone'>('profile');
+  const [activeSection, setActiveSection] = useState<'profile' | 'preferences' | 'subscription' | 'danger-zone'>('profile');
+
+  // Subscription state
+  const [subStatus, setSubStatus] = useState<{ planTier: string; isActive: boolean; stripeCurrentPeriodEnd: string } | null>(null);
+  const [portalLoading, setPortalLoading] = useState(false);
 
   // Load user data from Clerk
   useEffect(() => {
@@ -66,6 +72,28 @@ export default function SettingsPage() {
       applyTheme(savedTheme);
     }
   }, []);
+
+  // Fetch subscription status
+  useEffect(() => {
+    if (isLoaded && user) {
+      const fetchStatus = async () => {
+        try {
+          const token = await getToken();
+          const response = await fetch(`${API_BASE_URL}/payments/status`, {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${token}` }
+          });
+          if (response.ok) {
+            const data = await response.json();
+            setSubStatus(data);
+          }
+        } catch (e) {
+          console.error("Failed to load sub status", e);
+        }
+      };
+      fetchStatus();
+    }
+  }, [isLoaded, user, getToken]);
 
   // Intersection Observer for sidebar highlighting
   useEffect(() => {
@@ -175,6 +203,27 @@ export default function SettingsPage() {
     }
   };
 
+  const handlePortalSession = async () => {
+    setPortalLoading(true);
+    try {
+      const token = await getToken();
+      const response = await fetch(`${API_BASE_URL}/payments/create-portal-session`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (response.ok) {
+        const { url } = await response.json();
+        window.location.href = url;
+      } else {
+        showToast('Stripe Portal konnte nicht geladen werden.', 'error');
+      }
+    } catch (err) {
+      showToast('Aktion fehlgeschlagen.', 'error');
+    } finally {
+      setPortalLoading(false);
+    }
+  };
+
   // Input style helper
   const inputClass = twMerge(
     "form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg",
@@ -195,6 +244,7 @@ export default function SettingsPage() {
   const sidebarItems = [
     { name: 'Profil', icon: 'person', section: 'profile' },
     { name: 'Einstellungen', icon: 'tune', section: 'preferences' },
+    { name: 'Abonnement', icon: 'credit_card', section: 'subscription' },
     { name: 'Gefahrenzone', icon: 'warning', section: 'danger-zone' },
   ];
 
@@ -523,6 +573,53 @@ export default function SettingsPage() {
                         'Einstellungen speichern'
                       )}
                     </button>
+                  </div>
+                </div>
+              </section>
+
+              {/* ========== SUBSCRIPTION SECTION ========== */}
+              <section id="subscription">
+                <div className="flex flex-wrap justify-between gap-3 p-4">
+                  <h2 className="text-text-light dark:text-text-dark text-3xl font-bold leading-tight tracking-[-0.033em]">Abonnement & Zahlungen</h2>
+                </div>
+                <div className="bg-card-light dark:bg-card-dark/50 rounded-xl border border-border-light dark:border-border-dark p-6 space-y-6">
+                  <div className="flex flex-col sm:flex-row items-center gap-6 justify-between">
+                    <div className="flex items-center gap-6">
+                      <div className="bg-primary/10 dark:bg-primary/20 p-5 rounded-2xl">
+                          <span className="material-symbols-outlined text-4xl text-primary">redeem</span>
+                      </div>
+                      <div className="space-y-1">
+                        <p className="text-text-light dark:text-text-dark text-lg font-bold">
+                           Aktueller Plan: {subStatus?.planTier?.toUpperCase() || 'FREE'}
+                        </p>
+                        <p className="text-gray-500 dark:text-gray-400 text-sm">
+                           {subStatus?.isActive 
+                             ? (subStatus.stripeCurrentPeriodEnd 
+                                ? `Nächste Abrechnung: ${new Date(subStatus.stripeCurrentPeriodEnd).toLocaleDateString('de-DE')}`
+                                : 'Abonnement aktiv')
+                             : 'Du nutzt derzeit die kostenlose Testversion.'}
+                        </p>
+                      </div>
+                    </div>
+                    
+                    {!subStatus?.isActive ? (
+                       <button
+                         onClick={() => window.location.href = '/pricing'}
+                         className="w-full sm:w-auto px-6 h-12 bg-primary text-white rounded-lg font-bold hover:bg-primary/90 transition-all shadow-lg active:scale-95"
+                       >
+                         Upgrade auf Classic
+                       </button>
+                    ) : (
+                      <button
+                        onClick={handlePortalSession}
+                        disabled={portalLoading}
+                        className="w-full sm:w-auto px-6 h-12 bg-border-light dark:bg-border-dark text-text-light dark:text-text-dark rounded-lg font-bold hover:bg-gray-200 dark:hover:bg-slate-700 flex items-center justify-center gap-2"
+                      >
+                         {portalLoading && <span className="material-symbols-outlined text-base animate-spin">progress_activity</span>}
+                         Abonnement verwalten 
+                         <span className="material-symbols-outlined text-sm">open_in_new</span>
+                      </button>
+                    )}
                   </div>
                 </div>
               </section>

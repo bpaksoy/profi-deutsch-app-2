@@ -8,15 +8,23 @@ datasource db {
 }
 
 model User {
-  id            String         @id @default(uuid())
-  clerkId       String         @unique
-  email         String         @unique
-  name          String?
-  createdAt     DateTime       @default(now())
-  updatedAt     DateTime       @updatedAt
-  conversations Conversation[]
-  phrasebook    Phrase[]
-  progress      Progress?
+  id                     String         @id @default(uuid())
+  clerkId                String         @unique
+  email                  String         @unique
+  name                   String?
+  createdAt              DateTime       @default(now())
+  updatedAt              DateTime       @updatedAt
+  conversations          Conversation[]
+  phrasebook             Phrase[]
+  progress               Progress?
+  
+  // Payment & Subscription
+  stripeCustomerId       String?   @unique
+  stripeSubscriptionId   String?   @unique
+  stripePriceId          String?
+  stripeCurrentPeriodEnd DateTime?
+  isActive               Boolean   @default(false)
+  planTier               String    @default("FREE") // "FREE", "PRO", "ULTIMATE"
 }
 
 model Conversation {

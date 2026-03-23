@@ -1,0 +1,39 @@
+import { Controller, Post, Body, Req, UseGuards, Headers, RawBodyRequest } from '@nestjs/common';
+import { PaymentsService } from './payments.service';
+import { ClerkAuthGuard } from '../auth/clerk-auth.guard';
+import { GetUser } from '../auth/get-user.decorator';
+
+@Controller('payments')
+export class PaymentsController {
+    constructor(private readonly paymentsService: PaymentsService) {}
+
+    @Post('create-checkout-session')
+    @UseGuards(ClerkAuthGuard)
+    async createCheckoutSession(
+        @GetUser() user: any,
+        @Body('plan') plan: 'PRO' | 'ULTIMATE'
+    ) {
+        return this.paymentsService.createCheckoutSession(user.id, plan);
+    }
+
+    @Post('create-portal-session')
+    @UseGuards(ClerkAuthGuard)
+    async createPortalSession(@GetUser() user: any) {
+        return this.paymentsService.createPortalSession(user.id);
+    }
+
+    @Post('status') // Changed to Post for consistency with our GetUser decorator or use Get
+    @UseGuards(ClerkAuthGuard)
+    async getStatus(@GetUser() user: any) {
+        return this.paymentsService.getSubscriptionStatus(user.id);
+    }
+
+    @Post('webhook')
+    async handleWebhook(
+        @Headers('stripe-signature') signature: string,
+        @Req() req: RawBodyRequest<Request>
+    ) {
+        // Stripe requires the raw body for signature verification
+        return this.paymentsService.handleWebhook(signature, (req as any).rawBody);
+    }
+}

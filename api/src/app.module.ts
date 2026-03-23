@@ -6,6 +6,7 @@ import { PhrasebookModule } from './phrasebook/phrasebook.module';
 import { ProgressModule } from './progress/progress.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { AuthModule } from './auth/auth.module';
+import { PaymentsModule } from './payments/payments.module';
 
 
 @Module({
@@ -20,6 +21,7 @@ import { AuthModule } from './auth/auth.module';
     PhrasebookModule,
     ProgressModule,
     PrismaModule,
+    PaymentsModule,
   ],
   controllers: [],
   providers: [],
