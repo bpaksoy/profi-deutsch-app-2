@@ -11,7 +11,7 @@ export class PaymentsController {
     @UseGuards(ClerkAuthGuard)
     async createCheckoutSession(
         @GetUser() user: any,
-        @Body('plan') plan: 'PRO' | 'ULTIMATE'
+        @Body('plan') plan: 'CLASSIC' | 'PRO' | 'ULTIMATE'
     ) {
         return this.paymentsService.createCheckoutSession(user.id, plan);
     }

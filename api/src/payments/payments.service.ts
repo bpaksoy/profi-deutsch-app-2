@@ -21,22 +21,28 @@ export class PaymentsService {
         });
     }
 
-    async createCheckoutSession(clerkId: string, plan: 'PRO' | 'ULTIMATE') {
+    async createCheckoutSession(clerkId: string, plan: 'CLASSIC' | 'PRO' | 'ULTIMATE') {
         try {
             const user = await this.prisma.user.findUnique({ where: { clerkId } });
             if (!user) throw new Error('User not found');
 
-            // Map plans to Stripe Price IDs (Placeholders - user needs to replace these)
+            // Map plans to Stripe Price IDs
             const priceMap = {
+                'CLASSIC': this.configService.get('STRIPE_CLASSIC_PRICE_ID') || 'price_placeholder_classic',
                 'PRO': this.configService.get('STRIPE_PRO_PRICE_ID') || 'price_placeholder_pro',
                 'ULTIMATE': this.configService.get('STRIPE_ULTIMATE_PRICE_ID') || 'price_placeholder_ultimate'
             };
 
+            const priceId = priceMap[plan];
+            if (!priceId || priceId.includes('placeholder')) {
+                this.logger.warn(`Using placeholder price ID for ${plan}. Check your .env file.`);
+            }
+
             const session = await this.stripe.checkout.sessions.create({
-                payment_method_types: ['card', 'paypal'], // PayPal via Stripe is possible
+                payment_method_types: ['card', 'paypal'],
                 line_items: [
                     {
-                        price: priceMap[plan],
+                        price: priceId,
                         quantity: 1,
                     },
                 ],
@@ -54,7 +60,7 @@ export class PaymentsService {
             return { url: session.url };
         } catch (error) {
             this.logger.error(`Failed to create checkout session: ${error.message}`);
-            throw new InternalServerErrorException('Payment session creation failed.');
+            throw new InternalServerErrorException(`Payment session creation failed: ${error.message}`);
         }
     }
 
@@ -153,7 +159,7 @@ export class PaymentsService {
                 stripeSubscriptionId: subscription.id,
                 stripePriceId: subscription.items.data[0].price.id,
                 stripeCurrentPeriodEnd: new Date(subscription.current_period_end * 1000),
-                isActive: subscription.status === 'active' || subscription.status === 'trailinging' // corrected typo from "trailing" if it's "trialing"
+                isActive: subscription.status === 'active' || subscription.status === 'trialing'
             }
         });
         
