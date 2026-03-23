@@ -6,9 +6,7 @@ import ChatSidebar from '../../components/ChatSidebar';
 import ChatMessage from '../../components/ChatMessage';
 import { ListeningAgentIcon } from '../../components/ListeningAgentIcon';
 
-// Placeholder Avatars
-const USER_AVATAR = "https://lh3.googleusercontent.com/aida-public/AB6AXuC3UxJCLgdZY3vIQAPm31GnNp-7w1_8mASbyWEU7JgWMDBmyXkBUq0a9fqdYf3UiKOzV3UjUZdfW7a9VnuJBzD1Ld1yEOBhsCMqYwjROVjVPz6sHd2pznp2zP3eO3tl1y1m5wzdEvVadubycVDI-rzRskUm9FYWUjCjBcLfLNTjz5Di-Am4ZdbDJoqqBaWxS3l1HHJ_izz6YSC15Kd-OYpPp8eUpoN_90subodS_vH9WVSBWXHXfPyhA8tdvoGDTnfQV82dPnfwq2Ql";
-const AI_AVATAR = "https://lh3.googleusercontent.com/aida-public/AB6AXuCWUMtSS9G3SQC2IjMCNqvfvcH7IHfXBZoPZdQ1kBDZPxI54jL8edcEGhtruaLw-T5SJd_4UBiJkCiLYGWN6AEURmh_qRuUdsEyzQFDeHzexv0nZF0u6sW08jEDceAJn_bkfbIY8D8ztfXLhiN-KZNv9Gg9Re9iHmZrbyOLCARxuruv02f4KU4BPtDwBIz26fuD9s0rJk2KkWI0WfUoKGRNIiHmZrbyOLCARxuruv02f4KU4BPtDwBIz26fuD9s0rJk2KkWI0WfUoKGRNIiMZynfWg85WxTBis1vPoYSqQEOZtYzoYM3m5SCNTd4v5URd0n-NcRsk";
+// Removed hardcoded avatars to use props instead.
 
 interface ChatMessageData {
     type: 'ai' | 'user';
@@ -113,7 +111,7 @@ export const ChatInterface = (props: {
             setCurrentConversationId(conversations[0].id);
         } else if (conversations.length === 0) {
             setMessages([
-                { type: 'ai', sender: 'bot', message: 'Hallo! Ich bin Flo. Starte ein neues Gespräch!', avatar: AI_AVATAR }
+                { type: 'ai', sender: 'bot', message: 'Hallo! Ich bin Flo. Starte ein neues Gespräch!', avatar: props.aiAvatarUrl }
             ]);
         }
     }, [currentConversationId, conversations.length]);
@@ -169,7 +167,7 @@ export const ChatInterface = (props: {
                     type: m.role === 'assistant' ? 'ai' : 'user',
                     sender: m.role === 'assistant' ? 'bot' : 'user',
                     message: m.content,
-                    avatar: m.role === 'assistant' ? AI_AVATAR : USER_AVATAR,
+                    avatar: m.role === 'assistant' ? props.aiAvatarUrl : props.avatarUrl,
                     timestamp: m.timestamp
                 }));
                 setMessages(formattedMessages);
@@ -228,7 +226,7 @@ export const ChatInterface = (props: {
                 const newConv = await res.json();
                 setConversations(prev => [{ id: newConv.id, topic: newConv.topic, createdAt: newConv.createdAt }, ...prev]);
                 setCurrentConversationId(newConv.id);
-                setMessages([{ type: 'ai', sender: 'bot', message: 'Hallo! Worüber möchtest du sprechen?', avatar: AI_AVATAR, timestamp: new Date().toISOString() }]);
+                setMessages([{ type: 'ai', sender: 'bot', message: 'Hallo! Worüber möchtest du sprechen?', avatar: props.aiAvatarUrl, timestamp: new Date().toISOString() }]);
             }
         } catch (e) {
             console.error("Failed to create new chat", e);
@@ -246,7 +244,7 @@ export const ChatInterface = (props: {
             type: 'user',
             sender: 'user',
             message: userMessage,
-            avatar: USER_AVATAR,
+            avatar: props.avatarUrl,
             timestamp: new Date().toISOString()
         };
         setMessages(current => [...current, newUserMsg]);
@@ -272,7 +270,7 @@ export const ChatInterface = (props: {
                 type: 'ai',
                 sender: 'bot',
                 message: jsonResponse.responseText || "Entschuldigung, ich konnte keine Antwort generieren.",
-                avatar: AI_AVATAR,
+                avatar: props.aiAvatarUrl,
                 isTyping: false,
                 timestamp: new Date().toISOString()
             };
@@ -302,7 +300,7 @@ export const ChatInterface = (props: {
             type: 'user',
             sender: 'user',
             message: '…wird verarbeitet',
-            avatar: USER_AVATAR,
+            avatar: props.avatarUrl,
         };
         setMessages(current => [...current, placeholderUserMsg]);
 
@@ -327,7 +325,7 @@ export const ChatInterface = (props: {
                 type: 'ai',
                 sender: 'bot',
                 message: jsonResponse.responseText || "Entschuldigung, ich konnte keine Antwort generieren.",
-                avatar: AI_AVATAR,
+                avatar: props.aiAvatarUrl,
                 isTyping: false,
                 timestamp: new Date().toISOString()
             };
@@ -503,7 +501,7 @@ export const ChatInterface = (props: {
                     {/* TYPING BOX (Isolated functionality) */}
                     <div className="flex items-center gap-3 w-full max-w-3xl">
                         <div className="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-8 shrink-0 hidden sm:block opacity-70"
-                            style={{ backgroundImage: `url("${USER_AVATAR}")` }}>
+                            style={{ backgroundImage: `url("${props.avatarUrl}")` }}>
                         </div>
 
                         <div className="flex w-full flex-1 items-stretch rounded-2xl h-11 bg-gray-100 dark:bg-gray-800 border-2 border-transparent focus-within:border-primary/20 transition-all">

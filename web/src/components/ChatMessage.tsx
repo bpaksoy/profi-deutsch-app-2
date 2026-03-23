@@ -12,7 +12,7 @@ interface ChatMessageProps {
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
 
-const ChatMessage: React.FC<ChatMessageProps> = ({ message, sender, isTyping = false, timestamp }) => {
+const ChatMessage: React.FC<ChatMessageProps> = ({ message, sender, avatarUrl, isTyping = false, timestamp }) => {
     const isUser = sender === 'user';
     const isBot = sender === 'bot';
     const { getToken } = useAuth();
@@ -67,8 +67,12 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ message, sender, isTyping = f
     return (
         <div className={`flex w-full mb-4 items-end gap-2 ${isUser ? 'justify-end' : 'justify-start'}`}>
             {!isUser && (
-                <div className="size-8 rounded-full bg-primary/20 flex items-center justify-center shrink-0 border border-primary/20">
-                    <span className="material-symbols-outlined text-primary text-sm">smart_toy</span>
+                <div className="size-8 rounded-full overflow-hidden flex items-center justify-center shrink-0 border border-primary/20 shadow-sm">
+                    {avatarUrl ? (
+                         <img src={avatarUrl} alt="Flo" className="size-full object-cover" />
+                    ) : (
+                         <span className="material-symbols-outlined text-primary text-sm">smart_toy</span>
+                    )}
                 </div>
             )}
             
@@ -116,8 +120,12 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ message, sender, isTyping = f
             </div>
 
             {isUser && (
-                <div className="size-8 rounded-full bg-accent flex items-center justify-center shrink-0 border border-accent/20">
-                    <span className="material-symbols-outlined text-primary text-sm font-bold">person</span>
+                <div className="size-8 rounded-full overflow-hidden flex items-center justify-center shrink-0 border border-accent/20 shadow-sm bg-accent">
+                    {avatarUrl ? (
+                         <img src={avatarUrl} alt="Du" className="size-full object-cover" />
+                    ) : (
+                         <span className="material-symbols-outlined text-primary text-sm font-bold">person</span>
+                    )}
                 </div>
             )}
         </div>
