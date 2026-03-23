@@ -13,19 +13,19 @@ export class PaymentsController {
         @GetUser() user: any,
         @Body('plan') plan: 'CLASSIC' | 'PRO' | 'ULTIMATE'
     ) {
-        return this.paymentsService.createCheckoutSession(user.id, plan);
+        return this.paymentsService.createCheckoutSession(user.clerkId, plan);
     }
 
     @Post('create-portal-session')
     @UseGuards(ClerkAuthGuard)
     async createPortalSession(@GetUser() user: any) {
-        return this.paymentsService.createPortalSession(user.id);
+        return this.paymentsService.createPortalSession(user.clerkId);
     }
 
     @Post('status') // Changed to Post for consistency with our GetUser decorator or use Get
     @UseGuards(ClerkAuthGuard)
     async getStatus(@GetUser() user: any) {
-        return this.paymentsService.getSubscriptionStatus(user.id);
+        return this.paymentsService.getSubscriptionStatus(user.clerkId);
     }
 
     @Post('webhook')
