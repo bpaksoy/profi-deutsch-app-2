@@ -20,7 +20,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="de" className="light Zain overflow-x-hidden">
+    <html lang="de" className="light Zain overflow-x-hidden" suppressHydrationWarning>
       <head>
         <title>Sigsag | Profi-Deutsch Trainer</title>
         <link
