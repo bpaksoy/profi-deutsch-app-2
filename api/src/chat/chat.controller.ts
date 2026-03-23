@@ -60,11 +60,15 @@ export class ChatController {
     
     // Usage limits check
     const dbUser = await this.conversationService.validateUserPlan(userId);
-    const progress = await this.progressService.getUserProgress(userId);
     const LIMIT = 20;
 
-    if (dbUser.planTier === 'FREE' && progress.conversationCount >= LIMIT) {
-      throw new InternalServerErrorException(`Limit reached. Please upgrade to a paid plan to continue chatting with Flo. ${process.env.FRONTEND_URL}/pricing`);
+    // Check if it's a new day to allow first message even if counter is high
+    const now = new Date();
+    const last = dbUser.lastMessageAt ? new Date(dbUser.lastMessageAt) : null;
+    const isNewDay = !last || now.toDateString() !== last.toDateString();
+
+    if (dbUser.planTier === 'FREE' && !isNewDay && dbUser.dailyMessagesCount >= LIMIT) {
+      throw new ForbiddenException(`Daily chat limit reached. Please upgrade to a paid plan for unlimited access or try again tomorrow! ${process.env.FRONTEND_URL}/pricing`);
     }
 
     this.logger.log(`Received audio file of size: ${file.size} from user ${userId}`);
@@ -115,12 +119,15 @@ export class ChatController {
 
     // Usage limits check
     const dbUser = await this.conversationService.validateUserPlan(userId);
-    const progress = await this.progressService.getUserProgress(userId);
     const LIMIT = 20;
 
-    if (dbUser.planTier === 'FREE' && progress.conversationCount >= LIMIT) {
-      // Throw 403 Forbidden via InternalServerError (or better)
-      throw new InternalServerErrorException(`Nutzungsgrenze erreicht. Bitte upgrade deinen Plan für unbegrenzte Chats! ${process.env.FRONTEND_URL}/pricing`);
+    // Check if it's a new day to allow first message even if counter is high
+    const now = new Date();
+    const last = dbUser.lastMessageAt ? new Date(dbUser.lastMessageAt) : null;
+    const isNewDay = !last || now.toDateString() !== last.toDateString();
+
+    if (dbUser.planTier === 'FREE' && !isNewDay && dbUser.dailyMessagesCount >= LIMIT) {
+      throw new ForbiddenException(`Limit reached. Please upgrade to a paid plan or come back tomorrow! ${process.env.FRONTEND_URL}/pricing`);
     }
 
     this.logger.log(`Received text message from ${userId}: ${message} `);

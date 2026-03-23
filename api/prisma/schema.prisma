@@ -25,6 +25,8 @@ model User {
   stripeCurrentPeriodEnd DateTime?
   isActive               Boolean   @default(false)
   planTier               String    @default("FREE") // "FREE", "PRO", "ULTIMATE"
+  dailyMessagesCount     Int       @default(0)
+  lastMessageAt          DateTime? @default(now())
 }
 
 model Conversation {

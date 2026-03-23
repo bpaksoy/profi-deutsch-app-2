@@ -10,6 +10,28 @@ export class ProgressService {
     async trackActivity(userId: string, type: 'message' | 'time', amount: number) {
         this.logger.log(`Tracking activity for user ${userId}: ${type} +${amount}`);
 
+        // Update User daily limits first if it's a message
+        if (type === 'message') {
+            const user = await this.prisma.user.findUnique({
+                where: { clerkId: userId },
+                select: { lastMessageAt: true, dailyMessagesCount: true }
+            });
+
+            if (user) {
+                const now = new Date();
+                const last = user.lastMessageAt ? new Date(user.lastMessageAt) : null;
+                const isNewDay = !last || now.toDateString() !== last.toDateString();
+
+                await this.prisma.user.update({
+                    where: { clerkId: userId },
+                    data: {
+                        dailyMessagesCount: isNewDay ? amount : { increment: amount },
+                        lastMessageAt: now
+                    }
+                });
+            }
+        }
+
         let progress = await this.prisma.progress.findUnique({
             where: { userId }
         });
