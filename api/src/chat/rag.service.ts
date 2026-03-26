@@ -82,7 +82,7 @@ export class RAGService {
             throw new Error('Google Gemini API key is missing');
         }
 
-        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=${apiKey}`;
 
         // ✅ Convert DB messages to Gemini format
         const history: ConversationMessage[] = dbMessages.map(msg => ({
