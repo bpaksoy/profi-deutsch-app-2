@@ -69,7 +69,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ message, sender, avatarUrl, i
             {!isUser && (
                 <div className="size-8 rounded-full overflow-hidden flex items-center justify-center shrink-0 border border-primary/20 shadow-sm bg-primary/10">
                     <img 
-                        src={avatarUrl || "https://api.dicebear.com/7.x/bottts/svg?seed=Flo"} 
+                        src={avatarUrl || "/flo-avatar.svg"} 
                         alt="Flo" 
                         className="size-full object-cover" 
                         onError={(e) => {

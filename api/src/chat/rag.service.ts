@@ -36,7 +36,7 @@ export class RAGService {
                     include: {
                         messages: {
                             orderBy: { timestamp: 'asc' },
-                            take: 20  // Last 20 messages for context
+                            take: 10  // Last 10 messages for context
                         }
                     }
                 });
@@ -82,7 +82,7 @@ export class RAGService {
             throw new Error('Google Gemini API key is missing');
         }
 
-        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=${apiKey}`;
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
 
         // ✅ Convert DB messages to Gemini format
         const history: ConversationMessage[] = dbMessages.map(msg => ({
@@ -113,11 +113,12 @@ Du korrigierst Fehler sanft, aber nicht pedantisch. Wenn der Benutzer einen Fehl
 - Sei humorvoll und locker, wie ein guter Freund.
 
 # WICHTIGE REGELN
-1.  Antworte IMMER auf Deutsch, egal welche Sprache der Benutzer verwendet.
-2.  Wenn der Benutzer Englisch spricht, antworte auf Deutsch und ermutige ihn sanft, es auf Deutsch zu versuchen.
-3.  Verwende KEINE Markdown-Formatierung (keine Sternchen, kein Fettgedrucktes), da deine Antwort vorgelesen wird.
-4.  Vermeide lange Monologe.
-5.  Beende IMMER deine Sätze vollständig. Brich niemals mitten im Satz ab.`;
+1.  Antworte AUSSCHLIESSLICH auf Deutsch. Niemals auf Englisch oder einer anderen Sprache. Das ist die wichtigste Regel.
+2.  Du VERSTEHST alle Sprachen (Englisch, Türkisch, Spanisch, etc.), aber du antwortest NUR auf Deutsch.
+3.  Wenn der Benutzer auf Englisch schreibt, zeige dass du ihn verstanden hast, antworte aber auf Deutsch. Zum Beispiel: Wenn der User sagt "I want to go to the cinema", antworte: "Ah, du möchtest ins Kino gehen! Welchen Film möchtest du sehen?"
+4.  Verwende KEINE Markdown-Formatierung (keine Sternchen, kein Fettgedrucktes), da deine Antwort vorgelesen wird.
+5.  Vermeide lange Monologe.
+6.  Beende IMMER deine Sätze vollständig. Brich niemals mitten im Satz ab.`;
 
         this.logger.log(`Calling Gemini API (gemini-1.5-flash) with ${history.length} messages...`);
 
@@ -138,7 +139,7 @@ Du korrigierst Fehler sanft, aber nicht pedantisch. Wenn der Benutzer einen Fehl
                         contents: history,
                         generationConfig: {
                             temperature: 0.7,
-                            maxOutputTokens: 1024,
+                            maxOutputTokens: 500,
                             topP: 0.8,
                             topK: 40
                         },
@@ -253,6 +254,128 @@ Du korrigierst Fehler sanft, aber nicht pedantisch. Wenn der Benutzer einen Fehl
         data.models?.forEach((model: any) => {
             this.logger.log(`- ${model.name}`);
         });
+    }
+
+    async *streamResponse(userInput: string, conversationId?: string): AsyncGenerator<string> {
+        const apiKey = this.configService.get<string>('GEMINI_API_KEY');
+        if (!apiKey) throw new Error('Google Gemini API key is missing');
+
+        let conversationHistory: any[] = [];
+        if (conversationId) {
+            const conversation = await this.prisma.conversation.findUnique({
+                where: { id: conversationId },
+                include: { messages: { orderBy: { timestamp: 'asc' }, take: 10 } }
+            });
+            if (conversation) conversationHistory = conversation.messages;
+        }
+
+        const history = conversationHistory.map(msg => ({
+            role: msg.role === 'assistant' ? 'model' : 'user',
+            parts: [{ text: msg.content }]
+        }));
+        history.push({ role: 'user', parts: [{ text: userInput }] });
+
+        const today = new Date().toLocaleDateString('de-DE', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+        const systemPrompt = `# Persönlichkeit
+Du bist Flo, ein freundlicher, geduldiger und motivierender Sprachlernpartner für Deutsch.
+Dein Ziel ist es, dem Benutzer zu helfen, selbstbewusst Deutsch zu sprechen und das B2-Niveau zu erreichen.
+Du korrigierst Fehler sanft, aber nicht pedantisch. Wenn der Benutzer einen Fehler macht, wiederhole den Satz oft in der korrekten Form in deiner Antwort, ohne explizit zu sagen "Das war falsch".
+
+# Kontext
+- Heute ist: ${today}
+
+# Verhalten
+- Sei interessiert an dem, was der Benutzer sagt. Stelle Rückfragen.
+- Halte deine Antworten kurz und prägnant (max. 2-3 Sätze), damit der Benutzer mehr Sprechzeit hat.
+- Passe dein Sprachniveau an den Benutzer an (B1/B2).
+- Sei humorvoll und locker, wie ein guter Freund.
+
+# WICHTIGE REGELN
+1.  Antworte AUSSCHLIESSLICH auf Deutsch. Niemals auf Englisch oder einer anderen Sprache. Das ist die wichtigste Regel.
+2.  Du VERSTEHST alle Sprachen (Englisch, Türkisch, Spanisch, etc.), aber du antwortest NUR auf Deutsch.
+3.  Wenn der Benutzer auf Englisch schreibt, zeige dass du ihn verstanden hast, antworte aber auf Deutsch. Zum Beispiel: Wenn der User sagt "I want to go to the cinema", antworte: "Ah, du möchtest ins Kino gehen! Welchen Film möchtest du sehen?"
+4.  Verwende KEINE Markdown-Formatierung (keine Sternchen, kein Fettgedrucktes), da deine Antwort vorgelesen wird.
+5.  Vermeide lange Monologe.
+6.  Beende IMMER deine Sätze vollständig. Brich niemals mitten im Satz ab.`;
+
+        const requestBody = JSON.stringify({
+            contents: history,
+            generationConfig: { temperature: 0.7, maxOutputTokens: 500, topP: 0.8, topK: 40 },
+            systemInstruction: { parts: [{ text: systemPrompt }] },
+            safetySettings: [
+                { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_ONLY_HIGH" },
+                { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_ONLY_HIGH" },
+                { category: "HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold: "BLOCK_ONLY_HIGH" },
+                { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "BLOCK_ONLY_HIGH" }
+            ]
+        });
+
+        const models = ['gemini-2.5-flash', 'gemini-2.0-flash-lite'];
+        let response: globalThis.Response | null = null;
+
+        for (const model of models) {
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:streamGenerateContent?alt=sse&key=${apiKey}`;
+            
+            for (let attempt = 0; attempt < 2; attempt++) {
+                response = await fetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: requestBody
+                });
+
+                if (response.ok) break;
+
+                if (response.status === 429) {
+                    this.logger.warn(`${model} rate limited (attempt ${attempt + 1}), waiting...`);
+                    await new Promise(r => setTimeout(r, 3000));
+                    response = null;
+                    continue;
+                }
+
+                const errorText = await response.text();
+                this.logger.error(`${model} streaming error:`, errorText);
+                response = null;
+                break;
+            }
+
+            if (response?.ok) {
+                this.logger.log(`Using model: ${model}`);
+                break;
+            }
+        }
+
+        if (!response?.ok) {
+            throw new Error('All Gemini models failed');
+        }
+
+        const reader = response.body?.getReader();
+        if (!reader) throw new Error('No response body');
+
+        const decoder = new TextDecoder();
+        let buffer = '';
+
+        while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+
+            buffer += decoder.decode(value, { stream: true });
+            const lines = buffer.split('\n');
+            buffer = lines.pop() || '';
+
+            for (const line of lines) {
+                if (line.startsWith('data: ')) {
+                    const jsonStr = line.slice(6).trim();
+                    if (!jsonStr || jsonStr === '[DONE]') continue;
+                    try {
+                        const data = JSON.parse(jsonStr);
+                        const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
+                        if (text) yield text;
+                    } catch {
+                        // skip malformed JSON
+                    }
+                }
+            }
+        }
     }
 
 

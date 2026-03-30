@@ -5,7 +5,7 @@
 - **Frontend**: Next.js 14.2.16 on Firebase Hosting
 - **Database**: Supabase PostgreSQL via Prisma ORM 4.16.2
 - **Auth**: Firebase Authentication (Google provider)
-- **AI**: Google Gemini API (gemini-1.5-flash) for conversational responses
+- **AI**: Google Gemini API (gemini-2.5-flash) for conversational responses, with streaming SSE
 - **Speech**: Azure Speech Services (germanywestcentral, de-DE) for STT + TTS
 - **TTS Voice**: de-DE-KatjaNeural (48kHz MP3)
 
@@ -64,6 +64,41 @@ expressApp.use(session({...}));
 - `web/next.config.mjs` hardcodes `NEXT_PUBLIC_API_BASE_URL` for build-time
 - API prefix is `/api` (set via `app.setGlobalPrefix('api')`)
 
+## SSE Streaming (Text Chat)
+The `/chat/text` endpoint uses Server-Sent Events for real-time token streaming:
+- Backend: `rag.service.ts` → `streamResponse()` async generator calls Gemini's `streamGenerateContent?alt=sse` endpoint
+- Controller sets headers: `Content-Type: text/event-stream`, `Cache-Control: no-cache`, `X-Accel-Buffering: no`
+- Each chunk sent as: `data: {"type":"chunk","content":"..."}\n\n`
+- Final event: `data: {"type":"done","conversationId":"...","fullText":"..."}\n\n`
+- DB writes (save message + update conversation) are fire-and-forget (`Promise.all([...]).catch()`)
+- Frontend (`ChatInterface.tsx`) reads stream via `response.body.getReader()`, progressively updates UI
+- TTS is decoupled — fetched separately via `fetchAndPlayTts()` after text completes
+
+## Gemini Model Configuration
+- **Primary model**: `gemini-2.5-flash`
+- **Fallback model**: `gemini-2.0-flash-lite`
+- **Retry logic**: 2 attempts per model, 3s wait on 429 (rate limit), then falls through to next model
+- **maxOutputTokens**: 500
+- **Conversation history**: Limited to last 10 messages
+- **⚠️ Deprecated models**: `gemini-1.5-flash` returns 404 (removed). `gemini-2.0-flash` hits 429 on free tier (quota limit: 0).
+
+## German-Only Prompts
+All system prompts explicitly enforce German-only responses in 3 locations:
+- `rag.service.ts` (streaming + non-streaming): "Antworte AUSSCHLIESSLICH auf Deutsch. Niemals auf Englisch."
+- `assistant-service.ts` (dashboard agent): Same enforcement
+- Includes explicit example: if user writes English → respond in German explaining this is a German course
+
+## Avatar
+- Flo's avatar: `web/public/flo-avatar.svg` (custom DiceBear fun-emoji SVG — yellow face with heart eyes)
+- Referenced in `web/src/app/chat/page.tsx` (`AI_AVATAR = "/flo-avatar.svg"`)
+- Fallback in `web/src/components/ChatMessage.tsx`
+
+## Security
+- **No hardcoded API keys** — `web/src/lib/firebase.ts` uses `process.env.NEXT_PUBLIC_FIREBASE_*` only
+- `.gitignore` excludes: `.env.*`, `*.env.local`, `sigsag_status.md`, `FIREBASE_DEPLOYMENT.md`
+- Git history was scrubbed with `git-filter-repo` to remove previously exposed secrets
+- Firebase config vars set in `web/.env.local` (not tracked in git)
+
 ## Lessons Learned
 1. Cloud Functions CANNOT use system binaries (ffmpeg) — use SDK-native capabilities
 2. Azure Speech SDK works with WAV (16kHz, 16-bit, mono PCM) via createPushStream()
@@ -72,3 +107,6 @@ expressApp.use(session({...}));
 5. NestJS `rawBody: true` option also breaks multipart (consumes stream)
 6. Dashboard AssistantModal uses `NEXT_PUBLIC_API_BASE_URL` (not `API_BASE_URL`)
 7. All API calls need auth header: `Authorization: Bearer ${token}`
+8. Gemini free tier may have 0 quota for certain models — always have a fallback model
+9. SSE streaming dramatically improves perceived latency vs waiting for full response
+10. Decoupling TTS from text response prevents blocking the text stream

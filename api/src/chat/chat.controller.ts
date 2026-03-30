@@ -127,7 +127,7 @@ export class ChatController {
   @Post('text')
   async processText(
     @Body() body: { message: string, conversationId?: string },
-    @Session() session: Record<string, any>,
+    @Res() res: Response,
     @GetUser() user: any
   ) {
     const { message } = body;
@@ -137,58 +137,67 @@ export class ChatController {
     const dbUser = await this.conversationService.validateUserPlan(userId);
     const LIMIT = 500;
 
-    // Check if it's a new day to allow first message even if counter is high
     const now = new Date();
     const last = dbUser.lastMessageAt ? new Date(dbUser.lastMessageAt) : null;
     const isNewDay = !last || now.toDateString() !== last.toDateString();
 
     if (dbUser.planTier === 'FREE' && !isNewDay && dbUser.dailyMessagesCount >= LIMIT) {
-      throw new ForbiddenException(`Limit reached. Please upgrade to a paid plan or come back tomorrow! ${process.env.FRONTEND_URL}/pricing`);
+      res.status(403).json({ message: `Limit reached. Please upgrade to a paid plan or come back tomorrow! ${process.env.FRONTEND_URL}/pricing` });
+      return;
     }
 
     this.logger.log(`Received text message from ${userId}: ${message} `);
 
     if (!message || message.trim() === '') {
-      throw new InternalServerErrorException('Message cannot be empty');
+      res.status(500).json({ message: 'Message cannot be empty' });
+      return;
     }
 
-    let conversationId = body.conversationId || session.conversationId;
+    let conversationId = body.conversationId;
 
     if (!conversationId) {
       const conv = await this.conversationService.createConversation(userId, 'Text Chat');
       conversationId = conv.id;
-      session.conversationId = conversationId;
     }
 
     await this.conversationService.addMessage(conversationId, 'user', message);
-    const ragObject = await this.ragService.generateResponseJson(
-      message,
-      conversationId
-    );
 
-    await this.conversationService.addMessage(conversationId, 'assistant', ragObject.responseText);
+    // Set up SSE streaming
+    res.setHeader('Content-Type', 'text/event-stream');
+    res.setHeader('Cache-Control', 'no-cache');
+    res.setHeader('Connection', 'keep-alive');
+    res.setHeader('X-Accel-Buffering', 'no');
+    res.flushHeaders();
 
-    let audioBase64 = '';
+    let fullText = '';
     try {
-      const audioStream = await this.chatService.generateSpeechStream(ragObject.responseText);
-      const audioChunks: Buffer[] = [];
-      for await (const chunk of audioStream) {
-        audioChunks.push(chunk);
+      for await (const chunk of this.ragService.streamResponse(message, conversationId)) {
+        fullText += chunk;
+        res.write(`data: ${JSON.stringify({ type: 'chunk', content: chunk })}\n\n`);
       }
-      const audioBuffer = Buffer.concat(audioChunks);
-      audioBase64 = audioBuffer.toString('base64');
-    } catch (ttsError) {
-      this.logger.warn(`TTS generation failed: ${ttsError.message}`);
+
+      // Clean up markdown from accumulated text
+      fullText = fullText
+        .replace(/\*\*\*/g, '')
+        .replace(/\*\*/g, '')
+        .replace(/\*/g, '')
+        .replace(/#{1,6}\s/g, '')
+        .replace(/`{1,3}/g, '')
+        .trim();
+
+      // Fire-and-forget: save message and track activity in parallel
+      Promise.all([
+        this.conversationService.addMessage(conversationId, 'assistant', fullText),
+        this.progressService.trackActivity(userId, 'message', 1)
+      ]).catch(err => this.logger.error('Background save error:', err.message));
+
+      res.write(`data: ${JSON.stringify({ type: 'done', conversationId, fullText })}\n\n`);
+      res.end();
+    } catch (error) {
+      this.logger.error('Streaming error:', error.message);
+      res.write(`data: ${JSON.stringify({ type: 'error', message: 'Fehler bei der Antwort.' })}\n\n`);
+      res.end();
     }
-
-    await this.progressService.trackActivity(userId, 'message', 1);
-
-    return {
-      transcript: message,
-      responseText: ragObject.responseText,
-      audioBase64: audioBase64,
-      conversationId: conversationId
-    };
   }
 
   @Post('reset-conversation')

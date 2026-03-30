@@ -349,6 +349,17 @@ export const ChatInterface = (props: {
         };
         setMessages(current => [...current, newUserMsg]);
 
+        // Add placeholder AI message that will be updated as tokens stream in
+        const aiMsgId = Date.now().toString();
+        setMessages(current => [...current, {
+            type: 'ai',
+            sender: 'bot',
+            message: '',
+            avatar: props.aiAvatarUrl,
+            isTyping: true,
+            timestamp: new Date().toISOString()
+        }]);
+
         try {
             const token = await getToken();
             const response = await fetch(`${props.apiBaseUrl}/chat/text`, {
@@ -364,40 +375,118 @@ export const ChatInterface = (props: {
             });
 
             if (response.status === 403) {
-                setMessages(current => [...current, {
-                    type: 'ai',
-                    sender: 'bot',
-                    message: 'Limit erreicht! 🛑 Du hast deine Gratis-Nachrichten für heute aufgebraucht. Upgrade auf Classic oder Pro, um unbegrenzt mit Flo zu sprechen!',
-                    avatar: props.aiAvatarUrl,
-                    timestamp: new Date().toISOString()
-                }]);
+                setMessages(current => {
+                    const updated = [...current];
+                    updated[updated.length - 1] = {
+                        type: 'ai',
+                        sender: 'bot',
+                        message: 'Limit erreicht! 🛑 Du hast deine Gratis-Nachrichten für heute aufgebraucht. Upgrade auf Classic oder Pro, um unbegrenzt mit Flo zu sprechen!',
+                        avatar: props.aiAvatarUrl,
+                        isTyping: false,
+                        timestamp: new Date().toISOString()
+                    };
+                    return updated;
+                });
                 setIsProcessing(false);
                 return;
             }
 
             if (!response.ok) throw new Error('Backend failed to respond.');
 
-            const jsonResponse = await response.json();
-            const aiMessage: ChatMessageData = {
-                type: 'ai',
-                sender: 'bot',
-                message: jsonResponse.responseText || "Entschuldigung, ich konnte keine Antwort generieren.",
-                avatar: props.aiAvatarUrl,
-                isTyping: false,
-                timestamp: new Date().toISOString()
-            };
+            // Read SSE stream
+            const reader = response.body?.getReader();
+            if (!reader) throw new Error('No response body');
+            
+            const decoder = new TextDecoder();
+            let buffer = '';
+            let accumulatedText = '';
+            let newConversationId: string | null = null;
 
-            setMessages(current => [...current, aiMessage]);
-            if (jsonResponse.audioBase64) playAudioFromBase64(jsonResponse.audioBase64);
+            while (true) {
+                const { done, value } = await reader.read();
+                if (done) break;
 
-            if (jsonResponse.conversationId && jsonResponse.conversationId !== currentConversationId) {
-                setCurrentConversationId(jsonResponse.conversationId);
+                buffer += decoder.decode(value, { stream: true });
+                const lines = buffer.split('\n');
+                buffer = lines.pop() || '';
+
+                for (const line of lines) {
+                    if (!line.startsWith('data: ')) continue;
+                    const jsonStr = line.slice(6).trim();
+                    if (!jsonStr) continue;
+
+                    try {
+                        const event = JSON.parse(jsonStr);
+                        
+                        if (event.type === 'chunk') {
+                            accumulatedText += event.content;
+                            setMessages(current => {
+                                const updated = [...current];
+                                updated[updated.length - 1] = {
+                                    ...updated[updated.length - 1],
+                                    message: accumulatedText,
+                                    isTyping: true
+                                };
+                                return updated;
+                            });
+                        } else if (event.type === 'done') {
+                            newConversationId = event.conversationId;
+                            // Use the cleaned fullText from backend
+                            const finalText = event.fullText || accumulatedText;
+                            setMessages(current => {
+                                const updated = [...current];
+                                updated[updated.length - 1] = {
+                                    ...updated[updated.length - 1],
+                                    message: finalText,
+                                    isTyping: false
+                                };
+                                return updated;
+                            });
+                            // Request TTS in the background
+                            fetchAndPlayTts(finalText, token);
+                        }
+                    } catch {
+                        // skip malformed JSON
+                    }
+                }
+            }
+
+            if (newConversationId && newConversationId !== currentConversationId) {
+                setCurrentConversationId(newConversationId);
             }
             loadConversations();
         } catch (error) {
             console.error('Text Submission Failed:', error);
+            setMessages(current => {
+                const updated = [...current];
+                if (updated.length > 0 && updated[updated.length - 1].isTyping) {
+                    updated[updated.length - 1] = {
+                        ...updated[updated.length - 1],
+                        message: 'Entschuldigung, es gab einen Fehler.',
+                        isTyping: false
+                    };
+                }
+                return updated;
+            });
         } finally {
             setIsProcessing(false);
+        }
+    };
+
+    const fetchAndPlayTts = async (text: string, token: string | null) => {
+        try {
+            const res = await fetch(`${props.apiBaseUrl}/chat/tts?text=${encodeURIComponent(text)}`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (res.ok) {
+                const audioBlob = await res.blob();
+                const audioUrl = URL.createObjectURL(audioBlob);
+                const audio = new Audio(audioUrl);
+                audio.play().catch(err => console.error('Audio playback failed:', err));
+                audio.onended = () => URL.revokeObjectURL(audioUrl);
+            }
+        } catch (err) {
+            console.error('TTS fetch failed:', err);
         }
     };
 

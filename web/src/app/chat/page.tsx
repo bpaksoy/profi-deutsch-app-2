@@ -8,7 +8,7 @@ import { useUser } from '../../context/AuthContext';
 const ChatInterface = dynamic(() => import('./ChatInterface'), { ssr: false });
 
 const USER_AVATAR = "https://api.dicebear.com/7.x/notionists/svg?seed=User&backgroundColor=f1f5f9";
-const AI_AVATAR = "https://api.dicebear.com/7.x/bottts/svg?seed=Flo&backgroundColor=b6e3f4";
+const AI_AVATAR = "/flo-avatar.svg";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
 
