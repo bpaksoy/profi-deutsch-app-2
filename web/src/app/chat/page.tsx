@@ -2,7 +2,7 @@
 
 import React from 'react';
 import dynamic from 'next/dynamic';
-import { useUser } from '@clerk/nextjs';
+import { useUser } from '../../context/AuthContext';
 
 // Dynamically import ChatInterface with SSR disabled to avoid hydration errors
 const ChatInterface = dynamic(() => import('./ChatInterface'), { ssr: false });

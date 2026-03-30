@@ -2,7 +2,7 @@
 'use client';
 
 import React, { useState, useRef, useEffect } from 'react';
-import { useAuth } from '@clerk/nextjs';
+import { useAuth } from '../context/AuthContext';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
 
@@ -20,10 +20,90 @@ const useAudioRecorder = (submitCallback: (blob: Blob) => Promise<void>) => {
     const [isRecording, setIsRecording] = useState(false);
     const mediaRecorderRef = useRef<MediaRecorder | null>(null);
     const audioChunksRef = useRef<Blob[]>([]);
+    const audioContextRef = useRef<AudioContext | null>(null);
+    const streamRef = useRef<MediaStream | null>(null);
+
+    const convertToWav = async (webmBlob: Blob): Promise<Blob> => {
+        const arrayBuffer = await webmBlob.arrayBuffer();
+        const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+        const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+
+        // Resample to 16kHz mono
+        const targetSampleRate = 16000;
+        const numberOfChannels = 1;
+        
+        // Use OfflineAudioContext for resampling
+        const offlineContext = new OfflineAudioContext(
+            numberOfChannels,
+            Math.ceil(audioBuffer.duration * targetSampleRate),
+            targetSampleRate
+        );
+
+        const source = offlineContext.createBufferSource();
+        source.buffer = audioBuffer;
+        source.connect(offlineContext.destination);
+        source.start(0);
+
+        const resampled = await offlineContext.startRendering();
+        
+        // Get mono channel data
+        const samples = resampled.getChannelData(0);
+        
+        const wavBytes = encodeWav(samples, targetSampleRate, numberOfChannels);
+        return new Blob([wavBytes], { type: 'audio/wav' });
+    };
+
+    const encodeWav = (samples: Float32Array, sampleRate: number, numChannels: number): ArrayBuffer => {
+        const buffer = new ArrayBuffer(44 + samples.length * 2);
+        const view = new DataView(buffer);
+
+        const writeString = (offset: number, string: string) => {
+            for (let i = 0; i < string.length; i++) {
+                view.setUint8(offset + i, string.charCodeAt(i));
+            }
+        };
+
+        // RIFF identifier
+        writeString(0, 'RIFF');
+        // file length
+        view.setUint32(4, 36 + samples.length * 2, true);
+        // RIFF type
+        writeString(8, 'WAVE');
+        // format chunk identifier
+        writeString(12, 'fmt ');
+        // format chunk length
+        view.setUint32(16, 16, true);
+        // sample format (raw)
+        view.setUint16(20, 1, true);
+        // channel count
+        view.setUint16(22, numChannels, true);
+        // sample rate
+        view.setUint32(24, sampleRate, true);
+        // byte rate (sample rate * block align)
+        view.setUint32(28, sampleRate * numChannels * 2, true);
+        // block align (channel count * bytes per sample)
+        view.setUint16(32, numChannels * 2, true);
+        // bits per sample
+        view.setUint16(34, 16, true);
+        // data chunk identifier
+        writeString(36, 'data');
+        // data chunk length
+        view.setUint32(40, samples.length * 2, true);
+
+        // write the PCM samples
+        let offset = 44;
+        for (let i = 0; i < samples.length; i++, offset += 2) {
+            const s = Math.max(-1, Math.min(1, samples[i]));
+            view.setInt16(offset, s < 0 ? s * 0x8000 : s * 0x7FFF, true);
+        }
+
+        return buffer;
+    };
 
     const startRecording = async () => {
         try {
             const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            streamRef.current = stream;
             const recorder = new MediaRecorder(stream);
 
             recorder.ondataavailable = (event) => {
@@ -31,10 +111,22 @@ const useAudioRecorder = (submitCallback: (blob: Blob) => Promise<void>) => {
             };
 
             recorder.onstop = async () => {
-                const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
+                const webmBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
                 audioChunksRef.current = [];
                 stream.getTracks().forEach(track => track.stop());
-                await submitCallback(audioBlob);
+                
+                console.log('Recorded WebM blob:', webmBlob.size, 'bytes');
+                
+                try {
+                    console.log('Starting WAV conversion...');
+                    const wavBlob = await convertToWav(webmBlob);
+                    console.log('WAV conversion successful:', wavBlob.size, 'bytes');
+                    await submitCallback(wavBlob);
+                } catch (conversionError) {
+                    console.error('WAV conversion failed, falling back to WebM:', conversionError);
+                    // Fallback to original webm if conversion fails
+                    await submitCallback(webmBlob);
+                }
             };
 
             mediaRecorderRef.current = recorder;
@@ -164,7 +256,9 @@ export const VoiceAssistant: React.FC<VoiceAssistantProps> = ({ onClose }) => {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             const data = await response.json();
-            setCategories(data.map((cat: any) => cat.name));
+            if (Array.isArray(data)) {
+                setCategories(data.map((cat: any) => cat.name));
+            }
         } catch (error) {
             console.error('Failed to load categories:', error);
         }
@@ -234,21 +328,35 @@ export const VoiceAssistant: React.FC<VoiceAssistantProps> = ({ onClose }) => {
     };
 
     const handleSubmitAudio = async (audioBlob: Blob) => {
-        const formData = new FormData();
-        formData.append('audio', audioBlob, 'voice_input.webm');
         setIsProcessing(true);
 
         try {
             const token = await getToken();
+            console.log('Sending audio to backend:', audioBlob.type, audioBlob.size, 'bytes');
+            
+            // Convert blob to base64 to avoid Firebase Functions multipart issues
+            const arrayBuffer = await audioBlob.arrayBuffer();
+            const base64 = btoa(String.fromCharCode(...new Uint8Array(arrayBuffer)));
+            
             const response = await fetch(`${API_BASE_URL}/chat/stt`, {
                 method: 'POST',
-                headers: { 'Authorization': `Bearer ${token}` },
-                body: formData,
+                headers: { 
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ audioBase64: base64 }),
             });
 
-            if (!response.ok) throw new Error('Backend failed to transcribe/respond.');
+            console.log('Response status:', response.status);
+
+            if (!response.ok) {
+                const errorText = await response.text();
+                console.error('Backend error:', errorText);
+                throw new Error(`Backend failed to transcribe/respond: ${response.status}`);
+            }
 
             const jsonResponse = await response.json();
+            console.log('Backend response:', jsonResponse);
             const aiMessage: Message = {
                 id: Date.now(),
                 text: jsonResponse.responseText || "Tut mir leid, ich konnte keine Antwort generieren.",

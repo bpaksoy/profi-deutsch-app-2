@@ -1,6 +1,6 @@
 'use client';
 import React, { useCallback } from 'react';
-import { useAuth } from '@clerk/nextjs';
+import { useAuth } from '../context/AuthContext';
 interface ChatMessageProps {
     message: string;
     type: 'ai' | 'user';

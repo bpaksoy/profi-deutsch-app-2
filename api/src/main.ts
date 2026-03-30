@@ -47,8 +47,10 @@ async function bootstrap() {
   // Create the NestJS app
   const app = await NestFactory.create(AppModule, { rawBody: true });
 
-  // Enable CORS for your Next.js frontend
-  // Enable CORS for your Next.js frontend
+  // Set Global Prefix to /api
+  app.setGlobalPrefix('api');
+
+  // Enable CORS for your production frontend
   app.enableCors({
     origin: (origin, callback) => {
       // Allow requests with no origin (like mobile apps or curl requests)
@@ -56,6 +58,13 @@ async function bootstrap() {
 
       // Allow any localhost origin
       if (origin.match(/^http:\/\/localhost:\d+$/)) {
+        return callback(null, true);
+      }
+
+      // Allow your production firebase domains
+      if (origin.match(/^https:\/\/sigsag-6055d\.web\.app$/) || 
+          origin.match(/^https:\/\/sigsag-6055d\.firebaseapp\.com$/) ||
+          origin.includes('profi-deutsch-app')) {
         return callback(null, true);
       }
 
@@ -79,8 +88,9 @@ async function bootstrap() {
     }),
   );
 
-  await app.listen(port);
-  console.log(`Application is running on: ${await app.getUrl()}`);
+  const finalPort = process.env.PORT || 8080;
+  await app.listen(finalPort);
+  console.log(`Application is running on port: ${finalPort}`);
 }
 
 bootstrap();

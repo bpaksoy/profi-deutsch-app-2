@@ -3,7 +3,7 @@ import { Manrope } from 'next/font/google';
 import '../styles/global.css';
 import { CustomLayout } from '../components/ui/Layout'; // Adjust the path as needed
 import React from 'react';
-import { ClerkProvider } from '@clerk/nextjs';
+
 
 
 const manrope = Manrope({

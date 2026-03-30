@@ -2,7 +2,7 @@
 'use client';
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { useUser, useClerk, useAuth } from '@clerk/nextjs';
+import { useUser, useClerk, useAuth } from '../../context/AuthContext';
 import { twMerge } from 'tailwind-merge';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';

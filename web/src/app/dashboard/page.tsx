@@ -1,6 +1,6 @@
 'use client';
 import React, { useState } from 'react';
-import { useUser } from '@clerk/nextjs';
+import { useUser } from '../../context/AuthContext';
 import { AssistantModal } from '../../components/AssistantModal';
 import { AssistantOrb } from '../../components/AssistantOrb';
 import { VoiceAssistant } from '../../components/VoiceAssistant';
@@ -81,6 +81,8 @@ export default function DashboardPage() {
       {isVoiceAssistantOpen && (
         <VoiceAssistant onClose={() => setIsVoiceAssistantOpen(false)} />
       )}
+      <AssistantOrb onClick={() => setIsModalOpen(true)} isModalOpen={isModalOpen} />
+      {isModalOpen && <AssistantModal onClose={() => setIsModalOpen(false)} />}
     </div>
   );
 }

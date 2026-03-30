@@ -15,3 +15,5 @@ api/dist
 web/.env.local
 
 .env
+.firebase/
+api/firebase-debug.log

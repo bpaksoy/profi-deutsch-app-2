@@ -1,8 +1,10 @@
 'use client';
 
+export const dynamic = 'force-dynamic';
+
 import React, { useState, useEffect, useCallback } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
-import { useAuth } from '@clerk/nextjs';
+import { useAuth } from '../../context/AuthContext';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
 
@@ -84,7 +86,9 @@ export default function PhrasesPage() {
       });
       if (response.ok) {
         const data = await response.json();
-        setCategories(data);
+        if (Array.isArray(data)) {
+          setCategories(data);
+        }
       }
     } catch (error) {
       console.error('Failed to load categories:', error);

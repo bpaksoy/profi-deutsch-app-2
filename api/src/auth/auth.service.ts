@@ -1,44 +1,50 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Injectable, UnauthorizedException, OnModuleInit } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { createClerkClient, verifyToken } from '@clerk/backend';
+import * as admin from 'firebase-admin';
 
 @Injectable()
-export class AuthService {
-    private clerkClient;
+export class AuthService implements OnModuleInit {
+    constructor(private prisma: PrismaService) {}
 
-    constructor(private prisma: PrismaService) {
-        this.clerkClient = createClerkClient({ secretKey: process.env.CLERK_SECRET_KEY });
+    onModuleInit() {
+        if (admin.apps.length === 0) {
+            admin.initializeApp({
+                projectId: process.env.GOOGLE_CLOUD_PROJECT_ID || 'sigsag-6055d',
+            });
+        }
     }
 
     async validateToken(token: string) {
         try {
-            const decoded = await verifyToken(token, {
-                secretKey: process.env.CLERK_SECRET_KEY,
-            });
+            const decodedToken = await admin.auth().verifyIdToken(token);
+            const uid = decodedToken.uid;
 
             // Ensure user exists in our local DB
-            await this.getOrCreateUser(decoded.sub);
+            await this.getOrCreateUser(uid, decodedToken.email, decodedToken.name);
 
-            return decoded;
+            return {
+                sub: uid,
+                ...decodedToken,
+            };
         } catch (e) {
-            console.error('Clerk validation failed:', e);
+            console.error('Firebase validation failed:', e);
             throw new UnauthorizedException('Invalid token');
         }
     }
 
-    private async getOrCreateUser(clerkId: string) {
+    private async getOrCreateUser(clerkId: string, email?: string, name?: string) {
         let user = await this.prisma.user.findUnique({
             where: { clerkId },
         });
 
         if (!user) {
-            // Get user details from Clerk to populate our DB
-            const clerkUser = await this.clerkClient.users.getUser(clerkId);
             user = await this.prisma.user.create({
                 data: {
                     clerkId,
-                    email: clerkUser.emailAddresses[0]?.emailAddress || '',
-                    name: clerkUser.firstName ? `${clerkUser.firstName} ${clerkUser.lastName || ''}` : null,
+                    email: email || `guest_${clerkId}@example.com`,
+                    name: name || null,
+                    planTier: 'FREE',
+                    dailyMessagesCount: 0,
                 },
             });
         }

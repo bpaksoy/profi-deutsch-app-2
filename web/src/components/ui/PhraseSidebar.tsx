@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import React from 'react';
 import { twMerge } from 'tailwind-merge';
-import { useAuth } from '@clerk/nextjs';
+import { useAuth } from '../../context/AuthContext';
 
 interface PhraseSidebarProps {
   activeCategory?: string;

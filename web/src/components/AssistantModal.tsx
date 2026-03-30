@@ -2,8 +2,9 @@
 'use client';
 import React, { useState } from 'react';
 import { twMerge } from 'tailwind-merge';
+import { useAuth } from '../context/AuthContext';
 
-const API_BASE_URL = process.env.API_BASE_URL || 'http://localhost:8000';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
 interface Message {
     id: number;
     text: string;
@@ -14,6 +15,7 @@ export const AssistantModal: React.FC<{ onClose: () => void }> = ({ onClose }) =
     const [messages, setMessages] = useState<Message[]>([]);
     const [input, setInput] = useState('');
     const [isLoading, setIsLoading] = useState(false);
+    const { getToken } = useAuth();
 
     const sendMessage = async (userMessage: string) => {
         if (!userMessage.trim() || isLoading) return;
@@ -24,9 +26,13 @@ export const AssistantModal: React.FC<{ onClose: () => void }> = ({ onClose }) =
         setIsLoading(true);
 
         try {
-            const response = await fetch(`${API_BASE_URL}/chat/assistant`, {
+            const token = await getToken();
+            const response = await fetch(`${API_BASE_URL}/chat/text`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
                 body: JSON.stringify({ message: userMessage }),
             });
             
@@ -34,7 +40,7 @@ export const AssistantModal: React.FC<{ onClose: () => void }> = ({ onClose }) =
             
             const assistantMessage: Message = {
                 id: Date.now() + 1,
-                text: data.response || "Entschuldigung, ich bin abgelenkt.",
+                text: data.responseText || "Entschuldigung, ich bin abgelenkt.",
                 sender: 'assistant'
             };
             

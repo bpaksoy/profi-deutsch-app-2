@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { useUser } from '@clerk/nextjs';
+import { useUser } from '../../context/AuthContext';
 import { PhrasebookCard } from '../../components/PhrasebookCard';
 import { ProgressDashboard } from '../../components/ProgressDashboard';
 

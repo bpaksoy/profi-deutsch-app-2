@@ -3,11 +3,11 @@ import {
     InternalServerErrorException, Logger, UseGuards,
 } from '@nestjs/common';
 import { PhrasebookService } from './phrasebook.service';
-import { ClerkAuthGuard } from '../auth/clerk-auth.guard';
+import { FirebaseAuthGuard } from '../auth/firebase-auth.guard';
 import { GetUser } from '../auth/get-user.decorator';
 
 @Controller('phrasebook')
-@UseGuards(ClerkAuthGuard)
+@UseGuards(FirebaseAuthGuard)
 export class PhrasebookController {
     private readonly logger = new Logger(PhrasebookController.name);
 

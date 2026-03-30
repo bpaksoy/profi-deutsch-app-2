@@ -7,7 +7,7 @@ import {
 import { AuthService } from './auth.service';
 
 @Injectable()
-export class ClerkAuthGuard implements CanActivate {
+export class FirebaseAuthGuard implements CanActivate {
     constructor(private authService: AuthService) { }
 
     async canActivate(context: ExecutionContext): Promise<boolean> {
@@ -19,8 +19,8 @@ export class ClerkAuthGuard implements CanActivate {
         }
 
         const payload = await this.authService.validateToken(token);
-        // Attach the clerkId to the request for controller access
-        request['user'] = { clerkId: payload.sub };
+        // Attach the uid (historically called clerkId) to the request
+        request['user'] = { clerkId: payload.uid || payload.sub };
 
         return true;
     }

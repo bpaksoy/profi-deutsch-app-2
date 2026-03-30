@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useAuth } from '@clerk/nextjs';
+import { useAuth } from '../context/AuthContext';
 
 interface ProgressData {
     totalXp: number;
