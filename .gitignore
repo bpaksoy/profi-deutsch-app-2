@@ -15,5 +15,10 @@ api/dist
 web/.env.local
 
 .env
+.env.*
+*.env
+*.env.local
 .firebase/
 api/firebase-debug.log
+sigsag_status.md
+FIREBASE_DEPLOYMENT.md

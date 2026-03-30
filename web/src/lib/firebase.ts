@@ -2,12 +2,12 @@ import { initializeApp, getApps } from "firebase/app";
 import { getAuth } from "firebase/auth";
 
 const firebaseConfig = {
-    apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY || "REDACTED_FIREBASE_API_KEY",
+    apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY!,
     authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN || "sigsag-6055d.firebaseapp.com",
     projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || "sigsag-6055d",
     storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET || "sigsag-6055d.firebasestorage.app",
-    messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID || "1032406816801",
-    appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID || "REDACTED_FIREBASE_APP_ID"
+    messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID!,
+    appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID!,
 };
 
 // Initialize Firebase
