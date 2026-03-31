@@ -21,7 +21,8 @@ export const AssistantModal: React.FC<{ onClose: () => void }> = ({ onClose }) =
         if (!userMessage.trim() || isLoading) return;
 
         const newUserMessage: Message = { id: Date.now(), text: userMessage, sender: 'user' };
-        setMessages(current => [...current, newUserMessage]);
+        const assistantPlaceholderId = Date.now() + 1;
+        setMessages(current => [...current, newUserMessage, { id: assistantPlaceholderId, text: '', sender: 'assistant' }]);
         setInput('');
         setIsLoading(true);
 
@@ -35,20 +36,58 @@ export const AssistantModal: React.FC<{ onClose: () => void }> = ({ onClose }) =
                 },
                 body: JSON.stringify({ message: userMessage }),
             });
-            
-            const data = await response.json();
-            
-            const assistantMessage: Message = {
-                id: Date.now() + 1,
-                text: data.responseText || "Entschuldigung, ich bin abgelenkt.",
-                sender: 'assistant'
-            };
-            
-            setMessages(current => [...current, assistantMessage]);
 
+            if (!response.ok) throw new Error(`Backend error: ${response.status}`);
+
+            const reader = response.body?.getReader();
+            if (!reader) throw new Error('No response body');
+
+            const decoder = new TextDecoder();
+            let buffer = '';
+            let accumulatedText = '';
+
+            while (true) {
+                const { done, value } = await reader.read();
+                if (done) break;
+
+                buffer += decoder.decode(value, { stream: true });
+                const lines = buffer.split('\n');
+                buffer = lines.pop() || '';
+
+                for (const line of lines) {
+                    if (!line.startsWith('data: ')) continue;
+                    const jsonStr = line.slice(6).trim();
+                    if (!jsonStr) continue;
+
+                    try {
+                        const event = JSON.parse(jsonStr);
+                        if (event.type === 'chunk') {
+                            accumulatedText += event.content;
+                            setMessages(current => current.map(m =>
+                                m.id === assistantPlaceholderId ? { ...m, text: accumulatedText } : m
+                            ));
+                        } else if (event.type === 'done') {
+                            const finalText = event.fullText || accumulatedText;
+                            setMessages(current => current.map(m =>
+                                m.id === assistantPlaceholderId ? { ...m, text: finalText } : m
+                            ));
+                        }
+                    } catch {
+                        // skip malformed JSON
+                    }
+                }
+            }
         } catch (error) {
             console.error(error);
-            setMessages(current => [...current, { id: Date.now() + 1, text: "Verbindungsfehler.", sender: 'assistant' }]);
+            setMessages(current => {
+                const hasPlaceholder = current.some(m => m.id === assistantPlaceholderId);
+                if (hasPlaceholder) {
+                    return current.map(m =>
+                        m.id === assistantPlaceholderId ? { ...m, text: "Verbindungsfehler." } : m
+                    );
+                }
+                return [...current, { id: Date.now() + 1, text: "Verbindungsfehler.", sender: 'assistant' }];
+            });
         } finally {
             setIsLoading(false);
         }
