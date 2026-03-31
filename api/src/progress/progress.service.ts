@@ -73,4 +73,20 @@ export class ProgressService {
             level
         };
     }
+
+    async getUserTheme(userId: string) {
+        const user = await this.prisma.user.findUnique({
+            where: { clerkId: userId },
+            select: { theme: true }
+        });
+        return { theme: user?.theme || 'light' };
+    }
+
+    async setUserTheme(userId: string, theme: string) {
+        await this.prisma.user.update({
+            where: { clerkId: userId },
+            data: { theme }
+        });
+        return { theme };
+    }
 }

@@ -185,11 +185,21 @@ export default function SettingsPage() {
     }, 300);
   };
 
-  // ---- Theme Change (apply immediately) ----
-  const handleThemeChange = (newTheme: ThemeMode) => {
+  // ---- Theme Change (apply immediately + sync to server) ----
+  const handleThemeChange = async (newTheme: ThemeMode) => {
     setTheme(newTheme);
     applyTheme(newTheme);
     localStorage.setItem('sigsag-theme', newTheme);
+    try {
+      const token = await getToken();
+      await fetch(`${API_BASE_URL}/progress/theme`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+        body: JSON.stringify({ theme: newTheme })
+      });
+    } catch (e) {
+      console.error('Failed to sync theme:', e);
+    }
   };
 
   // ---- Account Deletion ----
