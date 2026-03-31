@@ -1,5 +1,7 @@
 # Sigsag - Your AI German Tutor for Professionals
 
+**Live:** [https://sigsag-6055d.web.app](https://sigsag-6055d.web.app)
+
 Welcome to **Sigsag**, an AI-powered platform for learning German with a focus on professional everyday life. Sigsag combines state-of-the-art language models (Gemini), Retrieval-Augmented Generation (RAG), and speech technologies to provide an immersive B2-level learning experience.
 
 ---
