@@ -20,7 +20,7 @@ const AuthContext = createContext<AuthContextType>({
 });
 
 const isPublicRoute = (path: string) => {
-    return ['/', '/sign-in', '/sign-up', '/impressum', '/datenschutz'].some(p => path.startsWith(p));
+    return ['/', '/sign-in', '/sign-up', '/forgot-password', '/impressum', '/datenschutz'].some(p => path.startsWith(p));
 };
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
