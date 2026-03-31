@@ -154,7 +154,7 @@ const SmileyFace: React.FC<{
     isProcessing: boolean;
 }> = ({ isRecording, isAssistantSpeaking, isProcessing }) => {
     return (
-        <svg width="192" height="192" viewBox="0 0 192 192" className="drop-shadow-2xl">
+        <svg viewBox="0 0 192 192" className="drop-shadow-2xl w-32 h-32 lg:w-48 lg:h-48">
             <circle cx="96" cy="96" r="90" fill={isRecording ? '#10b981' : isAssistantSpeaking ? '#3b82f6' : '#fbbf24'} className="transition-colors duration-300" />
 
             {isRecording ? (
@@ -405,8 +405,8 @@ export const VoiceAssistant: React.FC<VoiceAssistantProps> = ({ onClose }) => {
                 </div>
             )}
 
-            <div className="bg-white dark:bg-card-dark w-full max-w-4xl rounded-2xl shadow-2xl flex flex-col lg:flex-row overflow-hidden h-[80vh]">
-                <div className="lg:w-1/2 bg-gradient-to-br from-yellow-100 to-orange-100 dark:from-yellow-900/20 dark:to-orange-900/20 flex flex-col items-center justify-center p-8 relative">
+            <div className="bg-white dark:bg-card-dark w-full max-w-4xl rounded-2xl shadow-2xl flex flex-col lg:flex-row overflow-y-auto lg:overflow-hidden h-[80vh]">
+                <div className="lg:w-1/2 bg-gradient-to-br from-yellow-100 to-orange-100 dark:from-yellow-900/20 dark:to-orange-900/20 flex flex-col items-center justify-center p-4 lg:p-8 relative shrink-0">
                     <button onClick={onClose} className="absolute top-4 right-4 p-2 rounded-full hover:bg-white/20 transition-colors">
                         <span className="material-symbols-outlined">close</span>
                     </button>
@@ -423,8 +423,8 @@ export const VoiceAssistant: React.FC<VoiceAssistantProps> = ({ onClose }) => {
                         </div>
                     </div>
 
-                    <div className="mt-8 text-center">
-                        <p className="text-2xl font-bold text-gray-800 dark:text-white mb-2">
+                    <div className="mt-4 lg:mt-8 text-center">
+                        <p className="text-lg lg:text-2xl font-bold text-gray-800 dark:text-white mb-1 lg:mb-2">
                             {isRecording ? 'Ich höre zu...' : isAssistantSpeaking ? 'Ich spreche...' : isProcessing ? 'Ich überlege...' : 'Bereit, um dir zuzuhören.'}
                         </p>
                         <p className="text-sm text-gray-600 dark:text-gray-400">
@@ -435,19 +435,19 @@ export const VoiceAssistant: React.FC<VoiceAssistantProps> = ({ onClose }) => {
                     <button
                         onClick={handleMicClick}
                         disabled={isProcessing || isAssistantSpeaking}
-                        className={`mt-8 p-6 rounded-full shadow-lg transition-all ${isRecording ? 'bg-red-500 hover:bg-red-600 animate-pulse' : 'bg-primary hover:bg-primary/90'} ${(isProcessing || isAssistantSpeaking) ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'} text-white`}
+                        className={`mt-4 lg:mt-8 p-4 lg:p-6 rounded-full shadow-lg transition-all ${isRecording ? 'bg-red-500 hover:bg-red-600 animate-pulse' : 'bg-primary hover:bg-primary/90'} ${(isProcessing || isAssistantSpeaking) ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'} text-white`}
                     >
-                        <span className="material-symbols-outlined text-4xl">{isRecording ? 'stop' : 'mic'}</span>
+                        <span className="material-symbols-outlined text-3xl lg:text-4xl">{isRecording ? 'stop' : 'mic'}</span>
                     </button>
                 </div>
 
-                <div className="lg:w-1/2 flex flex-col bg-white dark:bg-gray-900">
-                    <div className="p-6 border-b border-gray-200 dark:border-gray-700">
-                        <h3 className="text-xl font-bold">Gespräch</h3>
+                <div className="lg:w-1/2 flex flex-col bg-white dark:bg-gray-900 shrink-0 min-h-[40vh] lg:min-h-0">
+                    <div className="p-4 lg:p-6 border-b border-gray-200 dark:border-gray-700">
+                        <h3 className="text-lg lg:text-xl font-bold">Gespräch</h3>
                         <p className="text-sm text-gray-500 dark:text-gray-400">Sprich mit mir Deutsch. Denk dir ein Thema aus oder frage mich, ob ich eine Idee habe.</p>
                     </div>
 
-                    <div className="flex-1 overflow-y-auto p-6 space-y-4">
+                    <div className="flex-1 overflow-y-auto p-4 lg:p-6 space-y-4">
                         {messages.map(msg => (
                             <div key={msg.id} className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}>
                                 <div className={`max-w-[80%] p-4 rounded-2xl ${msg.sender === 'user' ? 'bg-primary text-white rounded-br-sm' : 'bg-yellow-100 dark:bg-yellow-900/30 text-gray-900 dark:text-white rounded-bl-sm border-2 border-yellow-300 dark:border-yellow-700'}`}>
