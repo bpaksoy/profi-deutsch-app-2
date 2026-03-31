@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useAuth } from '../context/AuthContext';
+import { useAuth, useUser } from '../context/AuthContext';
 
 interface ProgressData {
     totalXp: number;
@@ -10,11 +10,20 @@ interface ProgressData {
 }
 
 export const ProgressDashboard = ({ apiBaseUrl }: { apiBaseUrl: string }) => {
-    const { getToken } = useAuth();
+    const { getToken, isSignedIn } = useAuth();
     const [progress, setProgress] = useState<ProgressData | null>(null);
     const [loading, setLoading] = useState(true);
 
+    // Reset state when user logs out
     useEffect(() => {
+        if (!isSignedIn) {
+            setProgress(null);
+            setLoading(false);
+        }
+    }, [isSignedIn]);
+
+    useEffect(() => {
+        if (!isSignedIn) return;
         const fetchProgress = async () => {
             try {
                 const token = await getToken();
@@ -25,31 +34,18 @@ export const ProgressDashboard = ({ apiBaseUrl }: { apiBaseUrl: string }) => {
                     const data = await response.json();
                     setProgress(data);
                 } else {
-                    // Mock data if not established on backend yet
-                    setProgress({
-                        totalXp: 120,
-                        level: 1,
-                        practiceTime: 15,
-                        conversationCount: 3,
-                        wordsMastered: 42
-                    });
+                    setProgress(null);
                 }
             } catch (e) {
                 console.error("Failed to fetch progress", e);
-                setProgress({
-                    totalXp: 120,
-                    level: 1,
-                    practiceTime: 15,
-                    conversationCount: 3,
-                    wordsMastered: 42
-                });
+                setProgress(null);
             } finally {
                 setLoading(false);
             }
         };
 
         fetchProgress();
-    }, [apiBaseUrl, getToken]);
+    }, [apiBaseUrl, getToken, isSignedIn]);
 
     if (loading) return <div className="p-4">Lade Fortschritt...</div>;
     if (!progress) return null;

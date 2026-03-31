@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 
 interface ChatSidebarProps {
     conversations: { id: string; topic: string; createdAt?: string }[];
@@ -22,6 +22,8 @@ const formatDate = (dateStr?: string) => {
     return date.toLocaleDateString('de-DE', { month: 'short', day: 'numeric' });
 };
 
+const INITIAL_SHOW = 5;
+
 const ChatSidebar: React.FC<ChatSidebarProps> = ({
     conversations,
     activeConversationId,
@@ -30,6 +32,10 @@ const ChatSidebar: React.FC<ChatSidebarProps> = ({
     onDeleteConversation,
     onRenameConversation
 }) => {
+    const [showAll, setShowAll] = useState(false);
+    const visibleConversations = showAll ? conversations : conversations.slice(0, INITIAL_SHOW);
+    const hasMore = conversations.length > INITIAL_SHOW;
+
     return (
         <aside className="hidden md:flex w-64 flex-col border-r border-border-light dark:border-border-dark bg-background-light dark:bg-background-dark">
             <div className="p-4 border-b border-border-light dark:border-border-dark">
@@ -47,7 +53,7 @@ const ChatSidebar: React.FC<ChatSidebarProps> = ({
                     Verlauf
                 </h3>
                 <div className="space-y-1">
-                    {conversations.map((conversation) => (
+                    {visibleConversations.map((conversation) => (
                         <div key={conversation.id} className="group relative">
                             <button
                                 onClick={() => onSelectConversation(conversation.id)}
@@ -90,6 +96,14 @@ const ChatSidebar: React.FC<ChatSidebarProps> = ({
                             </div>
                         </div>
                     ))}
+                    {hasMore && (
+                        <button
+                            onClick={() => setShowAll(!showAll)}
+                            className="w-full text-center py-2 text-xs font-medium text-primary hover:text-primary/80 transition-colors"
+                        >
+                            {showAll ? 'Weniger anzeigen' : `Alle ${conversations.length} anzeigen`}
+                        </button>
+                    )}
                 </div>
             </div>
         </aside>

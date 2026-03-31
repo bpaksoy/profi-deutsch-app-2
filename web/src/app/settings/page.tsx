@@ -20,6 +20,7 @@ export default function SettingsPage() {
   const { user, isLoaded } = useUser();
   const { signOut } = useClerk();
   const { getToken } = useAuth();
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
 
   // Profile form state
   const [firstName, setFirstName] = useState('');
@@ -316,12 +317,29 @@ export default function SettingsPage() {
 
                 {/* Logout */}
                 <button
-                  onClick={() => signOut({ redirectUrl: '/' })}
+                  onClick={() => setShowLogoutModal(true)}
                   className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-border-light dark:hover:bg-card-dark cursor-pointer text-text-light dark:text-text-dark mt-6"
                 >
                   <span className="material-symbols-outlined text-gray-500 dark:text-gray-400 text-2xl">logout</span>
                   <p className="text-sm font-medium leading-normal">Ausloggen</p>
                 </button>
+                {showLogoutModal && (
+                  <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm" onClick={() => setShowLogoutModal(false)}>
+                    <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-6 mx-4 max-w-sm w-full" onClick={e => e.stopPropagation()}>
+                      <div className="flex flex-col items-center text-center gap-4">
+                        <div className="p-3 rounded-full bg-red-50 dark:bg-red-900/20">
+                          <span className="material-symbols-outlined text-3xl text-red-500">logout</span>
+                        </div>
+                        <h3 className="text-lg font-bold text-gray-900 dark:text-white">Abmelden?</h3>
+                        <p className="text-sm text-gray-500 dark:text-gray-400">Möchtest du dich wirklich abmelden?</p>
+                        <div className="flex gap-3 w-full mt-2">
+                          <button onClick={() => setShowLogoutModal(false)} className="flex-1 px-4 py-2.5 rounded-lg border border-gray-200 dark:border-gray-600 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">Abbrechen</button>
+                          <button onClick={() => signOut({ redirectUrl: '/' })} className="flex-1 px-4 py-2.5 rounded-lg bg-red-500 text-white text-sm font-medium hover:bg-red-600 transition-colors">Abmelden</button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             </aside>
 

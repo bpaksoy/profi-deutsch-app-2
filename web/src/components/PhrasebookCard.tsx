@@ -133,29 +133,64 @@ export const PhrasebookCard: React.FC = () => {
         }
     };
 
-    const filteredPhrases = Array.isArray(phrases) ? phrases.filter(phrase =>
-        phrase.german.toLowerCase().includes(searchQuery.toLowerCase())
-    ) : [];
+    const filteredPhrases = Array.isArray(phrases) ? phrases.filter(phrase => {
+        const q = searchQuery.toLowerCase();
+        return phrase.german.toLowerCase().includes(q) ||
+            (phrase.english && phrase.english.toLowerCase().includes(q)) ||
+            (phrase.context && phrase.context.toLowerCase().includes(q));
+    }) : [];
+
+    const totalPhrases = categories.reduce((sum, cat) => sum + cat.phraseCount, 0);
+
+    // Empty state: show a clean, minimal card
+    if (totalPhrases === 0 && phrases.length === 0) {
+        return (
+            <div className="bg-card-light dark:bg-card-dark rounded-xl shadow-sm border border-border-light dark:border-border-dark">
+                <div className="p-6 flex flex-col items-center text-center gap-3 py-10">
+                    <span className="material-symbols-outlined text-4xl text-gray-300 dark:text-gray-600">menu_book</span>
+                    <p className="text-gray-500 dark:text-gray-400">
+                        Noch keine Redemittel gespeichert.
+                    </p>
+                    <p className="text-sm text-gray-400 dark:text-gray-500">
+                        Speichere nützliche Ausdrücke aus deinen Gesprächen — sie erscheinen hier.
+                    </p>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="bg-card-light dark:bg-card-dark rounded-xl shadow-sm border border-border-light dark:border-border-dark">
             <div className="p-6">
-                <div className="flex flex-col sm:flex-row gap-4 justify-between mb-4">
+                {/* Search bar first, then categories below */}
+                <div className="flex flex-col gap-3 mb-4">
+                    <div className="relative w-full sm:w-72">
+                        <input
+                            className="w-full pl-10 pr-4 py-2 rounded-full bg-accent/10 dark:bg-background-dark border border-border-light dark:border-border-dark focus:ring-2 focus:ring-primary/50 focus:border-primary outline-none transition-all text-sm"
+                            placeholder="Redemittel suchen..."
+                            type="text"
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                        />
+                        <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-[20px]">
+                            search
+                        </span>
+                    </div>
                     <div className="flex gap-2 flex-wrap">
                         <button
                             onClick={() => setSelectedCategory('')}
-                            className={`px-4 py-2 rounded-full text-sm font-semibold transition-colors ${!selectedCategory
+                            className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-colors ${!selectedCategory
                                 ? 'bg-primary/10 text-primary dark:bg-accent dark:text-primary'
                                 : 'hover:bg-gray-100 dark:hover:bg-white/10'
                                 }`}
                         >
-                            Alle
+                            Alle ({totalPhrases})
                         </button>
-                        {categories.map(cat => (
+                        {categories.filter(cat => cat.phraseCount > 0).map(cat => (
                             <button
                                 key={cat.id}
                                 onClick={() => setSelectedCategory(cat.id)}
-                                className={`px-4 py-2 rounded-full text-sm font-semibold transition-colors ${selectedCategory === cat.id
+                                className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-colors ${selectedCategory === cat.id
                                     ? 'bg-primary/10 text-primary dark:bg-accent dark:text-primary'
                                     : 'hover:bg-gray-100 dark:hover:bg-white/10'
                                     }`}
@@ -164,53 +199,41 @@ export const PhrasebookCard: React.FC = () => {
                             </button>
                         ))}
                     </div>
-                    <div className="relative w-full sm:w-64">
-                        <input
-                            className="w-full pl-10 pr-4 py-2 rounded-full bg-accent/10 dark:bg-background-dark border border-border-light dark:border-border-dark focus:ring-2 focus:ring-primary/50 focus:border-primary outline-none transition-all"
-                            placeholder="Redemittel suchen..."
-                            type="text"
-                            value={searchQuery}
-                            onChange={(e) => setSearchQuery(e.target.value)}
-                        />
-                        <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
-                            search
-                        </span>
-                    </div>
                 </div>
-                <ul className="mt-6 space-y-4">
+                <ul className="space-y-3">
                     {filteredPhrases.length === 0 ? (
-                        <li className="text-center py-8 text-gray-500">
-                            Noch keine Redemittel gespeichert. Füge hier Redemittel aus deinen Gesprächen ein.
+                        <li className="text-center py-6 text-gray-500 text-sm">
+                            Keine Redemittel gefunden.
                         </li>
                     ) : (
                         filteredPhrases.map(phrase => (
                             <li
                                 key={phrase.id}
-                                className="flex justify-between items-center p-4 rounded-lg bg-background-light dark:bg-background-dark"
+                                className="flex justify-between items-center p-3 rounded-lg bg-background-light dark:bg-background-dark"
                             >
-                                <div className="flex-1">
-                                    <p className="font-medium">{phrase.german}</p>
+                                <div className="flex-1 min-w-0">
+                                    <p className="font-medium text-sm">{phrase.german}</p>
                                     {phrase.english && (
-                                        <p className="text-sm text-gray-500 mt-1">{phrase.english}</p>
+                                        <p className="text-xs text-gray-500 mt-0.5">{phrase.english}</p>
                                     )}
                                     {phrase.context && (
-                                        <p className="text-xs text-gray-400 mt-1">{phrase.context}</p>
+                                        <p className="text-xs text-gray-400 mt-0.5 truncate">{phrase.context}</p>
                                     )}
                                 </div>
-                                <div className="flex items-center gap-3">
+                                <div className="flex items-center gap-2 ml-2 flex-shrink-0">
                                     <button
                                         onClick={() => playPhrase(phrase.german)}
                                         aria-label="Anhören"
-                                        className="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-white/10 transition-colors"
+                                        className="p-1.5 rounded-full hover:bg-gray-200 dark:hover:bg-white/10 transition-colors"
                                     >
-                                        <span className="material-symbols-outlined">volume_up</span>
+                                        <span className="material-symbols-outlined text-[20px]">volume_up</span>
                                     </button>
                                     <button
                                         onClick={() => deletePhrase(phrase.id)}
                                         aria-label="Löschen"
-                                        className="p-2 rounded-full hover:bg-red-100 dark:hover:bg-red-900/20 text-red-600 transition-colors"
+                                        className="p-1.5 rounded-full hover:bg-red-100 dark:hover:bg-red-900/20 text-red-600 transition-colors"
                                     >
-                                        <span className="material-symbols-outlined">delete</span>
+                                        <span className="material-symbols-outlined text-[20px]">delete</span>
                                     </button>
                                 </div>
                             </li>
