@@ -25,7 +25,8 @@ Antworte immer sehr kurz, präzise und ermutigend (maximal 1-2 Sätze). Keine Ma
                 }],
                 generationConfig: {
                     temperature: 0.8,
-                    maxOutputTokens: 100,
+                    maxOutputTokens: 1024,
+                    thinkingConfig: { thinkingBudget: 0 },
                 },
                 // ... safety settings ...
             })

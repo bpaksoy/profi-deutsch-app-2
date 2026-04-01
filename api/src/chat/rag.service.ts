@@ -139,9 +139,10 @@ Du korrigierst Fehler sanft, aber nicht pedantisch. Wenn der Benutzer einen Fehl
                         contents: history,
                         generationConfig: {
                             temperature: 0.7,
-                            maxOutputTokens: 500,
+                            maxOutputTokens: 2048,
                             topP: 0.8,
-                            topK: 40
+                            topK: 40,
+                            thinkingConfig: { thinkingBudget: 0 }
                         },
                         systemInstruction: {
                             parts: [{ text: systemPrompt }]
@@ -300,7 +301,7 @@ Du korrigierst Fehler sanft, aber nicht pedantisch. Wenn der Benutzer einen Fehl
 
         const requestBody = JSON.stringify({
             contents: history,
-            generationConfig: { temperature: 0.7, maxOutputTokens: 500, topP: 0.8, topK: 40 },
+            generationConfig: { temperature: 0.7, maxOutputTokens: 2048, topP: 0.8, topK: 40, thinkingConfig: { thinkingBudget: 0 } },
             systemInstruction: { parts: [{ text: systemPrompt }] },
             safetySettings: [
                 { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_ONLY_HIGH" },
