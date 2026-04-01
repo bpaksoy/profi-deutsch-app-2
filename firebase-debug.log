@@ -1,0 +1,45 @@
+[debug] [2026-04-01T11:19:42.656Z] ----------------------------------------------------------------------
+[debug] [2026-04-01T11:19:42.662Z] Command:       /usr/local/bin/node /usr/local/bin/firebase deploy
+[debug] [2026-04-01T11:19:42.662Z] CLI Version:   15.8.0
+[debug] [2026-04-01T11:19:42.662Z] Platform:      darwin
+[debug] [2026-04-01T11:19:42.662Z] Node Version:  v22.13.1
+[debug] [2026-04-01T11:19:42.662Z] Time:          Wed Apr 01 2026 13:19:42 GMT+0200 (Central European Summer Time)
+[debug] [2026-04-01T11:19:42.662Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2026-04-01T11:19:43.536Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2026-04-01T11:19:43.536Z] > authorizing via signed-in user (paksoybanu83@gmail.com)
+[debug] [2026-04-01T11:19:43.536Z] [iam] checking project sigsag-6055d for permissions ["cloudfunctions.functions.create","cloudfunctions.functions.delete","cloudfunctions.functions.get","cloudfunctions.functions.list","cloudfunctions.functions.update","cloudfunctions.operations.get","firebase.projects.get","firebasehosting.sites.update"]
+[debug] [2026-04-01T11:19:43.537Z] Checked if tokens are valid: true, expires at: 1775045239541
+[debug] [2026-04-01T11:19:43.537Z] Checked if tokens are valid: true, expires at: 1775045239541
+[debug] [2026-04-01T11:19:43.538Z] >>> [apiv2][query] POST https://cloudresourcemanager.googleapis.com/v1/projects/sigsag-6055d:testIamPermissions [none]
+[debug] [2026-04-01T11:19:43.538Z] >>> [apiv2][(partial)header] POST https://cloudresourcemanager.googleapis.com/v1/projects/sigsag-6055d:testIamPermissions  x-goog-user-project=sigsag-6055d
+[debug] [2026-04-01T11:19:43.538Z] >>> [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/sigsag-6055d:testIamPermissions {"permissions":["cloudfunctions.functions.create","cloudfunctions.functions.delete","cloudfunctions.functions.get","cloudfunctions.functions.list","cloudfunctions.functions.update","cloudfunctions.operations.get","firebase.projects.get","firebasehosting.sites.update"]}
+[debug] [2026-04-01T11:19:43.898Z] <<< [apiv2][status] POST https://cloudresourcemanager.googleapis.com/v1/projects/sigsag-6055d:testIamPermissions 200
+[debug] [2026-04-01T11:19:43.898Z] <<< [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/sigsag-6055d:testIamPermissions {"permissions":["cloudfunctions.functions.create","cloudfunctions.functions.delete","cloudfunctions.functions.get","cloudfunctions.functions.list","cloudfunctions.functions.update","cloudfunctions.operations.get","firebase.projects.get","firebasehosting.sites.update"]}
+[debug] [2026-04-01T11:19:43.899Z] Checked if tokens are valid: true, expires at: 1775045239541
+[debug] [2026-04-01T11:19:43.899Z] Checked if tokens are valid: true, expires at: 1775045239541
+[debug] [2026-04-01T11:19:43.899Z] >>> [apiv2][query] POST https://iam.googleapis.com/v1/projects/sigsag-6055d/serviceAccounts/sigsag-6055d@appspot.gserviceaccount.com:testIamPermissions [none]
+[debug] [2026-04-01T11:19:43.899Z] >>> [apiv2][body] POST https://iam.googleapis.com/v1/projects/sigsag-6055d/serviceAccounts/sigsag-6055d@appspot.gserviceaccount.com:testIamPermissions {"permissions":["iam.serviceAccounts.actAs"]}
+[debug] [2026-04-01T11:19:44.755Z] <<< [apiv2][status] POST https://iam.googleapis.com/v1/projects/sigsag-6055d/serviceAccounts/sigsag-6055d@appspot.gserviceaccount.com:testIamPermissions 200
+[debug] [2026-04-01T11:19:44.755Z] <<< [apiv2][body] POST https://iam.googleapis.com/v1/projects/sigsag-6055d/serviceAccounts/sigsag-6055d@appspot.gserviceaccount.com:testIamPermissions {"permissions":["iam.serviceAccounts.actAs"]}
+[debug] [2026-04-01T11:19:44.755Z] Checked if tokens are valid: true, expires at: 1775045239541
+[debug] [2026-04-01T11:19:44.755Z] Checked if tokens are valid: true, expires at: 1775045239541
+[debug] [2026-04-01T11:19:44.756Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects/sigsag-6055d [none]
+[debug] [2026-04-01T11:19:45.197Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects/sigsag-6055d 200
+[debug] [2026-04-01T11:19:45.198Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects/sigsag-6055d {"projectId":"sigsag-6055d","projectNumber":"1032406816801","displayName":"Sigsag","name":"projects/sigsag-6055d","resources":{"hostingSite":"sigsag-6055d"},"state":"ACTIVE","etag":"1_4374b1dd-4956-46b3-bd73-2156ff066014"}
+[debug] [2026-04-01T11:19:47.314Z] defaultcredentials: writing to file /Users/banupaksoy/.config/firebase/paksoybanu83_gmail_com_application_default_credentials.json
+[debug] [2026-04-01T11:19:47.315Z] Checked if tokens are valid: true, expires at: 1775045239541
+[debug] [2026-04-01T11:19:47.316Z] Checked if tokens are valid: true, expires at: 1775045239541
+[debug] [2026-04-01T11:19:47.316Z] >>> [apiv2][query] GET https://firebasehosting.googleapis.com/v1beta1/projects/sigsag-6055d/sites pageToken=&pageSize=10
+[debug] [2026-04-01T11:19:48.589Z] <<< [apiv2][status] GET https://firebasehosting.googleapis.com/v1beta1/projects/sigsag-6055d/sites 200
+[debug] [2026-04-01T11:19:48.589Z] <<< [apiv2][body] GET https://firebasehosting.googleapis.com/v1beta1/projects/sigsag-6055d/sites {"sites":[{"name":"projects/sigsag-6055d/sites/sigsag-6055d","defaultUrl":"https://sigsag-6055d.web.app","type":"DEFAULT_SITE"}]}
+[debug] [2026-04-01T11:19:48.590Z] Checked if tokens are valid: true, expires at: 1775045239541
+[debug] [2026-04-01T11:19:48.590Z] Checked if tokens are valid: true, expires at: 1775045239541
+[debug] [2026-04-01T11:19:48.591Z] >>> [apiv2][query] GET https://firebasehosting.googleapis.com/v1beta1/projects/sigsag-6055d/sites 
+[debug] [2026-04-01T11:19:49.445Z] <<< [apiv2][status] GET https://firebasehosting.googleapis.com/v1beta1/projects/sigsag-6055d/sites 200
+[debug] [2026-04-01T11:19:49.445Z] <<< [apiv2][body] GET https://firebasehosting.googleapis.com/v1beta1/projects/sigsag-6055d/sites {"sites":[{"name":"projects/sigsag-6055d/sites/sigsag-6055d","defaultUrl":"https://sigsag-6055d.web.app","type":"DEFAULT_SITE"}]}
+[debug] [2026-04-01T11:19:49.445Z] Checked if tokens are valid: true, expires at: 1775045239541
+[debug] [2026-04-01T11:19:49.445Z] Checked if tokens are valid: true, expires at: 1775045239541
+[debug] [2026-04-01T11:19:49.445Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects/sigsag-6055d/webApps/-/config [none]
+[debug] [2026-04-01T11:19:50.115Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects/sigsag-6055d/webApps/-/config 200
+[debug] [2026-04-01T11:19:50.116Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects/sigsag-6055d/webApps/-/config {"projectId":"sigsag-6055d","appId":"1:1032406816801:web:6cfaf37e0a33031802ab60","storageBucket":"sigsag-6055d.firebasestorage.app","apiKey":"AIzaSyCG3vZ14_EL19KSjVPf0bvVMm7AC3fy24Q","authDomain":"sigsag-6055d.firebaseapp.com","messagingSenderId":"1032406816801","measurementId":"G-VTN9D1HFE5","projectNumber":"1032406816801","version":"2"}

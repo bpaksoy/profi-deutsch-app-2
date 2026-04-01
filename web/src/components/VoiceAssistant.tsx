@@ -115,12 +115,8 @@ const useAudioRecorder = (submitCallback: (blob: Blob) => Promise<void>) => {
                 audioChunksRef.current = [];
                 stream.getTracks().forEach(track => track.stop());
                 
-                console.log('Recorded WebM blob:', webmBlob.size, 'bytes');
-                
                 try {
-                    console.log('Starting WAV conversion...');
                     const wavBlob = await convertToWav(webmBlob);
-                    console.log('WAV conversion successful:', wavBlob.size, 'bytes');
                     await submitCallback(wavBlob);
                 } catch (conversionError) {
                     console.error('WAV conversion failed, falling back to WebM:', conversionError);
@@ -332,7 +328,6 @@ export const VoiceAssistant: React.FC<VoiceAssistantProps> = ({ onClose }) => {
 
         try {
             const token = await getToken();
-            console.log('Sending audio to backend:', audioBlob.type, audioBlob.size, 'bytes');
             
             // Convert blob to base64 to avoid Firebase Functions multipart issues
             const arrayBuffer = await audioBlob.arrayBuffer();
@@ -352,16 +347,11 @@ export const VoiceAssistant: React.FC<VoiceAssistantProps> = ({ onClose }) => {
                 body: JSON.stringify({ audioBase64: base64 }),
             });
 
-            console.log('Response status:', response.status);
-
             if (!response.ok) {
-                const errorText = await response.text();
-                console.error('Backend error:', errorText);
                 throw new Error(`Backend failed to transcribe/respond: ${response.status}`);
             }
 
             const jsonResponse = await response.json();
-            console.log('Backend response:', jsonResponse);
             const aiMessage: Message = {
                 id: Date.now(),
                 text: jsonResponse.responseText || "Tut mir leid, ich konnte keine Antwort generieren.",
