@@ -336,7 +336,12 @@ export const VoiceAssistant: React.FC<VoiceAssistantProps> = ({ onClose }) => {
             
             // Convert blob to base64 to avoid Firebase Functions multipart issues
             const arrayBuffer = await audioBlob.arrayBuffer();
-            const base64 = btoa(String.fromCharCode(...new Uint8Array(arrayBuffer)));
+            const bytes = new Uint8Array(arrayBuffer);
+            let binary = '';
+            for (let i = 0; i < bytes.length; i++) {
+                binary += String.fromCharCode(bytes[i]);
+            }
+            const base64 = btoa(binary);
             
             const response = await fetch(`${API_BASE_URL}/chat/stt`, {
                 method: 'POST',
