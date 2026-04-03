@@ -5,7 +5,14 @@ import dynamic from 'next/dynamic';
 import { useUser } from '../../context/AuthContext';
 
 // Dynamically import ChatInterface with SSR disabled to avoid hydration errors
-const ChatInterface = dynamic(() => import('./ChatInterface'), { ssr: false });
+const ChatInterface = dynamic(() => import('./ChatInterface'), { 
+  ssr: false,
+  loading: () => (
+    <div className="flex h-[calc(100vh-64px)] items-center justify-center">
+      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+    </div>
+  )
+});
 
 const USER_AVATAR = "https://api.dicebear.com/7.x/notionists/svg?seed=User&backgroundColor=f1f5f9";
 const AI_AVATAR = "/flo-avatar.svg";

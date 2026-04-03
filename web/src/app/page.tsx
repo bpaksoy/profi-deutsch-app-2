@@ -7,7 +7,7 @@ import { useAuth } from "../context/AuthContext";
 export default function Page() { 
    const { isSignedIn, isLoaded } = useAuth();
 
-   const startHref = isLoaded && isSignedIn ? "/dashboard" : "/sign-in";
+   const startHref = isLoaded && isSignedIn ? "/dashboard" : "/chat";
    const signUpHref = isLoaded && isSignedIn ? "/dashboard" : "/sign-up";
 
    return (
