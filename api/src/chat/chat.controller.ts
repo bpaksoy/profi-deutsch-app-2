@@ -12,7 +12,6 @@ import { ProgressService } from '../progress/progress.service';
 import { ConversationService } from './conversation.service';
 
 @Controller('chat')
-@UseGuards(FirebaseAuthGuard)
 export class ChatController {
   private readonly logger = new Logger(ChatController.name);
 
@@ -50,6 +49,7 @@ export class ChatController {
   }
 
   @Post('stt')
+  @UseGuards(FirebaseAuthGuard)
   async transcribeAndProcess(
     @Body() body: { audioBase64: string; conversationId?: string },
     @Session() session: Record<string, any>,
@@ -213,6 +213,7 @@ export class ChatController {
   }
 
   @Post('reset-conversation')
+  @UseGuards(FirebaseAuthGuard)
   async resetConversation(@Session() session: Record<string, any>) {
     if (session.conversationId) {
       this.ragService.clearConversation(session.conversationId);
@@ -223,21 +224,25 @@ export class ChatController {
   }
 
   @Get('conversations')
+  @UseGuards(FirebaseAuthGuard)
   async getConversations(@GetUser() user: any) {
     return this.conversationService.getConversations(user.clerkId);
   }
 
   @Get('conversations/:id/messages')
+  @UseGuards(FirebaseAuthGuard)
   async getMessages(@Param('id') id: string) {
     return this.conversationService.getMessages(id);
   }
 
   @Post('conversations')
+  @UseGuards(FirebaseAuthGuard)
   async createConversation(@GetUser() user: any) {
     return this.conversationService.createConversation(user.clerkId, 'Neues Gespräch');
   }
 
   @Patch('conversations/:id')
+  @UseGuards(FirebaseAuthGuard)
   async updateConversation(
     @Param('id') id: string,
     @Body() body: { topic: string },
@@ -247,6 +252,7 @@ export class ChatController {
   }
 
   @Delete('conversations/:id')
+  @UseGuards(FirebaseAuthGuard)
   async deleteConversation(
     @Param('id') id: string,
     @GetUser() user: any

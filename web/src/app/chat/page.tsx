@@ -20,9 +20,7 @@ const AI_AVATAR = "/flo-avatar.svg";
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
 
 export default function ChatPage() {
-  const { user, isLoaded } = useUser();
-
-  if (!isLoaded) return null;
+  const { user } = useUser();
 
   return <ChatInterface
     username={user?.firstName || 'Entdecker'}

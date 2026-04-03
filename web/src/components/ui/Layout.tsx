@@ -205,16 +205,8 @@ const Sidebar: React.FC<{ activeNav?: string; user: any }> = ({ activeNav, user 
 };
 
 export const CustomLayout: React.FC<LayoutProps> = ({ children, activeNav }) => {
-  const { user, isLoaded } = useUser();
+  const { user } = useUser();
   const showPhraseSidebar = activeNav === 'phrases';
-
-  if (!isLoaded) {
-    return (
-      <div className="h-screen w-full flex items-center justify-center bg-background-light dark:bg-background-dark">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-      </div>
-    );
-  }
 
   return (
     <div className="flex flex-col min-h-screen bg-background-light dark:bg-background-dark">

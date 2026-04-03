@@ -155,7 +155,7 @@ export const ChatInterface = (props: {
     aiAvatarUrl: string;
     apiBaseUrl: string;
 }) => {
-    const { getToken, isSignedIn } = useAuth();
+    const { getToken, isSignedIn, isLoaded } = useAuth();
     const [isAgentListening, setIsAgentListening] = useState(false);
     const [messages, setMessages] = useState<ChatMessageData[]>([]);
     const [textInput, setTextInput] = useState('');
@@ -194,6 +194,7 @@ export const ChatInterface = (props: {
     }, [messages]);
 
     useEffect(() => {
+        if (!isLoaded) return; // Wait for auth to resolve before initializing
         if (isSignedIn) {
             loadConversations();
             loadCategories();
@@ -206,7 +207,7 @@ export const ChatInterface = (props: {
                 setGuestLimitReached(true);
             }
         }
-    }, [isSignedIn]);
+    }, [isLoaded, isSignedIn]);
 
     const loadCategories = async () => {
         try {
@@ -233,12 +234,12 @@ export const ChatInterface = (props: {
             loadMessages(currentConversationId);
         } else if (conversations.length > 0) {
             setCurrentConversationId(conversations[0].id);
-        } else if (conversations.length === 0) {
+        } else if (conversations.length === 0 && isLoaded) {
             setMessages([
                 { type: 'ai', sender: 'bot', message: 'Hallo! Ich bin Flo. Starte ein neues Gespräch!', avatar: props.aiAvatarUrl }
             ]);
         }
-    }, [currentConversationId, conversations.length, isSignedIn]);
+    }, [currentConversationId, conversations.length, isSignedIn, isLoaded]);
 
     useEffect(() => {
         const handleSelection = () => {
