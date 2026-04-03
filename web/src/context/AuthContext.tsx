@@ -19,8 +19,11 @@ const AuthContext = createContext<AuthContextType>({
     logout: async () => {},
 });
 
+const PUBLIC_ROUTES = ['/sign-in', '/sign-up', '/forgot-password', '/impressum', '/datenschutz'];
+
 const isPublicRoute = (path: string) => {
-    return ['/', '/sign-in', '/sign-up', '/forgot-password', '/impressum', '/datenschutz'].some(p => path.startsWith(p));
+    if (path === '/') return true;
+    return PUBLIC_ROUTES.some(p => path.startsWith(p));
 };
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
@@ -33,13 +36,15 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
             setUser(firebaseUser);
             setLoading(false);
-            
-            if (!loading && !firebaseUser && !isPublicRoute(pathname)) {
-                router.push('/sign-in');
-            }
         });
         return () => unsubscribe();
-    }, [pathname, router]);
+    }, []);
+
+    useEffect(() => {
+        if (!loading && !user && !isPublicRoute(pathname)) {
+            router.push('/sign-in');
+        }
+    }, [loading, user, pathname, router]);
 
     const getToken = async () => {
         if (!auth.currentUser) return null;
