@@ -19,7 +19,7 @@ const AuthContext = createContext<AuthContextType>({
     logout: async () => {},
 });
 
-const PUBLIC_ROUTES = ['/sign-in', '/sign-up', '/forgot-password', '/impressum', '/datenschutz'];
+const PUBLIC_ROUTES = ['/sign-in', '/sign-up', '/forgot-password', '/impressum', '/datenschutz', '/chat', '/pricing', '/tipps'];
 
 const isPublicRoute = (path: string) => {
     if (path === '/') return true;

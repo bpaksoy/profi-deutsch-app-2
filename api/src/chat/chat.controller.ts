@@ -2,6 +2,7 @@ import { Controller, Get, Query, Res, InternalServerErrorException, Header, Logg
 
 import { Response } from 'express';
 import { FirebaseAuthGuard } from '../auth/firebase-auth.guard';
+import { OptionalFirebaseAuthGuard } from '../auth/optional-auth.guard';
 import { GetUser } from '../auth/get-user.decorator';
 import { ChatService } from './chat.service';
 import { RAGService } from './rag.service';
@@ -25,6 +26,7 @@ export class ChatController {
   ) { }
 
   @Get('tts')
+  @UseGuards(OptionalFirebaseAuthGuard)
   @Header('Content-Type', 'audio/mpeg')
   @Header('Cache-Control', 'no-cache')
   async getTtsStream(
@@ -125,42 +127,50 @@ export class ChatController {
   }
 
   @Post('text')
+  @UseGuards(OptionalFirebaseAuthGuard)
   async processText(
     @Body() body: { message: string, conversationId?: string },
     @Res() res: Response,
     @GetUser() user: any
   ) {
     const { message } = body;
-    const userId = user.clerkId;
-
-    // Usage limits check
-    const dbUser = await this.conversationService.validateUserPlan(userId);
-    const LIMIT = 500;
-
-    const now = new Date();
-    const last = dbUser.lastMessageAt ? new Date(dbUser.lastMessageAt) : null;
-    const isNewDay = !last || now.toDateString() !== last.toDateString();
-
-    if (dbUser.planTier === 'FREE' && !isNewDay && dbUser.dailyMessagesCount >= LIMIT) {
-      res.status(403).json({ message: `Limit reached. Please upgrade to a paid plan or come back tomorrow! ${process.env.FRONTEND_URL}/pricing` });
-      return;
-    }
-
-    this.logger.log(`Received text message from ${userId}: ${message} `);
+    const isGuest = !user;
 
     if (!message || message.trim() === '') {
-      res.status(500).json({ message: 'Message cannot be empty' });
+      res.status(400).json({ message: 'Message cannot be empty' });
       return;
     }
 
+    let userId: string | null = null;
     let conversationId = body.conversationId;
 
-    if (!conversationId) {
-      const conv = await this.conversationService.createConversation(userId, 'Text Chat');
-      conversationId = conv.id;
-    }
+    if (!isGuest) {
+      userId = user.clerkId;
 
-    await this.conversationService.addMessage(conversationId, 'user', message);
+      // Usage limits check for authenticated users
+      const dbUser = await this.conversationService.validateUserPlan(userId);
+      const LIMIT = 500;
+
+      const now = new Date();
+      const last = dbUser.lastMessageAt ? new Date(dbUser.lastMessageAt) : null;
+      const isNewDay = !last || now.toDateString() !== last.toDateString();
+
+      if (dbUser.planTier === 'FREE' && !isNewDay && dbUser.dailyMessagesCount >= LIMIT) {
+        res.status(403).json({ message: `Limit reached. Please upgrade to a paid plan or come back tomorrow! ${process.env.FRONTEND_URL}/pricing` });
+        return;
+      }
+
+      this.logger.log(`Received text message from ${userId}: ${message} `);
+
+      if (!conversationId) {
+        const conv = await this.conversationService.createConversation(userId, 'Text Chat');
+        conversationId = conv.id;
+      }
+
+      await this.conversationService.addMessage(conversationId, 'user', message);
+    } else {
+      this.logger.log(`Received guest text message: ${message.substring(0, 50)}`);
+    }
 
     // Set up SSE streaming
     res.setHeader('Content-Type', 'text/event-stream');
@@ -185,13 +195,15 @@ export class ChatController {
         .replace(/`{1,3}/g, '')
         .trim();
 
-      // Fire-and-forget: save message and track activity in parallel
-      Promise.all([
-        this.conversationService.addMessage(conversationId, 'assistant', fullText),
-        this.progressService.trackActivity(userId, 'message', 1)
-      ]).catch(err => this.logger.error('Background save error:', err.message));
+      // Save conversation only for authenticated users
+      if (!isGuest && conversationId && userId) {
+        Promise.all([
+          this.conversationService.addMessage(conversationId, 'assistant', fullText),
+          this.progressService.trackActivity(userId, 'message', 1)
+        ]).catch(err => this.logger.error('Background save error:', err.message));
+      }
 
-      res.write(`data: ${JSON.stringify({ type: 'done', conversationId, fullText })}\n\n`);
+      res.write(`data: ${JSON.stringify({ type: 'done', conversationId: conversationId || null, fullText })}\n\n`);
       res.end();
     } catch (error) {
       this.logger.error('Streaming error:', error.message);

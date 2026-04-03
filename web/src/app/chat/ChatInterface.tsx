@@ -155,7 +155,7 @@ export const ChatInterface = (props: {
     aiAvatarUrl: string;
     apiBaseUrl: string;
 }) => {
-    const { getToken } = useAuth();
+    const { getToken, isSignedIn } = useAuth();
     const [isAgentListening, setIsAgentListening] = useState(false);
     const [messages, setMessages] = useState<ChatMessageData[]>([]);
     const [textInput, setTextInput] = useState('');
@@ -166,7 +166,24 @@ export const ChatInterface = (props: {
     const [showCategoryModal, setShowCategoryModal] = useState(false);
     const [phraseToSave, setPhraseToSave] = useState<string | null>(null);
     const [availableCategories, setAvailableCategories] = useState<string[]>([]);
+    const [guestLimitReached, setGuestLimitReached] = useState(false);
     const messagesEndRef = useRef<HTMLDivElement>(null);
+
+    const GUEST_DAILY_LIMIT = 10;
+
+    const getGuestMessageCount = (): number => {
+        const today = new Date().toISOString().slice(0, 10);
+        const key = `guest_messages_${today}`;
+        return parseInt(localStorage.getItem(key) || '0', 10);
+    };
+
+    const incrementGuestMessageCount = (): number => {
+        const today = new Date().toISOString().slice(0, 10);
+        const key = `guest_messages_${today}`;
+        const count = getGuestMessageCount() + 1;
+        localStorage.setItem(key, count.toString());
+        return count;
+    };
 
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -177,9 +194,19 @@ export const ChatInterface = (props: {
     }, [messages]);
 
     useEffect(() => {
-        loadConversations();
-        loadCategories();
-    }, []);
+        if (isSignedIn) {
+            loadConversations();
+            loadCategories();
+        } else {
+            // Guest: show welcome message, check daily limit
+            setMessages([
+                { type: 'ai', sender: 'bot', message: 'Hallo! Ich bin Flo. Schreib mir etwas auf Deutsch und ich helfe dir!', avatar: props.aiAvatarUrl }
+            ]);
+            if (getGuestMessageCount() >= GUEST_DAILY_LIMIT) {
+                setGuestLimitReached(true);
+            }
+        }
+    }, [isSignedIn]);
 
     const loadCategories = async () => {
         try {
@@ -201,6 +228,7 @@ export const ChatInterface = (props: {
     };
 
     useEffect(() => {
+        if (!isSignedIn) return;
         if (currentConversationId) {
             loadMessages(currentConversationId);
         } else if (conversations.length > 0) {
@@ -210,7 +238,7 @@ export const ChatInterface = (props: {
                 { type: 'ai', sender: 'bot', message: 'Hallo! Ich bin Flo. Starte ein neues Gespräch!', avatar: props.aiAvatarUrl }
             ]);
         }
-    }, [currentConversationId, conversations.length]);
+    }, [currentConversationId, conversations.length, isSignedIn]);
 
     useEffect(() => {
         const handleSelection = () => {
@@ -336,6 +364,21 @@ export const ChatInterface = (props: {
     const handleTextSubmit = async () => {
         if (!textInput.trim() || isProcessing) return;
 
+        // Guest daily limit check
+        if (!isSignedIn) {
+            if (getGuestMessageCount() >= GUEST_DAILY_LIMIT) {
+                setGuestLimitReached(true);
+                setMessages(current => [...current, {
+                    type: 'ai',
+                    sender: 'bot',
+                    message: 'Du hast dein tägliches Limit von 10 Nachrichten erreicht! 🛑 Melde dich an oder komm morgen wieder!',
+                    avatar: props.aiAvatarUrl,
+                    timestamp: new Date().toISOString()
+                }]);
+                return;
+            }
+        }
+
         const userMessage = textInput.trim();
         setTextInput('');
         setIsProcessing(true);
@@ -361,16 +404,16 @@ export const ChatInterface = (props: {
         }]);
 
         try {
-            const token = await getToken();
+            const token = isSignedIn ? await getToken() : null;
+            const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+            if (token) headers['Authorization'] = `Bearer ${token}`;
+
             const response = await fetch(`${props.apiBaseUrl}/chat/text`, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
+                headers,
                 body: JSON.stringify({
                     message: userMessage,
-                    conversationId: currentConversationId
+                    conversationId: isSignedIn ? currentConversationId : undefined
                 }),
             });
 
@@ -443,7 +486,7 @@ export const ChatInterface = (props: {
                                 return updated;
                             });
                             // Request TTS in the background
-                            fetchAndPlayTts(finalText, token);
+                            fetchAndPlayTts(finalText);
                         }
                     } catch {
                         // skip malformed JSON
@@ -454,7 +497,15 @@ export const ChatInterface = (props: {
             if (newConversationId && newConversationId !== currentConversationId) {
                 setCurrentConversationId(newConversationId);
             }
-            loadConversations();
+            if (isSignedIn) {
+                loadConversations();
+            } else {
+                // Increment guest message counter
+                const count = incrementGuestMessageCount();
+                if (count >= GUEST_DAILY_LIMIT) {
+                    setGuestLimitReached(true);
+                }
+            }
         } catch (error) {
             console.error('Text Submission Failed:', error);
             setMessages(current => {
@@ -473,10 +524,15 @@ export const ChatInterface = (props: {
         }
     };
 
-    const fetchAndPlayTts = async (text: string, token: string | null) => {
+    const fetchAndPlayTts = async (text: string) => {
         try {
+            const headers: Record<string, string> = {};
+            if (isSignedIn) {
+                const token = await getToken();
+                if (token) headers['Authorization'] = `Bearer ${token}`;
+            }
             const res = await fetch(`${props.apiBaseUrl}/chat/tts?text=${encodeURIComponent(text)}`, {
-                headers: { 'Authorization': `Bearer ${token}` }
+                headers
             });
             if (res.ok) {
                 const audioBlob = await res.blob();
@@ -588,7 +644,7 @@ export const ChatInterface = (props: {
     };
 
     const handleSavePhrase = () => {
-        if (!selection) return;
+        if (!selection || !isSignedIn) return;
         setPhraseToSave(selection.text);
         setShowCategoryModal(true);
         setSelection(null);
@@ -638,22 +694,44 @@ export const ChatInterface = (props: {
                 </div>
             )}
 
-            <ChatSidebar
-                conversations={conversations}
-                activeConversationId={currentConversationId || undefined}
-                onSelectConversation={setCurrentConversationId}
-                onNewChat={handleNewChat}
-                onDeleteConversation={handleDeleteConversation}
-                onRenameConversation={handleRenameConversation}
-            />
+            {isSignedIn && (
+                <ChatSidebar
+                    conversations={conversations}
+                    activeConversationId={currentConversationId || undefined}
+                    onSelectConversation={setCurrentConversationId}
+                    onNewChat={handleNewChat}
+                    onDeleteConversation={handleDeleteConversation}
+                    onRenameConversation={handleRenameConversation}
+                />
+            )}
 
             <main className="flex flex-1 flex-col">
                 <header className="flex md:hidden items-center justify-between p-4 border-b border-border-light dark:border-border-dark">
                     <h2 className="text-lg font-bold">Sprech-Buddy</h2>
-                    <button className="p-2">
-                        <span className="material-symbols-outlined">menu</span>
-                    </button>
+                    {isSignedIn && (
+                        <button className="p-2">
+                            <span className="material-symbols-outlined">menu</span>
+                        </button>
+                    )}
                 </header>
+
+                {!isSignedIn && (
+                    <div className="px-4 py-3 bg-primary/10 border-b border-primary/20 text-center text-sm">
+                        {guestLimitReached ? (
+                            <span>
+                                Tägliches Limit erreicht!{' '}
+                                <a href="/sign-up" className="font-bold text-primary underline">Jetzt registrieren</a>{' '}
+                                für unbegrenzten Zugang.
+                            </span>
+                        ) : (
+                            <span>
+                                Gast-Modus: {GUEST_DAILY_LIMIT - getGuestMessageCount()} Nachrichten übrig heute.{' '}
+                                <a href="/sign-up" className="font-bold text-primary underline">Registrieren</a>{' '}
+                                für mehr!
+                            </span>
+                        )}
+                    </div>
+                )}
 
                 <div className="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8">
                     <div className="mx-auto max-w-3xl">
@@ -677,12 +755,12 @@ export const ChatInterface = (props: {
                     <div className="flex flex-col items-center gap-2">
                         <button
                             onClick={handleMicClick}
-                            disabled={isProcessing}
+                            disabled={isProcessing || !isSignedIn}
                             className={`group relative size-20 rounded-full flex items-center justify-center transition-all duration-300 shadow-xl
                                 ${isRecording 
                                     ? 'bg-red-500 scale-110 shadow-red-500/40 ring-4 ring-red-500/20' 
                                     : 'bg-primary hover:bg-primary/90 shadow-primary/30'
-                                } ${isProcessing ? 'opacity-50 cursor-wait' : 'cursor-pointer'}`}
+                                } ${(isProcessing || !isSignedIn) ? 'opacity-50 cursor-wait' : 'cursor-pointer'}`}
                         >
                              {isRecording ? (
                                 <span className="material-symbols-outlined text-4xl text-white animate-pulse">stop</span>
@@ -692,7 +770,7 @@ export const ChatInterface = (props: {
                              
                              {/* Label for Mic */}
                              <div className="absolute -top-8 left-1/2 -translate-x-1/2 whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity bg-black text-white text-[10px] px-2 py-1 rounded">
-                                 Sprechen & Hören
+                                 {isSignedIn ? 'Sprechen & Hören' : 'Anmelden zum Sprechen'}
                              </div>
                         </button>
                         
@@ -723,7 +801,7 @@ export const ChatInterface = (props: {
                         <div className="flex w-full flex-1 items-stretch rounded-2xl h-11 bg-gray-100 dark:bg-gray-800 border-2 border-transparent focus-within:border-primary/20 transition-all">
                             <input
                                 className="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-2xl text-text-light dark:text-text-dark focus:outline-0 border-none bg-transparent h-full placeholder:text-gray-500 dark:placeholder:text-gray-400 px-4 text-sm font-normal leading-normal"
-                                placeholder={isRecording ? "Warte, ich höre dir gerade zu..." : "Oder hier tippen..."}
+                                placeholder={isRecording ? "Warte, ich höre dir gerade zu..." : guestLimitReached ? "Limit erreicht – bitte registrieren!" : "Oder hier tippen..."}
                                 value={textInput}
                                 onChange={(e) => setTextInput(e.target.value)}
                                 onKeyDown={(e) => {
@@ -732,13 +810,13 @@ export const ChatInterface = (props: {
                                         handleTextSubmit();
                                     }
                                 }}
-                                disabled={isProcessing || isRecording}
+                                disabled={isProcessing || isRecording || guestLimitReached}
                             />
                             <div className="flex items-center justify-center pr-2">
                                 <button
                                     onClick={handleTextSubmit}
-                                    className={`flex items-center justify-center p-2 rounded-full hover:bg-primary/10 text-gray-400 hover:text-primary transition-colors ${(!textInput.trim() || isProcessing || isRecording) ? 'opacity-30 cursor-not-allowed' : ''}`}
-                                    disabled={!textInput.trim() || isProcessing || isRecording}
+                                    className={`flex items-center justify-center p-2 rounded-full hover:bg-primary/10 text-gray-400 hover:text-primary transition-colors ${(!textInput.trim() || isProcessing || isRecording || guestLimitReached) ? 'opacity-30 cursor-not-allowed' : ''}`}
+                                    disabled={!textInput.trim() || isProcessing || isRecording || guestLimitReached}
                                 >
                                     <span className="material-symbols-outlined text-xl">send</span>
                                 </button>
