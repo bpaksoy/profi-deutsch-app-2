@@ -63,7 +63,7 @@ const TopNavBar: React.FC<{ activeNav?: string }> = ({ activeNav }) => {
           <Link href="/" className="text-xl font-bold leading-tight tracking-[-0.015em] text-primary">Sigsag</Link>
         </div>
         <nav className="hidden items-center gap-6 sm:flex">
-          <Link href={isSignedIn ? "/dashboard" : "/chat"} className={twMerge("text-text-light dark:text-text-dark text-sm font-medium leading-normal hover:text-primary dark:hover:text-accent transition-colors", activeNav === 'dashboard' && 'text-primary dark:text-accent')}>Start</Link>
+          <Link href="/dashboard" className={twMerge("text-text-light dark:text-text-dark text-sm font-medium leading-normal hover:text-primary dark:hover:text-accent transition-colors", activeNav === 'dashboard' && 'text-primary dark:text-accent')}>Start</Link>
           <Link href="/phrases" className={twMerge("text-text-light dark:text-text-dark text-sm font-medium leading-normal hover:text-primary dark:hover:text-accent transition-colors", activeNav === 'phrases' && 'text-primary dark:text-accent')}>Meine Redemittel</Link>
           <Link href="/chat" className={twMerge("text-text-light dark:text-text-dark text-sm font-medium leading-normal hover:text-primary dark:hover:text-accent transition-colors", activeNav === 'chat' && 'text-primary dark:text-accent')}>Chat</Link>
           <Link href="/tipps" className={twMerge("text-text-light dark:text-text-dark text-sm font-medium leading-normal hover:text-primary dark:hover:text-accent transition-colors", activeNav === 'tipps' && 'text-primary dark:text-accent')}>Tipps</Link>
@@ -94,7 +94,7 @@ const TopNavBar: React.FC<{ activeNav?: string }> = ({ activeNav }) => {
       {/* Mobile menu */}
       {mobileMenuOpen && (
         <nav className="sm:hidden border-t border-border-light dark:border-border-dark bg-card-light dark:bg-card-dark px-4 py-3 flex flex-col gap-1">
-          <Link href={isSignedIn ? "/dashboard" : "/chat"} onClick={() => setMobileMenuOpen(false)} className={twMerge("flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors hover:bg-gray-100 dark:hover:bg-white/10", activeNav === 'dashboard' && 'bg-primary/10 text-primary')}>
+          <Link href="/dashboard" onClick={() => setMobileMenuOpen(false)} className={twMerge("flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors hover:bg-gray-100 dark:hover:bg-white/10", activeNav === 'dashboard' && 'bg-primary/10 text-primary')}>
             <span className="material-symbols-outlined text-lg">dashboard</span>Start
           </Link>
           <Link href="/chat" onClick={() => setMobileMenuOpen(false)} className={twMerge("flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors hover:bg-gray-100 dark:hover:bg-white/10", activeNav === 'chat' && 'bg-primary/10 text-primary')}>

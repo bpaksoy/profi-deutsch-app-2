@@ -1,7 +1,6 @@
 import { Injectable, OnModuleInit, OnModuleDestroy, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PrismaClient } from '@prisma/client';
-import { execSync } from 'child_process';
 
 @Injectable()
 export class PrismaService extends PrismaClient implements OnModuleInit, OnModuleDestroy {
@@ -18,13 +17,15 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
     }
 
     async onModuleInit() {
-        try {
-            execSync('npx prisma migrate deploy', { stdio: 'pipe' });
-            this.logger.log('DB migrations applied successfully');
-        } catch (e) {
-            this.logger.warn('Migration warning (may already be up to date):', e.message);
-        }
         await this.$connect();
+        try {
+            await this.$executeRawUnsafe(
+                `ALTER TABLE "User" ADD COLUMN IF NOT EXISTS "theme" TEXT NOT NULL DEFAULT 'light'`
+            );
+            this.logger.log('Schema column check complete (theme column ensured)');
+        } catch (e) {
+            this.logger.warn('Column ensure warning:', e.message);
+        }
     }
 
     async onModuleDestroy() {
