@@ -22,3 +22,4 @@ web/.env.local
 api/firebase-debug.log
 sigsag_status.md
 FIREBASE_DEPLOYMENT.md
+firebase-debug.log

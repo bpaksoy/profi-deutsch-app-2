@@ -548,6 +548,21 @@ export const ChatInterface = (props: {
     };
 
     const handleSubmitAudio = async (audioBlob: Blob) => {
+        // Guest daily limit check
+        if (!isSignedIn) {
+            if (getGuestMessageCount() >= GUEST_DAILY_LIMIT) {
+                setGuestLimitReached(true);
+                setMessages(current => [...current, {
+                    type: 'ai',
+                    sender: 'bot',
+                    message: 'Du hast dein tägliches Limit von 10 Nachrichten erreicht! 🛑 Melde dich an oder komm morgen wieder!',
+                    avatar: props.aiAvatarUrl,
+                    timestamp: new Date().toISOString()
+                }]);
+                return;
+            }
+        }
+
         setIsProcessing(true);
 
         const placeholderUserMsg: ChatMessageData = {
@@ -559,7 +574,9 @@ export const ChatInterface = (props: {
         setMessages(current => [...current, placeholderUserMsg]);
 
         try {
-            const token = await getToken();
+            const token = isSignedIn ? await getToken() : null;
+            const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+            if (token) headers['Authorization'] = `Bearer ${token}`;
             console.log('Sending audio to backend:', audioBlob.type, audioBlob.size, 'bytes');
             
             // Convert blob to base64 to avoid Firebase Functions multipart issues
@@ -568,13 +585,10 @@ export const ChatInterface = (props: {
             
             const response = await fetch(`${props.apiBaseUrl}/chat/stt`, {
                 method: 'POST',
-                headers: { 
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json'
-                },
+                headers,
                 body: JSON.stringify({ 
                     audioBase64: base64,
-                    conversationId: currentConversationId || undefined
+                    conversationId: isSignedIn ? (currentConversationId || undefined) : undefined
                 }),
             });
 
@@ -608,7 +622,14 @@ export const ChatInterface = (props: {
             if (jsonResponse.conversationId && jsonResponse.conversationId !== currentConversationId) {
                 setCurrentConversationId(jsonResponse.conversationId);
             }
-            loadConversations();
+            if (isSignedIn) {
+                loadConversations();
+            } else {
+                const count = incrementGuestMessageCount();
+                if (count >= GUEST_DAILY_LIMIT) {
+                    setGuestLimitReached(true);
+                }
+            }
         } catch (error) {
             console.error('Submission Failed:', error);
             setMessages(current => current.map(msg =>
@@ -756,12 +777,12 @@ export const ChatInterface = (props: {
                     <div className="flex flex-col items-center gap-2">
                         <button
                             onClick={handleMicClick}
-                            disabled={isProcessing || !isSignedIn}
+                            disabled={isProcessing || guestLimitReached}
                             className={`group relative size-20 rounded-full flex items-center justify-center transition-all duration-300 shadow-xl
                                 ${isRecording 
                                     ? 'bg-red-500 scale-110 shadow-red-500/40 ring-4 ring-red-500/20' 
                                     : 'bg-primary hover:bg-primary/90 shadow-primary/30'
-                                } ${(isProcessing || !isSignedIn) ? 'opacity-50 cursor-wait' : 'cursor-pointer'}`}
+                                } ${(isProcessing || guestLimitReached) ? 'opacity-50 cursor-wait' : 'cursor-pointer'}`}
                         >
                              {isRecording ? (
                                 <span className="material-symbols-outlined text-4xl text-white animate-pulse">stop</span>
@@ -771,7 +792,7 @@ export const ChatInterface = (props: {
                              
                              {/* Label for Mic */}
                              <div className="absolute -top-8 left-1/2 -translate-x-1/2 whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity bg-black text-white text-[10px] px-2 py-1 rounded">
-                                 {isSignedIn ? 'Sprechen & Hören' : 'Anmelden zum Sprechen'}
+                                 Sprechen & Hören
                              </div>
                         </button>
                         

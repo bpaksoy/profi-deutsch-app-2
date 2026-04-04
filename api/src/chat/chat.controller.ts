@@ -49,40 +49,40 @@ export class ChatController {
   }
 
   @Post('stt')
-  @UseGuards(FirebaseAuthGuard)
+  @UseGuards(OptionalFirebaseAuthGuard)
   async transcribeAndProcess(
     @Body() body: { audioBase64: string; conversationId?: string },
     @Session() session: Record<string, any>,
     @GetUser() user: any
   ) {
+    const isGuest = !user;
+
     try {
-      const userId = user.clerkId;
-      
-      // Usage limits check
-      const dbUser = await this.conversationService.validateUserPlan(userId);
-      const LIMIT = 500;
-
-      // Check if it's a new day to allow first message even if counter is high
-      const now = new Date();
-      const last = dbUser.lastMessageAt ? new Date(dbUser.lastMessageAt) : null;
-      const isNewDay = !last || now.toDateString() !== last.toDateString();
-
-      if (dbUser.planTier === 'FREE' && !isNewDay && dbUser.dailyMessagesCount >= LIMIT) {
-        throw new ForbiddenException(`Daily chat limit reached. Please upgrade to a paid plan for unlimited access or try again tomorrow! ${process.env.FRONTEND_URL}/pricing`);
-      }
-
       if (!body.audioBase64) {
         this.logger.error('No audio data received in request');
         throw new InternalServerErrorException('No audio data provided');
       }
 
+      if (!isGuest) {
+        const userId = user.clerkId;
+        // Usage limits check for authenticated users
+        const dbUser = await this.conversationService.validateUserPlan(userId);
+        const LIMIT = 500;
+        const now = new Date();
+        const last = dbUser.lastMessageAt ? new Date(dbUser.lastMessageAt) : null;
+        const isNewDay = !last || now.toDateString() !== last.toDateString();
+        if (dbUser.planTier === 'FREE' && !isNewDay && dbUser.dailyMessagesCount >= LIMIT) {
+          throw new ForbiddenException(`Daily chat limit reached. Please upgrade to a paid plan for unlimited access or try again tomorrow! ${process.env.FRONTEND_URL}/pricing`);
+        }
+      }
+
       const audioBuffer = Buffer.from(body.audioBase64, 'base64');
-      this.logger.log(`Received audio data of size: ${audioBuffer.length} bytes from user ${userId}`);
+      this.logger.log(`Received audio data of size: ${audioBuffer.length} bytes from ${isGuest ? 'guest' : user.clerkId}`);
 
-      let conversationId = body.conversationId || session?.conversationId;
+      let conversationId: string | undefined = body.conversationId || session?.conversationId;
 
-      if (!conversationId) {
-        const conv = await this.conversationService.createConversation(userId, 'Voice Chat');
+      if (!isGuest && !conversationId) {
+        const conv = await this.conversationService.createConversation(user.clerkId, 'Voice Chat');
         conversationId = conv.id;
         if (session) session.conversationId = conversationId;
       }
@@ -90,35 +90,41 @@ export class ChatController {
       this.logger.log(`Starting transcription for ${audioBuffer.length} bytes`);
       const transcription = await this.azureSpeechService.transcribeAudio(audioBuffer);
       this.logger.log(`Transcription completed: "${transcription}"`);
-      
+
       if (!transcription || transcription.trim() === '') {
         this.logger.warn('Empty transcription received');
         throw new InternalServerErrorException('Could not transcribe audio - please try speaking more clearly');
       }
 
-      await this.conversationService.addMessage(conversationId, 'user', transcription);
+      if (!isGuest) {
+        await this.conversationService.addMessage(conversationId, 'user', transcription);
+      }
 
       const ragObject = await this.ragService.generateResponseJson(
         transcription,
         conversationId
       );
 
-      await this.conversationService.addMessage(conversationId, 'assistant', ragObject.responseText);
-      const audioStream = await this.chatService.generateSpeechStream(ragObject.responseText);
+      if (!isGuest) {
+        await this.conversationService.addMessage(conversationId, 'assistant', ragObject.responseText);
+      }
 
+      const audioStream = await this.chatService.generateSpeechStream(ragObject.responseText);
       const audioChunks: Buffer[] = [];
       for await (const chunk of audioStream) {
         audioChunks.push(chunk);
       }
       const ttsBuffer = Buffer.concat(audioChunks);
 
-      await this.progressService.trackActivity(userId, 'message', 1);
+      if (!isGuest) {
+        await this.progressService.trackActivity(user.clerkId, 'message', 1);
+      }
 
       return {
         transcript: transcription,
         responseText: ragObject.responseText,
         audioBase64: ttsBuffer.toString('base64'),
-        conversationId: conversationId
+        conversationId: conversationId || null
       };
     } catch (error) {
       this.logger.error('STT endpoint error:', error.message, error.stack);
